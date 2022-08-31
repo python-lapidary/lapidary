@@ -1,0 +1,22 @@
+{% extends 'module.py.jinja2' %}
+{% block body -%}
+{% set model = model.body -%}
+class {{ model.class_name }}(pydantic.BaseModel):
+{%- if model.docstr %}
+    """
+    {{ model.docstr | indent }}
+    """
+{% endif -%}
+{% if model.attributes %}{%- for attr_name, attr in model.attributes.items() %}
+    {{ attr_name }}: typing.Annotated[{{ attr.type.type.__repr__() }}, pydantic.Field(
+    {%- for key, value in attr.type.field_props.items() -%}
+        {{ key }}={{ value }},{{ ' ' }}
+    {%- endfor -%}
+    {%- if attr.type.direction -%}
+        direction={{ attr.type.direction -}}
+    {%- endif -%}
+    )]
+{%- endfor %}{% else %}
+    pass
+{%- endif %}
+{%- endblock %}

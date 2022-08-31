@@ -1,0 +1,9 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool.poetry.dependencies]
+deprecation = "^2.0.6"
+lapis-client-base = {git = "https://github.com/lapis-project/lapis-client-base.git", rev = "develop"}
+pydantic = { extras = ["email"], version = "^1.9.2" }
+python = "^3.10"

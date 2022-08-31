@@ -1,0 +1,57 @@
+from dataclasses import dataclass
+from typing import TypeVar, TypeAlias
+
+import inflection
+
+from .client_class import get_client_class
+from .schema_class import get_schema_class
+from ..refs import ResolverFunc
+from ...openapi import model as openapi
+
+T = TypeVar('T')
+
+SchemaImport: TypeAlias = tuple[str, str]
+
+
+@dataclass(frozen=True)
+class Module:
+    name: str
+    package: str
+    imports: list[str]
+    body: T
+    type_checking_imports: list[SchemaImport]
+
+
+def get_schema_class_module(model: openapi.Schema, path: list[str], resolver: ResolverFunc) -> Module:
+    schema_class = get_schema_class(model, path, resolver)
+
+    type_checking_imports = {t for attr in schema_class.attributes.values() for t in attr.type.type.type_checking_imports()}
+    imports = {t for attr in schema_class.attributes.values() for t in attr.type.type.imports()}
+
+    return Module(
+        package='.'.join(path[:-1]),
+        name=inflection.underscore(schema_class.class_name),
+        body=schema_class,
+        imports=list({
+            'typing',
+            'lapis_client_base',
+            'pydantic',
+            *imports
+        }),
+        type_checking_imports=list(type_checking_imports),
+    )
+
+
+def get_client_class_module(model: openapi.OpenApiModel, package_name: str) -> Module:
+    return Module(
+        package=package_name,
+        name='client',
+        body=get_client_class(model),
+        imports=[
+            'typing',
+            'pydantic',
+            'deprecation',
+            'lapis_client_base',
+        ],
+        type_checking_imports=[],
+    )
