@@ -10,7 +10,10 @@ from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field
 
 
 class Reference(BaseModel):
-    pass
+    class Config:
+        extra = Extra.forbid
+
+    ref: Annotated[str, Field(alias='$ref')]
 
 
 class Contact(BaseModel):
@@ -79,17 +82,11 @@ class Style(Enum):
 
 
 class Paths(BaseModel):
-    pass
-
-    class Config:
-        extra = Extra.forbid
+    __root__: Annotated[dict[str, PathItem], Field(default_factory=dict)]
 
 
 class SecurityRequirement(BaseModel):
-    pass
-
-    class Config:
-        extra = Extra.allow
+    __root__: Annotated[dict[str, list[str]], Field(default_factory=dict)]
 
 
 class ExternalDocumentation(BaseModel):
@@ -327,10 +324,7 @@ class AuthorizationCodeOAuthFlow(BaseModel):
 
 
 class Callback(BaseModel):
-    pass
-
-    class Config:
-        extra = Extra.allow
+    __root__: Annotated[dict[str, PathItem], Field(default_factory=dict)]
 
 
 class Info(BaseModel):
@@ -527,6 +521,14 @@ class PathItem(BaseModel):
     parameters: Annotated[
         Optional[List[Union[Parameter, Reference]]], Field(unique_items=True)
     ]
+    get: Optional[Operation]
+    put: Optional[Operation]
+    post: Optional[Operation]
+    delete: Optional[Operation]
+    options: Optional[Operation]
+    head: Optional[Operation]
+    patch: Optional[Operation]
+    trace: Optional[Operation]
 
 
 class Operation(BaseModel):
@@ -550,10 +552,7 @@ class Operation(BaseModel):
 
 
 class Responses(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
-    default: Optional[Union[Response, Reference]]
+    __root__: Annotated[Optional[dict[str, Union[Response, Reference]]], Field(default_factory=dict)]
 
 
 class Parameter(BaseModel):
@@ -604,3 +603,4 @@ Response.update_forward_refs()
 MediaType.update_forward_refs()
 PathItem.update_forward_refs()
 Operation.update_forward_refs()
+Paths.update_forward_refs()
