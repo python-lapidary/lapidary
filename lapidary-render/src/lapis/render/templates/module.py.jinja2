@@ -1,0 +1,15 @@
+from __future__ import annotations
+
+{%- for imp in model.imports %}
+import {{ imp }}
+{%- endfor %}
+
+if typing.TYPE_CHECKING:
+{%- for imp in model.type_checking_imports %}
+    from {{ imp[0] }} import {{ imp[1] }}
+{%- else %}
+    pass
+{%- endfor %}
+
+
+{% block body required %}{% endblock %}

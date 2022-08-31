@@ -1,0 +1,11 @@
+{% extends 'module.py.jinja2' -%}
+{% block body -%}
+{% set model = model.body -%}
+class ApiClient(lapis_client_base.ApiBase):
+{% for attr in model.attributes -%}
+    async def _var_api_call_simple_raw(self, _var_param_: _var_param_type_) -> dict:
+        pass
+{%- else %}
+    pass
+{%- endfor %}
+{%- endblock %}
