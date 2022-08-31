@@ -10,4 +10,14 @@ version = "0.1.0"
 license = "AGPL-3.0"
 
 [tool.poetry.dependencies]
+Jinja2 = "^3.1.2"
+PyYAML = "^6.0"
+inflection = "^0.5.1"
+lapis-client-base = {git = "https://github.com/lapis-project/lapis-client-base.git", rev = "develop"}
+pydantic = { extras = ["email"], version = "^1.9.2" }
 python = "^3.10"
+tomlkit = "^0.11.4"
+typer = "^0.6.1"
+
+[tool.poetry.dev-dependencies]
+toml-sort = "^0.20.0"
