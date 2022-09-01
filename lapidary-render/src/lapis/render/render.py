@@ -11,6 +11,7 @@ from .elems.module import get_schema_class_module, get_client_class_module
 from .elems.pyproject import get_pyproject, render_pyproject
 from .refs import resolve_ref, ResolverFunc
 from ..openapi import model as openapi
+from .black import format_code
 
 import logging
 
@@ -48,6 +49,8 @@ def render_client(model: openapi.OpenApiModel, target: Path, package_name: str) 
     for (dirpath, dirnames, filenames) in os.walk(package_dir):
         if '__init__.py' not in filenames:
             (Path(dirpath) / '__init__.py').touch()
+
+    format_code(target, gen_root)
 
 
 def render_client_module(model: openapi.OpenApiModel, package_name: str, gen_root: Path, env: Environment):
