@@ -18,7 +18,9 @@ def get_schema_class(
         path: list[str],
         resolver: ResolverFunc,
 ) -> SchemaClass:
-    attributes = {attr_name: get_attribute(attr, [*path, attr_name], resolver) for attr_name, attr in
+    if isinstance(schema, openapi.Reference):
+        schema, path = resolver(schema)
+    attributes = {attr_name: get_attribute(attr, schema.required and attr_name in schema.required, [*path, attr_name], resolver) for attr_name, attr in
                   schema.properties.items()} if schema.properties else {}
 
     return SchemaClass(
