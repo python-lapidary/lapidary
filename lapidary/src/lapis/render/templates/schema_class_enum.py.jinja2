@@ -1,0 +1,4 @@
+{% for attr_name, attr in model.attributes.items() %}    {{ attr_name }} = '{{ attr.annotation.field_props.default }}'
+{% else %}
+    pass
+{%- endfor -%}
