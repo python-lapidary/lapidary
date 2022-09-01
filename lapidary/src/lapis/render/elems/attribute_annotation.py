@@ -33,7 +33,9 @@ class AttributeAnnotationModel:
     allowReserved: Optional[bool] = False
 
 
-def get_attr_annotation(attr_type: Union[openapi.Schema, openapi.Reference], path: list[str], resolver: ResolverFunc) -> AttributeAnnotationModel:
+def get_attr_annotation(
+        attr_type: Union[openapi.Schema, openapi.Reference], required: bool, path: list[str], resolver: ResolverFunc
+) -> AttributeAnnotationModel:
     if isinstance(attr_type, openapi.Reference):
         attr_type, path = resolver(attr_type)
 
@@ -53,7 +55,7 @@ def get_attr_annotation(attr_type: Union[openapi.Schema, openapi.Reference], pat
         direction = None
 
     return AttributeAnnotationModel(
-        type=get_type_name(attr_type, path),
+        type=get_type_name(attr_type, required, path, resolver),
         direction=direction,
         field_props=field_props
     )
