@@ -13,13 +13,13 @@ class AttributeModel:
     deprecated: bool = False
 
 
-def get_attribute(attr_type: Union[openapi.Schema, openapi.Reference], path: list[str], resolver: ResolverFunc) -> AttributeModel:
+def get_attribute(attr_type: Union[openapi.Schema, openapi.Reference], required: bool, path: list[str], resolver: ResolverFunc) -> AttributeModel:
     name = path[-1]
     if isinstance(attr_type, openapi.Reference):
         attr_type, path = resolver(attr_type)
 
     return AttributeModel(
         name=name,
-        type=get_attr_annotation(attr_type, path, resolver),
+        type=get_attr_annotation(attr_type, required, path, resolver),
         deprecated=attr_type.deprecated,
     )
