@@ -157,4 +157,4 @@ class GenericTypeRef(TypeRef):
 
     def __repr__(self):
         module_dot = '' if self.schema_type else self.module + '.'
-        return f'{module_dot}{self.name}[{",".join(self.args.__repr__())}]'
+        return f'{module_dot}{self.name}{self.args.__repr__()}'
