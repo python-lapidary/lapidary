@@ -5,8 +5,8 @@ from ..openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
-ResolverFunc = Callable[[openapi.Reference], T]
+T = TypeVar('T', openapi.Schema, openapi.Parameter, openapi.SecurityScheme)
+ResolverFunc = Callable[[openapi.Reference], tuple[T, list[str]]]
 
 
 def ref_to_path(ref: openapi.Reference) -> list[str]:
