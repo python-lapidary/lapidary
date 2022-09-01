@@ -90,7 +90,7 @@ class TypeRef(BaseModel):
 
     @staticmethod
     def from_str(path: str, schema_type: bool = False) -> TypeRef:
-        module, name = path.rsplit(path, 1)
+        module, name = path.rsplit('.', 1)
         return TypeRef(module=module, name=name, schema_type=schema_type)
 
     @staticmethod
