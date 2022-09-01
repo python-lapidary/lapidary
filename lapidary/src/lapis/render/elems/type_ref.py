@@ -116,6 +116,9 @@ class TypeRef(BaseModel):
     def list_of(self) -> GenericTypeRef:
         return GenericTypeRef(module='builtins', name='list', args=[self])
 
+    def _types(self) -> list[TypeRef]:
+        return [self]
+
 
 class BuiltinTypeRef(TypeRef):
     module: str = 'builtins'
@@ -146,14 +149,13 @@ class GenericTypeRef(TypeRef):
             return super().union_with(other)
 
     def type_checking_imports(self) -> list[tuple[str, str]]:
-        result = super().type_checking_imports()
-        result += [(arg.module, arg.name) for arg in self.args if arg.schema_type]
-        return result
+        return [imp for typ in self._types() if typ.schema_type for imp in typ.type_checking_imports()]
 
     def imports(self) -> list[str]:
-        result = super().imports()
-        result += [arg.module for arg in self.args if not arg.schema_type]
-        return result
+        return [imp for typ in self._types() if not typ.schema_type for imp in typ.imports()]
+
+    def _types(self) -> list[TypeRef]:
+        return [self, *[typ for arg in self.args for typ in arg._types()]]
 
     def __repr__(self):
         module_dot = '' if self.schema_type else self.module + '.'
