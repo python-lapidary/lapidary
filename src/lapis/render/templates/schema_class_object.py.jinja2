@@ -1,0 +1,12 @@
+{%- for attr_name, attr in model.attributes.items() %}
+    {{ attr_name }}: typing.Annotated[{{ attr.annotation.type.__repr__() }}, pydantic.Field(
+    {%- for key, value in attr.annotation.field_props.items() -%}
+        {{ key }}={{ value }},{{ ' ' }}
+    {%- endfor -%}
+    {%- if attr.annotation.direction -%}
+        direction={{ attr.annotation.direction -}}
+    {%- endif -%}
+    )]
+{%- else %}
+    pass
+{% endfor -%}
