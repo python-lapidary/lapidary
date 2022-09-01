@@ -152,7 +152,7 @@ class GenericTypeRef(TypeRef):
         return [imp for typ in self._types() if typ.schema_type for imp in typ.type_checking_imports()]
 
     def imports(self) -> list[str]:
-        return [imp for typ in self._types() if not typ.schema_type for imp in typ.imports()]
+        return [imp for typ in self._types() if not typ.schema_type for imp in TypeRef.imports(typ)]
 
     def _types(self) -> list[TypeRef]:
         return [self, *[typ for arg in self.args for typ in arg._types()]]
