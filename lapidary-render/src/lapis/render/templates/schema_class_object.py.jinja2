@@ -1,5 +1,5 @@
-{%- for attr_name, attr in model.attributes.items() %}
-    {{ attr_name }}: typing.Annotated[{{ attr.annotation.type.__repr__() }}, pydantic.Field(
+{%- for attr in model.attributes %}
+    {{ attr.name }}: typing.Annotated[{{ attr.annotation.type.__repr__() }}, pydantic.Field(
     {%- for key, value in attr.annotation.field_props.items() -%}
         {{ key }}={{ value }},{{ ' ' }}
     {%- endfor -%}

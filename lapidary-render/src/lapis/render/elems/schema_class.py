@@ -12,7 +12,7 @@ from ...openapi import model as openapi
 class SchemaClass:
     class_name: str
     base_type: TypeRef
-    attributes: dict[str, AttributeModel]
+    attributes: list[AttributeModel]
     docstr: Optional[str]
 
 
@@ -25,11 +25,11 @@ def get_schema_class(
         schema, path = resolver(schema)
 
     if schema.enum:
-        attributes = {value: get_enum_attribute(value) for value in schema.enum}
+        attributes = [get_enum_attribute(value) for value in schema.enum]
         base_type = TypeRef.from_str('enum.Enum')
     else:
-        attributes = {attr_name: get_attribute(attr, schema.required and attr_name in schema.required, [*path, attr_name], resolver) for attr_name, attr in
-                      schema.properties.items()} if schema.properties else {}
+        attributes = [get_attribute(attr, schema.required and attr_name in schema.required, [*path, attr_name], resolver) for attr_name, attr in
+                      schema.properties.items()] if schema.properties else []
         base_type = TypeRef.from_str('pydantic.BaseModel')
 
     return SchemaClass(

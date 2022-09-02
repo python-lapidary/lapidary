@@ -25,8 +25,8 @@ class Module:
 def get_schema_class_module(model: openapi.Schema, path: list[str], resolver: ResolverFunc) -> Module:
     schema_class = get_schema_class(model, path, resolver)
 
-    type_checking_imports = {t for attr in schema_class.attributes.values() for t in attr.annotation.type.type_checking_imports()}
-    imports = {t for attr in schema_class.attributes.values() for t in attr.annotation.type.imports()}
+    type_checking_imports = {t for attr in schema_class.attributes for t in attr.annotation.type.type_checking_imports()}
+    imports = {t for attr in schema_class.attributes for t in attr.annotation.type.imports()}
     imports.update(schema_class.base_type.imports())
 
     return Module(
