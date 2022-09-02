@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, Union
 
-import inflection
+from typing import Optional, Union
 
 from .attribute import AttributeModel, get_attribute, get_enum_attribute
 from .type_ref import TypeRef
@@ -26,7 +25,7 @@ def get_schema_class(
         schema, path = resolver(schema)
 
     if schema.enum:
-        attributes = {inflection.underscore(str(value)): get_enum_attribute(inflection.underscore(str(value)), value) for value in schema.enum}
+        attributes = {value: get_enum_attribute(value) for value in schema.enum}
         base_type = TypeRef.from_str('enum.Enum')
     else:
         attributes = {attr_name: get_attribute(attr, schema.required and attr_name in schema.required, [*path, attr_name], resolver) for attr_name, attr in
