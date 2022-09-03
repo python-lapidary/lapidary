@@ -16,7 +16,9 @@ def main(
         target_directory: Path,
         package_name: str,
 ):
+    logger.info('Load schema')
     doc = load_schema(schema_path)
+    logger.info('Parse schema')
     tree = OpenApiModel(**doc)
     render_client(tree, target_directory, package_name)
 

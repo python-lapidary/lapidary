@@ -62,6 +62,7 @@ def render_client_module(model: openapi.OpenApiModel, package_name: str, gen_roo
 
 def render_schema_modules(model: openapi.OpenApiModel, package_name: str, gen_root: Path, resolver: ResolverFunc, env: Environment):
     if model.components.schemas:
+        logger.info('Render schema modules')
         for name, schema in model.components.schemas.items():
             render_schema_module(name, schema, package_name, gen_root, resolver, env)
 
