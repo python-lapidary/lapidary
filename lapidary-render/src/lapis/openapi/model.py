@@ -514,7 +514,7 @@ class PathItem(BaseModel):
     class Config:
         extra = Extra.forbid
 
-    _ref: Annotated[Optional[str], Field(alias='$ref')]
+    ref_: Annotated[Optional[str], Field(alias='$ref')]
     summary: Optional[str]
     description: Optional[str]
     servers: Optional[List[Server]]
