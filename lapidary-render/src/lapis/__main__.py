@@ -1,4 +1,3 @@
-import json
 import logging
 from pathlib import Path
 
@@ -24,12 +23,8 @@ def main(
 
 def load_schema(schema_path):
     with open(schema_path, 'rt') as f:
-        if schema_path.endswith('.json'):
-            s = f.read()
-            doc = json.loads(s)
-        elif schema_path.endswith('.yaml'):
-            import yaml
-            doc = yaml.safe_load(f)
+        import yaml
+        doc = yaml.safe_load(f)
     return doc
 
 
