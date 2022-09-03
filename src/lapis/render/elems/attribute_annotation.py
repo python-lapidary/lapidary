@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, Any, Union
 
-from .type_ref import get_type_name, TypeRef
+from .type_ref import get_type_ref, TypeRef
 from ..refs import ResolverFunc
 from ...openapi import model as openapi
 
@@ -55,7 +55,7 @@ def get_attr_annotation(
         direction = None
 
     return AttributeAnnotationModel(
-        type=get_type_name(attr_type, required, path, resolver),
+        type=get_type_ref(attr_type, required, path, resolver),
         direction=direction,
         field_props=field_props
     )
