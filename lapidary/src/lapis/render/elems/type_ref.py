@@ -33,8 +33,8 @@ def module_name(path: list[str]) -> str:
     return '.'.join([*path[:-1], inflection.underscore(path[-1])])
 
 
-def get_type_name(schema: openapi.Schema, required: bool, path: list[str], resolver: ResolverFunc) -> TypeRef:
-    typ = _get_type_name(schema, path, resolver)
+def get_type_ref(schema: openapi.Schema, required: bool, path: list[str], resolver: ResolverFunc) -> TypeRef:
+    typ = _get_type_ref(schema, path, resolver)
 
     if schema.nullable:
         typ = typ.union_with(BuiltinTypeRef.from_str('None'))
@@ -44,7 +44,7 @@ def get_type_name(schema: openapi.Schema, required: bool, path: list[str], resol
     return typ
 
 
-def _get_type_name(schema: openapi.Schema, path: list[str], resolver: ResolverFunc) -> TypeRef:
+def _get_type_ref(schema: openapi.Schema, path: list[str], resolver: ResolverFunc) -> TypeRef:
     name = schema.type.name if schema.type is not None else None
     logger.debug('%s %s', name, '.'.join(path))
 
@@ -69,7 +69,7 @@ def _get_type_name(schema: openapi.Schema, path: list[str], resolver: ResolverFu
         else:
             item_schema = schema.items
             path = [*path, inflection.camelize(path[-1]) + 'Item']
-        type_ref = get_type_name(item_schema, True, path, resolver)
+        type_ref = get_type_ref(item_schema, True, path, resolver)
         return type_ref.list_of()
     return TypeRef.from_type(Any)
 
