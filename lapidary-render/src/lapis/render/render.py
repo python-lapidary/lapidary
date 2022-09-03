@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 def render(source: str, destination: Path, render_model: Any, env: Environment):
     try:
         text = env.get_template(source).render(model=render_model)
+        text = format_code(text)
         with open(destination, 'wt') as fb:
             fb.write(text)
     except Exception as x:
@@ -50,7 +51,6 @@ def render_client(model: openapi.OpenApiModel, target: Path, package_name: str) 
         if '__init__.py' not in filenames:
             (Path(dirpath) / '__init__.py').touch()
 
-    format_code(target, gen_root)
 
 
 def render_client_module(model: openapi.OpenApiModel, package_name: str, gen_root: Path, env: Environment):
