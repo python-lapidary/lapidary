@@ -47,6 +47,9 @@ def get_attr_annotation(
     if 'pattern' in attr_type.__fields_set__:
         field_props['regex'] = f"r'${getattr(attr_type, 'pattern')}'"
 
+    if not required:
+        field_props['default'] = 'lapis_client_base.absent.ABSENT'
+
     if attr_type.readOnly:
         direction = 'lapis_client_base.ParamDirection.read'
     elif attr_type.writeOnly:
