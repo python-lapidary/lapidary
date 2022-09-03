@@ -56,6 +56,7 @@ def get_operation_param(param: Union[openapi.Parameter, openapi.Reference], path
 
 
 def sanitise_param_name(param_name: str) -> str:
+    # potential name clash
     return re.compile(r'\W+').sub('_', param_name)
 
 
