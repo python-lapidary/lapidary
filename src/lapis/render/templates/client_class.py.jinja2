@@ -1,11 +1,24 @@
 {% extends 'module.py.jinja2' -%}
+{% macro render_param(param) %}
+{{ param.name }}: {{ param.annotation.type.__repr__() }}{% if not param.required %} = lapis_client_base.absent.ABSENT{% endif %},
+{% endmacro %}
 {% block body -%}
 {% set model = model.body -%}
 class ApiClient(lapis_client_base.ApiBase):
-{% for attr in model.attributes -%}
-    async def _var_api_call_simple_raw(self, _var_param_: _var_param_type_) -> dict:
-        pass
-{%- else %}
+{%- for func in model.methods %}
+    async def {{ func.name }}(
+        self,{% for param in func.params if param.required%}
+        {{ render_param(param) }}
+{% endfor %}{% for param in func.params if not param.required%}
+        {{  render_param(param) }}
+{% endfor %}) -> dict:
+        import {{ func.params_model_name.module }}
+        return super()._request(
+            '{{ func.method.upper() }}',
+            f'{{ func.path }}'{% if func.params_model_name %},
+            {{ func.params_model_name.full_name() }}(**locals()){% endif %}
+        )
+{% else %}
     pass
 {%- endfor %}
 {%- endblock %}
