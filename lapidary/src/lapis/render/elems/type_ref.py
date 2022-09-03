@@ -60,7 +60,7 @@ def _get_type_ref(schema: openapi.Schema, path: list[str], resolver: ResolverFun
         elif schema.oneOf:
             return BuiltinTypeRef.from_str('Unsupported')
         else:
-            return TypeRef.from_type(Any)
+            return _get_type_ref_from_path(path, True)
     elif schema.type in PRIMITIVE_TYPES:
         return BuiltinTypeRef.from_str(PRIMITIVE_TYPES[schema.type].__name__)
     elif schema.type == openapi.Type.array:
@@ -72,6 +72,12 @@ def _get_type_ref(schema: openapi.Schema, path: list[str], resolver: ResolverFun
         type_ref = get_type_ref(item_schema, True, path, resolver)
         return type_ref.list_of()
     return TypeRef.from_type(Any)
+
+
+def _get_type_ref_from_path(path: list[str], schema_type: bool) -> TypeRef:
+    module = '.'.join(path[:-1])
+    name = inflection.camelize(path[-1])
+    return TypeRef(module=module, name=name, schema_type=schema_type)
 
 
 class TypeRef(BaseModel):
@@ -86,7 +92,10 @@ class TypeRef(BaseModel):
         if self.schema_type:
             return self.name
         else:
-            return self.module + '.' + self.name
+            return self.full_name()
+
+    def full_name(self):
+        return self.module + '.' + self.name
 
     @staticmethod
     def from_str(path: str, schema_type: bool = False) -> TypeRef:
@@ -105,10 +114,10 @@ class TypeRef(BaseModel):
             return TypeRef(module=module, name=name, schema_type=False)
 
     def type_checking_imports(self) -> list[tuple[str, str]]:
-        return [(self.module, self.name)] if self.schema_type else []
+        return []
 
     def imports(self) -> list[str]:
-        return [self.module] if not self.schema_type else []
+        return [self.module]
 
     def union_with(self, other: TypeRef) -> GenericTypeRef:
         return GenericTypeRef(module='typing', name='Union', args=[self, other])
@@ -128,11 +137,17 @@ class BuiltinTypeRef(TypeRef):
         extra = Extra.forbid
 
     def __repr__(self):
-        return self.name
+        return self.full_name()
 
     @staticmethod
     def from_str(name: str) -> BuiltinTypeRef:
         return BuiltinTypeRef(name=name)
+
+    def imports(self) -> list[str]:
+        return []
+
+    def full_name(self):
+        return self.name
 
 
 class GenericTypeRef(TypeRef):
@@ -149,14 +164,16 @@ class GenericTypeRef(TypeRef):
             return super().union_with(other)
 
     def type_checking_imports(self) -> list[tuple[str, str]]:
-        return [imp for typ in self._types() if typ.schema_type for imp in typ.type_checking_imports()]
+        return []
 
     def imports(self) -> list[str]:
-        return [imp for typ in self._types() if not typ.schema_type for imp in TypeRef.imports(typ)]
+        return [imp for typ in self._types() for imp in TypeRef.imports(typ)]
 
     def _types(self) -> list[TypeRef]:
         return [self, *[typ for arg in self.args for typ in arg._types()]]
 
-    def __repr__(self):
-        module_dot = '' if self.schema_type else self.module + '.'
-        return f'{module_dot}{self.name}{self.args.__repr__()}'
+    def __repr__(self) -> str:
+        return self.full_name()
+
+    def full_name(self) -> str:
+        return f'{super().full_name()}[{", ".join(arg.full_name() for arg in self.args)}]'
