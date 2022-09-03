@@ -38,7 +38,7 @@ def get_type_ref(schema: openapi.Schema, required: bool, path: list[str], resolv
 
     if schema.nullable:
         typ = typ.union_with(BuiltinTypeRef.from_str('None'))
-    if not required or schema.readOnly or schema.writeOnly:
+    if not required:
         typ = typ.union_with(TypeRef.from_type(Absent))
 
     return typ
@@ -52,26 +52,34 @@ def _get_type_ref(schema: openapi.Schema, path: list[str], resolver: ResolverFun
         return TypeRef(module=module_name(path), name=inflection.camelize(path[-1]), schema_type=True)
     elif schema.type == openapi.Type.string:
         return TypeRef.from_type(STRING_FORMATS.get(schema.format, str))
-    elif schema.type == openapi.Type.object:
-        if schema.properties or schema.allOf:
-            return TypeRef(module=module_name(path), name=inflection.camelize(path[-1]), schema_type=True)
-        elif schema.anyOf:
-            return BuiltinTypeRef.from_str('Unsupported')
-        elif schema.oneOf:
-            return BuiltinTypeRef.from_str('Unsupported')
-        else:
-            return _get_type_ref_from_path(path, True)
     elif schema.type in PRIMITIVE_TYPES:
         return BuiltinTypeRef.from_str(PRIMITIVE_TYPES[schema.type].__name__)
+    elif schema.type == openapi.Type.object:
+        return _get_type_ref_object(schema, path)
     elif schema.type == openapi.Type.array:
-        if isinstance(schema.items, openapi.Reference):
-            item_schema, path = resolver(schema.items)
-        else:
-            item_schema = schema.items
-            path = [*path, inflection.camelize(path[-1]) + 'Item']
-        type_ref = get_type_ref(item_schema, True, path, resolver)
-        return type_ref.list_of()
+        return _get_type_ref_array(schema, path, resolver)
     return TypeRef.from_type(Any)
+
+
+def _get_type_ref_object(schema: openapi.Schema, path: list[str]) -> TypeRef:
+    if schema.properties or schema.allOf:
+        return TypeRef(module=module_name(path), name=inflection.camelize(path[-1]), schema_type=True)
+    elif schema.anyOf:
+        return BuiltinTypeRef.from_str('Unsupported')
+    elif schema.oneOf:
+        return BuiltinTypeRef.from_str('Unsupported')
+    else:
+        return _get_type_ref_from_path(path, True)
+
+
+def _get_type_ref_array(schema: openapi.Schema, path: list[str], resolver: ResolverFunc) -> TypeRef:
+    if isinstance(schema.items, openapi.Reference):
+        item_schema, path = resolver(schema.items)
+    else:
+        item_schema = schema.items
+        path = [*path, inflection.camelize(path[-1]) + 'Item']
+    type_ref = get_type_ref(item_schema, True, path, resolver)
+    return type_ref.list_of()
 
 
 def _get_type_ref_from_path(path: list[str], schema_type: bool) -> TypeRef:
