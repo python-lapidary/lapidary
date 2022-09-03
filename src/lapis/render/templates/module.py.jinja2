@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import typing
 {%- for imp in model.imports %}
 import {{ imp }}
 {%- endfor %}
 
 if typing.TYPE_CHECKING:
 {%- for imp in model.type_checking_imports %}
-    import {{ imp[0] }}
+    import {{ imp }}
 {%- else %}
     pass
 {%- endfor %}
