@@ -42,16 +42,29 @@ def get_schema_class_module(model: openapi.Schema, path: list[str], resolver: Re
     )
 
 
-def get_client_class_module(model: openapi.OpenApiModel, package_name: str) -> Module:
+def get_client_class_module(model: openapi.OpenApiModel, package_name: str, resolver: ResolverFunc) -> Module:
+    client_class = get_client_class(model, package_name, resolver)
+
+    imports = list({
+        imp
+        for attr in client_class.methods
+        for t in attr.params
+        for imp in t.annotation.type.imports()
+    })
+
+    import_list = [
+        'typing',
+        'pydantic',
+        'deprecation',
+        'lapis_client_base',
+        *imports,
+    ]
+    import_list.sort()
+
     return Module(
         package=package_name,
         name='client',
-        body=get_client_class(model),
-        imports=[
-            'typing',
-            'pydantic',
-            'deprecation',
-            'lapis_client_base',
-        ],
+        body=client_class,
+        imports=import_list,
         type_checking_imports=[],
     )

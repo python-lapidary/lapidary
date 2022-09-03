@@ -25,9 +25,9 @@ FIELD_PROPS = {
 @dataclass(frozen=True)
 class AttributeAnnotationModel:
     type: TypeRef
-    direction: Optional[str]
     field_props: dict[str, Any]
 
+    direction: Optional[str] = None
     style: Optional[str] = None
     explode: Optional[bool] = None
     allowReserved: Optional[bool] = False

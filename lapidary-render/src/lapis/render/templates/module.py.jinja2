@@ -6,7 +6,7 @@ import {{ imp }}
 
 if typing.TYPE_CHECKING:
 {%- for imp in model.type_checking_imports %}
-    from {{ imp[0] }} import {{ imp[1] }}
+    import {{ imp[0] }}
 {%- else %}
     pass
 {%- endfor %}
