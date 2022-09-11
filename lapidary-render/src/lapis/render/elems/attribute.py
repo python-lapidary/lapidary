@@ -1,11 +1,11 @@
 import re
 from dataclasses import dataclass
-
-from typing import Union, Any
+from typing import Any
 
 from .attribute_annotation import AttributeAnnotationModel, get_attr_annotation
 from .type_ref import BuiltinTypeRef
-from ..refs import ResolverFunc
+from ..module_path import ModulePath
+from ..refs import ResolverFunc, SchemaOrRef
 from ...openapi import model as openapi
 
 PYTHON_KEYWORDS = [
@@ -52,33 +52,40 @@ class AttributeModel:
     deprecated: bool = False
 
 
-def get_attribute(attr_type: Union[openapi.Schema, openapi.Reference], required: bool, path: list[str], resolver: ResolverFunc) -> AttributeModel:
-    name = path[-1]
-    if isinstance(attr_type, openapi.Reference):
-        attr_type, path = resolver(attr_type)
+def get_attributes(parent_schema: openapi.Schema, parent_class_name: str, module: ModulePath, resolver: ResolverFunc) -> list[AttributeModel]:
+    def is_required(schema: openapi.Schema, prop_name: str) -> bool:
+        return schema.required is not None and prop_name in schema.required
 
+    return [
+        get_attribute(prop_schema, name, parent_class_name, is_required(parent_schema, name), module, resolver)
+        for name, prop_schema in parent_schema.properties.items()
+    ]
+
+
+def get_attribute(typ: SchemaOrRef, name: str, parent_name: str, required: bool, module: ModulePath, resolve: ResolverFunc) -> AttributeModel:
     return AttributeModel(
-        name=name,
-        annotation=get_attr_annotation(attr_type, required, path, resolver),
-        deprecated=attr_type.deprecated,
+        name=name.replace(':', '_'),
+        annotation=get_attr_annotation(typ, name, parent_name, required, module, resolve),
     )
 
 
 def get_enum_attribute(value: Any) -> AttributeModel:
+    name = _name_for_value(value)
+    value = "'" + value.replace("'", r"\'") + "'" if value is not None else None
     return AttributeModel(
-        name=_name_for_value(value),
+        name=name,
         annotation=AttributeAnnotationModel(
             type=BuiltinTypeRef.from_type(type(value)),
             field_props={'default': value},
-            direction=None,
         )
     )
 
 
 def _name_for_value(value: Any) -> str:
+    if value is None: return 'none'
     result = re.compile(r'\W+').sub('_', str(value))
     if result == '' or not result[0].isalpha():
-        result = 'v' + result
+        result = 'v_' + result
     if result in PYTHON_KEYWORDS:
         result += '_'
     return result

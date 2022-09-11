@@ -1,6 +1,6 @@
 {% extends 'module.py.jinja2' %}
 {% block body -%}
-{% set model = model.body -%}
+{% for model in model.body -%}
 class {{ model.class_name }}({{ model.base_type.__repr__() }}):
 {%- if model.docstr %}
     """
@@ -12,4 +12,6 @@ class {{ model.class_name }}({{ model.base_type.__repr__() }}):
 {% elif model.base_type.__repr__() == 'enum.Enum' %}
 {% include 'schema_class_enum.py.jinja2' %}
 {% endif %}
+
+{% endfor %}
 {%- endblock %}

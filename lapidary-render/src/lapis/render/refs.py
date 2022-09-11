@@ -1,25 +1,40 @@
+import functools
 import logging
-from typing import Mapping, Any, Callable, TypeVar
+from typing import Callable, TypeVar, Union, TypeAlias, Type, cast
 
+import inflection
+
+from .module_path import ModulePath
 from ..openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar('T', openapi.Schema, openapi.Parameter, openapi.SecurityScheme)
-ResolverFunc = Callable[[openapi.Reference], tuple[T, list[str]]]
+ResolverFunc = Callable[[openapi.Reference, Type[T]], tuple[T, ModulePath, str]]
+
+SchemaOrRef: TypeAlias = Union[openapi.Schema, openapi.Reference]
 
 
-def ref_to_path(ref: openapi.Reference) -> list[str]:
-    return ref.ref.split('/')[1:]
+def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, typ: Type[T]) -> tuple[T, ModulePath, str]:
+    """
+    module = {root_package}.{path[0:4]}
+    name = path[4:]
+    """
+
+    path = openapi.ref_to_path(model.recursive_resolve(ref.ref))
+
+    if path[0] == 'paths':
+        op = model.resolve(_mkref(path[:4]), openapi.Operation)
+        if op.operationId:
+            path[2:4] = op.operationId
+
+    module = ModulePath(root_package) / path[:-1] / inflection.underscore(path[-1])
+    return model.resolve(_mkref(path), typ), module, path[-1]
 
 
-def resolve_ref(openapi_model: openapi.OpenApiModel, package: str, ref: openapi.Reference) -> (T, list[str]):
-    model: Any = openapi_model
-    path = ref_to_path(ref)
-    for part in path:
-        model = model[part] if isinstance(model, Mapping) else getattr(model, part)
+def get_resolver(model: openapi.OpenApiModel, package: str) -> ResolverFunc:
+    return cast(ResolverFunc, functools.partial(resolve, model, package))
 
-    path = [package, *path]
 
-    logger.debug('%s -> %s', ref.ref, '.'.join(path))
-    return model, path
+def _mkref(s: list[str]) -> str:
+    return '/'.join(['#', *s])

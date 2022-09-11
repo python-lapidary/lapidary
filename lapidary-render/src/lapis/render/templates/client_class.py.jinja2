@@ -7,12 +7,14 @@
 class ApiClient(lapis_client_base.ApiBase):
 {%- for func in model.methods %}
     async def {{ func.name }}(
-        self,{% for param in func.params if param.required%}
+        self,{% for param in func.params if param.required %}
         {{ render_param(param) }}
-{% endfor %}{% for param in func.params if not param.required%}
-        {{  render_param(param) }}
-{% endfor %}) -> dict:
+{%- endfor %}{% for param in func.params if not param.required %}
+        {{ render_param(param) }}
+{%- endfor %}) -> dict:
+{%- if func.params_model_name %}
         import {{ func.params_model_name.module }}
+{%- endif %}
         return super()._request(
             '{{ func.method.upper() }}',
             f'{{ func.path }}'{% if func.params_model_name %},
