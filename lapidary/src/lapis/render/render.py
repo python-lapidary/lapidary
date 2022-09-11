@@ -1,17 +1,17 @@
-import dataclasses
 import logging
 import os
-from functools import partial
 from pathlib import Path
-from pprint import pprint
-
-from jinja2 import Environment, PackageLoader
 from typing import Any
 
+from jinja2 import Environment, PackageLoader
+
 from .black import format_code
-from .elems.module import get_schema_class_module, get_client_class_module
+from .elems.client_class import get_operations
+from .elems.client_module import get_client_class_module
 from .elems.pyproject import get_pyproject, render_pyproject
-from .refs import resolve_ref, ResolverFunc
+from .elems.schema_module import get_modules_for_components_schemas, get_modules_for_param_model_classes
+from .module_path import ModulePath
+from .refs import ResolverFunc, get_resolver
 from ..openapi import model as openapi
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 def render(source: str, destination: Path, render_model: Any, env: Environment):
     try:
+        destination.parent.mkdir(parents=True, exist_ok=True)
         text = env.get_template(source).render(model=render_model)
         text = format_code(text)
         with open(destination, 'wt') as fb:
@@ -37,35 +38,44 @@ def render_client(model: openapi.OpenApiModel, target: Path, package_name: str) 
     render_pyproject(target, get_pyproject(model.info))
 
     gen_root = target / 'gen'
-    package_dir = gen_root / package_name
-    package_dir.mkdir(parents=True, exist_ok=True)
+    gen_root.mkdir(parents=True, exist_ok=True)
 
-    resolver = partial(resolve_ref, model, package_name)
+    resolver = get_resolver(model, package_name)
 
     render_client_module(model, package_name, gen_root, resolver, env)
     render_schema_modules(model, package_name, gen_root, resolver, env)
 
-    for (dirpath, dirnames, filenames) in os.walk(package_dir):
-        if '__init__.py' not in filenames:
-            (Path(dirpath) / '__init__.py').touch()
+    ensure_init_py(gen_root, package_name)
 
 
 def render_client_module(model: openapi.OpenApiModel, package_name: str, gen_root: Path, resolver: ResolverFunc, env: Environment):
     logger.info('Render client modules')
-    client_class_module = get_client_class_module(model, package_name, resolver)
-    path = gen_root.joinpath(*package_name.split('.'), 'api_client.py')
+    root_mod = ModulePath(package_name)
+    client_module = root_mod / 'client.py'
+    client_class_module = get_client_class_module(model, client_module, root_mod, resolver)
+    path = client_module.to_path(gen_root)
     render('client_class.py.jinja2', path, client_class_module, env)
 
 
 def render_schema_modules(model: openapi.OpenApiModel, package_name: str, gen_root: Path, resolver: ResolverFunc, env: Environment):
+    root_module = ModulePath(package_name)
+
     if model.components.schemas:
         logger.info('Render schema modules')
-        for name, schema in model.components.schemas.items():
-            render_schema_module(name, schema, package_name, gen_root, resolver, env)
+        modules = get_modules_for_components_schemas(model.components.schemas, root_module / 'components' / 'schemas', resolver)
+        for module in modules:
+            render('schema_class.py.jinja2', module.path.to_path(gen_root).with_suffix('.py'), module, env)
+
+    for path, path_item in model.paths.__root__.items():
+        for tpl in get_operations(path_item, True):
+            method, op = tpl
+            if op.parameters:
+                module_path = root_module / 'paths' / op.operationId
+                mod = get_modules_for_param_model_classes(op, module_path, resolver)
+                render('schema_class.py.jinja2', module_path.to_path(gen_root) / 'schemas.py', mod, env)
 
 
-def render_schema_module(name: str, schema: openapi.Schema, package_name: str, gen_root: Path, resolver: ResolverFunc, env: Environment):
-    module = get_schema_class_module(schema, [package_name, 'components', 'schemas', name], resolver)
-    path = gen_root.joinpath(*module.package.split('.'), module.name + '.py')
-    path.parent.mkdir(parents=True, exist_ok=True)
-    render('schema_class.py.jinja2', path, module, env)
+def ensure_init_py(gen_root, package_name):
+    for (dirpath, dirnames, filenames) in os.walk(gen_root / package_name):
+        if '__init__.py' not in filenames:
+            (Path(dirpath) / '__init__.py').touch()

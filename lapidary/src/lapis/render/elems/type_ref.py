@@ -10,8 +10,11 @@ import inflection
 from lapis_client_base import Absent
 from pydantic import BaseModel, Field, Extra
 
-from ..refs import ResolverFunc
 from ...openapi import model as openapi
+
+if typing.TYPE_CHECKING:
+    from ..refs import ResolverFunc
+    from ..module_path import ModulePath
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +36,8 @@ def module_name(path: list[str]) -> str:
     return '.'.join([*path[:-1], inflection.underscore(path[-1])])
 
 
-def get_type_ref(schema: openapi.Schema, required: bool, path: list[str], resolver: ResolverFunc) -> TypeRef:
-    typ = _get_type_ref(schema, path, resolver)
+def get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, required: bool, resolver: ResolverFunc) -> TypeRef:
+    typ = _get_type_ref(schema, module, name, resolver)
 
     if schema.nullable:
         typ = typ.union_with(BuiltinTypeRef.from_str('None'))
@@ -44,71 +47,59 @@ def get_type_ref(schema: openapi.Schema, required: bool, path: list[str], resolv
     return typ
 
 
-def _get_type_ref(schema: openapi.Schema, path: list[str], resolver: ResolverFunc) -> TypeRef:
-    name = schema.type.name if schema.type is not None else None
-    logger.debug('%s %s', name, '.'.join(path))
-
+def _get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeRef:
     if schema.enum:
-        return TypeRef(module=module_name(path), name=inflection.camelize(path[-1]), schema_type=True)
+        return TypeRef(module=module.str(), name=name)
     elif schema.type == openapi.Type.string:
         return TypeRef.from_type(STRING_FORMATS.get(schema.format, str))
     elif schema.type in PRIMITIVE_TYPES:
         return BuiltinTypeRef.from_str(PRIMITIVE_TYPES[schema.type].__name__)
     elif schema.type == openapi.Type.object:
-        return _get_type_ref_object(schema, path)
+        return _get_type_ref_object(schema, module, name)
     elif schema.type == openapi.Type.array:
-        return _get_type_ref_array(schema, path, resolver)
+        return _get_type_ref_array(schema, module, name, resolver)
     return TypeRef.from_type(Any)
 
 
-def _get_type_ref_object(schema: openapi.Schema, path: list[str]) -> TypeRef:
+def _get_type_ref_object(schema: openapi.Schema, module: ModulePath, name: str) -> TypeRef:
     if schema.properties or schema.allOf:
-        return TypeRef(module=module_name(path), name=inflection.camelize(path[-1]), schema_type=True)
+        return TypeRef(module=module.str(), name=name)
     elif schema.anyOf:
         return BuiltinTypeRef.from_str('Unsupported')
     elif schema.oneOf:
         return BuiltinTypeRef.from_str('Unsupported')
     else:
-        return _get_type_ref_from_path(path, True)
+        return TypeRef(module=module.str(), name=name)
 
 
-def _get_type_ref_array(schema: openapi.Schema, path: list[str], resolver: ResolverFunc) -> TypeRef:
+def _get_type_ref_array(schema: openapi.Schema, module: ModulePath, parent_name: str, resolver: ResolverFunc) -> TypeRef:
     if isinstance(schema.items, openapi.Reference):
-        item_schema, path = resolver(schema.items)
+        item_schema, module, name = resolver(schema.items, openapi.Schema)
     else:
         item_schema = schema.items
-        path = [*path, inflection.camelize(path[-1]) + 'Item']
-    type_ref = get_type_ref(item_schema, True, path, resolver)
+        name = parent_name + 'Item'
+
+    type_ref = get_type_ref(item_schema, module, name, True, resolver)
     return type_ref.list_of()
-
-
-def _get_type_ref_from_path(path: list[str], schema_type: bool) -> TypeRef:
-    module = '.'.join(path[:-1])
-    name = inflection.camelize(path[-1])
-    return TypeRef(module=module, name=name, schema_type=schema_type)
 
 
 class TypeRef(BaseModel):
     module: str
     name: str
-    schema_type: bool
 
     class Config:
         extra = Extra.forbid
 
     def __repr__(self):
-        if self.schema_type:
-            return self.name
-        else:
-            return self.full_name()
+        return self.full_name()
 
     def full_name(self):
-        return self.module + '.' + self.name
+        return self.module + '.' + self.name if self.module != 'builtins' else self.name
 
     @staticmethod
-    def from_str(path: str, schema_type: bool = False) -> TypeRef:
+    def from_str(path: str) -> TypeRef:
         module, name = path.rsplit('.', 1)
-        return TypeRef(module=module, name=name, schema_type=schema_type)
+        return TypeRef(module=module, name=name)
 
     @staticmethod
     def from_type(typ: typing.Type) -> TypeRef:
@@ -119,7 +110,7 @@ class TypeRef(BaseModel):
         if module == 'builtins':
             return BuiltinTypeRef.from_str(name)
         else:
-            return TypeRef(module=module, name=name, schema_type=False)
+            return TypeRef(module=module, name=name)
 
     def type_checking_imports(self) -> list[tuple[str, str]]:
         return []
