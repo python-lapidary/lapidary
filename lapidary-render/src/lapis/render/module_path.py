@@ -23,3 +23,6 @@ class ModulePath:
 
     def __repr__(self):
         return self.str()
+
+    def __eq__(self, other: ModulePath):
+        return self.parts == other.parts
