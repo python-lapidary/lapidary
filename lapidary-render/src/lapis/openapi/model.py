@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Optional, Union
+from typing import Annotated, Any, Dict, List, Optional, Union, Mapping
 
 from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field
 
@@ -82,7 +82,7 @@ class Style(Enum):
 
 
 class Paths(BaseModel):
-    __root__: Annotated[dict[str, PathItem], Field(default_factory=dict)]
+    __root__: Annotated[dict[str, Union[PathItem, Reference]], Field(default_factory=dict)]
 
 
 class SecurityRequirement(BaseModel):
@@ -324,7 +324,7 @@ class AuthorizationCodeOAuthFlow(BaseModel):
 
 
 class Callback(BaseModel):
-    __root__: Annotated[dict[str, PathItem], Field(default_factory=dict)]
+    __root__: Annotated[dict[str, Union[PathItem, Reference]], Field(default_factory=dict)]
 
 
 class Info(BaseModel):
@@ -438,6 +438,10 @@ class SecurityScheme(BaseModel):
     ]
 
 
+def ref_to_path(ref: str) -> list[str]:
+    return ref.split('/')[1:]
+
+
 class OpenApiModel(BaseModel):
     """
     Validation schema for OpenAPI Specification 3.0.X.
@@ -454,6 +458,39 @@ class OpenApiModel(BaseModel):
     tags: Annotated[Optional[List[Tag]], Field(unique_items=True)]
     paths: Paths
     components: Optional[Components]
+
+    def resolve(self, ref: str, t: Optional[type]) -> Any:
+        result = self._schema_get(self.recursive_resolve(ref))
+        if t is not None and not isinstance(result, t):
+            raise TypeError(ref, t, type(result))
+        else:
+            return result
+
+    def recursive_resolve(self, ref: str) -> str:
+        """
+        Resolve recursive references
+        :return: The last reference, which points to a non-reference object
+        """
+
+        stack = []
+
+        while True:
+            model = self._schema_get(ref)
+            if isinstance(model, Reference):
+                ref = model.ref
+                if ref in stack:
+                    raise RecursionError(stack, ref)
+                else:
+                    stack.append(ref)
+            else:
+                return ref
+
+    def _schema_get(self, ref: str) -> Any:
+        model = self
+        path = ref_to_path(ref)
+        for part in path:
+            model = model[part] if isinstance(model, Mapping) else getattr(model, part)
+        return model
 
 
 class Components(BaseModel):
@@ -514,7 +551,6 @@ class PathItem(BaseModel):
     class Config:
         extra = Extra.forbid
 
-    ref_: Annotated[Optional[str], Field(alias='$ref')]
     summary: Optional[str]
     description: Optional[str]
     servers: Optional[List[Server]]
