@@ -3,9 +3,9 @@ from typing import Optional, Any
 
 import inflection
 
-from .type_ref import TypeRef, get_type_ref
+from .refs import SchemaOrRef, ResolverFunc
 from ..module_path import ModulePath
-from ..refs import SchemaOrRef, ResolverFunc
+from ..type_ref import TypeRef, get_type_ref
 from ...openapi import model as openapi
 
 
