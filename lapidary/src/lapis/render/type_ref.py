@@ -10,11 +10,11 @@ import inflection
 from lapis_client_base import Absent
 from pydantic import BaseModel, Field, Extra
 
-from ...openapi import model as openapi
+from ..openapi import model as openapi
 
 if typing.TYPE_CHECKING:
-    from ..refs import ResolverFunc
-    from ..module_path import ModulePath
+    from .elems.refs import ResolverFunc
+    from .module_path import ModulePath
 
 logger = logging.getLogger(__name__)
 
@@ -174,5 +174,5 @@ class GenericTypeRef(TypeRef):
     def __repr__(self) -> str:
         return self.full_name()
 
-    def full_name(self) -> str:
-        return f'{super().full_name()}[{", ".join(arg.full_name() for arg in self.args)}]'
+    # def full_name(self) -> str:
+    #     return f'{super().full_name()}[{", ".join(arg.full_name() for arg in self.args)}]'

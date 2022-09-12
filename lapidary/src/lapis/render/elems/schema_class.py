@@ -6,9 +6,9 @@ import inflection
 
 from .attribute import AttributeModel, get_attributes, get_enum_attribute
 from .attribute_annotation import AttributeAnnotationModel
-from .type_ref import TypeRef, BuiltinTypeRef
+from .refs import ResolverFunc
 from ..module_path import ModulePath
-from ..refs import ResolverFunc
+from ..type_ref import TypeRef, BuiltinTypeRef
 from ...openapi import model as openapi
 
 logger = logging.getLogger(__name__)

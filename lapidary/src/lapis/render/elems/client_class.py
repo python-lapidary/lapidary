@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 from typing import Union, Generator
 
 from .operation_function import OperationFunctionModel, get_operation_func
+from .refs import ResolverFunc
 from ..module_path import ModulePath
-from ..refs import ResolverFunc
 from ...openapi import model as openapi
 
 
