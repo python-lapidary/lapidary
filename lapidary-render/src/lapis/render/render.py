@@ -9,9 +9,9 @@ from .black import format_code
 from .elems.client_class import get_operations
 from .elems.client_module import get_client_class_module
 from .elems.pyproject import get_pyproject, render_pyproject
-from .elems.schema_module import get_modules_for_components_schemas, get_modules_for_param_model_classes
+from .elems.refs import get_resolver, ResolverFunc
+from .elems.schema_module import get_modules_for_components_schemas, get_module_for_param_model_classes
 from .module_path import ModulePath
-from .refs import ResolverFunc, get_resolver
 from ..openapi import model as openapi
 
 logger = logging.getLogger(__name__)

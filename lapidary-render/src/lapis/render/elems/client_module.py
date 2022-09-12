@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from lapis.openapi import model as openapi
-from lapis.render.elems.client_class import get_client_class, ClientClass
-from lapis.render.elems.module import AbstractModule, template_imports
-from lapis.render.module_path import ModulePath
-from lapis.render.refs import ResolverFunc
+from .client_class import ClientClass, get_client_class
+from .module import AbstractModule, template_imports
+from .refs import ResolverFunc
+from ..module_path import ModulePath
+from ...openapi import model as openapi
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -12,7 +12,7 @@ class ClientModule(AbstractModule):
     body: ClientClass
 
 
-def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePath, root_module:ModulePath, resolver: ResolverFunc) -> ClientModule:
+def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePath, root_module: ModulePath, resolver: ResolverFunc) -> ClientModule:
     client_class = get_client_class(model, root_module, resolver)
 
     imports = [

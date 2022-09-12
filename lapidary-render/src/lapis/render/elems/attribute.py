@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from typing import Any
 
 from .attribute_annotation import AttributeAnnotationModel, get_attr_annotation
-from .type_ref import BuiltinTypeRef
+from .refs import ResolverFunc, SchemaOrRef
 from ..module_path import ModulePath
-from ..refs import ResolverFunc, SchemaOrRef
+from ..type_ref import BuiltinTypeRef
 from ...openapi import model as openapi
 
 PYTHON_KEYWORDS = [

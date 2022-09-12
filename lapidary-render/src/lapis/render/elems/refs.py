@@ -4,8 +4,8 @@ from typing import Callable, TypeVar, Union, TypeAlias, Type, cast
 
 import inflection
 
-from .module_path import ModulePath
-from ..openapi import model as openapi
+from ..module_path import ModulePath
+from ...openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 

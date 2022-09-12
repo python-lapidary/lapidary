@@ -1,17 +1,14 @@
-import typing
 from unittest import TestCase
 
-import lapis_client_base
-import pydantic
 from lapis_client_base import Absent
 
 from lapis.openapi import model as openapi
 from lapis.render.elems.attribute import AttributeModel
 from lapis.render.elems.attribute_annotation import AttributeAnnotationModel
+from lapis.render.elems.refs import get_resolver
 from lapis.render.elems.schema_class import get_schema_class, SchemaClass
-from lapis.render.elems.type_ref import TypeRef, GenericTypeRef, BuiltinTypeRef
 from lapis.render.module_path import ModulePath
-from lapis.render.refs import get_resolver
+from lapis.render.type_ref import TypeRef, BuiltinTypeRef
 
 model = openapi.OpenApiModel(
     openapi='3.0.3',

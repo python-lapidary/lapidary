@@ -7,9 +7,9 @@ import inflection
 
 from .attribute import AttributeModel
 from .attribute_annotation import AttributeAnnotationModel
-from .type_ref import TypeRef, get_type_ref
+from .refs import ResolverFunc
 from ..module_path import ModulePath
-from ..refs import ResolverFunc
+from ..type_ref import TypeRef, get_type_ref
 from ...openapi import model as openapi
 
 logger = logging.getLogger(__name__)

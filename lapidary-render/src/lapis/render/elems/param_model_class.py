@@ -4,10 +4,10 @@ import inflection
 
 from .attribute import AttributeModel
 from .attribute_annotation import get_attr_annotation
+from .refs import ResolverFunc
 from .schema_class import SchemaClass, get_schema_classes
-from .type_ref import TypeRef
 from ..module_path import ModulePath
-from ..refs import ResolverFunc
+from ..type_ref import TypeRef
 from ...openapi import model as openapi
 
 """

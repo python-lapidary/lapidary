@@ -5,9 +5,9 @@ import inflection
 
 from .module import AbstractModule, template_imports
 from .param_model_class import get_param_model_classes
+from .refs import ResolverFunc
 from .schema_class import SchemaClass, get_schema_classes
 from ..module_path import ModulePath
-from ..refs import ResolverFunc
 from ...openapi import model as openapi
 
 
