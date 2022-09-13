@@ -1,5 +1,6 @@
 {% extends 'module.py.jinja2' %}
 {% block body -%}
+{% set path = model.path %}
 {% for model in model.body -%}
 class {{ model.class_name }}({{ model.base_type.__repr__() }}):
 {%- if model.docstr %}

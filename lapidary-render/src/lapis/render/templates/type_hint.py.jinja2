@@ -1,0 +1,10 @@
+{% macro type_hint(type_ref, module_path) %}
+    {%- if type_ref.module == module_path.str() %}
+        '{{- type_ref.name }}'
+    {%- else %}
+        {{- type_ref.full_name() }}
+    {%- endif %}
+    {%- if type_ref.args is defined %}
+        [{% for arg in type_ref.args %}{{ type_hint(arg, module_path) }},{% endfor %}]
+    {%- endif %}
+{%- endmacro -%}
