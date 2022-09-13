@@ -1,13 +1,13 @@
 import logging
 import os
 from pathlib import Path
-from typing import Any
 
 from jinja2 import Environment, PackageLoader
 
 from .black import format_code
 from .elems.client_class import get_operations
 from .elems.client_module import get_client_class_module
+from .elems.module import AbstractModule
 from .elems.pyproject import get_pyproject, render_pyproject
 from .elems.refs import get_resolver, ResolverFunc
 from .elems.schema_module import get_modules_for_components_schemas, get_module_for_param_model_classes
@@ -17,7 +17,7 @@ from ..openapi import model as openapi
 logger = logging.getLogger(__name__)
 
 
-def render(source: str, destination: Path, render_model: Any, env: Environment):
+def render(source: str, destination: Path, render_model: AbstractModule, env: Environment):
     try:
         destination.parent.mkdir(parents=True, exist_ok=True)
         text = env.get_template(source).render(model=render_model)
@@ -70,9 +70,9 @@ def render_schema_modules(model: openapi.OpenApiModel, package_name: str, gen_ro
         for tpl in get_operations(path_item, True):
             method, op = tpl
             if op.parameters:
-                module_path = root_module / 'paths' / op.operationId
-                mod = get_modules_for_param_model_classes(op, module_path, resolver)
-                render('schema_class.py.jinja2', module_path.to_path(gen_root) / 'schemas.py', mod, env)
+                module_path = root_module / 'paths' / op.operationId / 'schemas'
+                mod = get_module_for_param_model_classes(op, module_path, resolver)
+                render('schema_class.py.jinja2', module_path.to_path(gen_root).with_suffix('.py'), mod, env)
 
 
 def ensure_init_py(gen_root, package_name):
