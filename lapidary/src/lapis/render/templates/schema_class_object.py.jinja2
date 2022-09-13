@@ -1,12 +1,13 @@
+{% from 'type_hint.py.jinja2' import type_hint %}
 {%- for attr in model.attributes %}
-    {{ attr.name }} = typing.Annotated[{{ attr.annotation.type.__repr__() }}, pydantic.Field(
-    {%- for key, value in attr.annotation.field_props.items() -%}
+    {{ attr.name }}: typing.Annotated[{{ type_hint(attr.annotation.type, path) }}, pydantic.Field(
+    {%- for key, value in attr.annotation.field_props.items() -%}{% if key != 'default' %}
         {{ key }}={{ value }},{{ ' ' }}
-    {%- endfor -%}
+    {%- endif %}{%- endfor -%}
     {%- if attr.annotation.direction -%}
         direction={{ attr.annotation.direction -}}
     {%- endif -%}
-    )]
+    )]{% if 'default' in attr.annotation.field_props %} = {{ attr.annotation.field_props.default }}{% endif %}
 {%- else %}
     pass
 {% endfor -%}
