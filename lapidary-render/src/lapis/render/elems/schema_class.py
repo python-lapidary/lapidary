@@ -59,7 +59,7 @@ def get_schema_class(
     if schema.type is not openapi.Type.object:
         return None
 
-    logger.info(name)
+    logger.debug(name)
 
     base_type = TypeRef.from_str('pydantic.BaseModel')
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
