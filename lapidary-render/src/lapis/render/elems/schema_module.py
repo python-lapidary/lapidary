@@ -65,7 +65,7 @@ def _get_module_for_components_schema(classes: list[SchemaClass], path: ModulePa
     )
 
 
-def get_modules_for_param_model_classes(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Optional[SchemaModule]:
+def get_module_for_param_model_classes(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> SchemaModule:
     mod = module / 'schemas'
     classes = [cls for cls in get_param_model_classes(op, op.operationId, mod, resolve)]
     return _get_module_for_components_schema(classes, mod)
