@@ -15,4 +15,9 @@ class {{ model.class_name }}({{ model.base_type.__repr__() }}):
 {% endif %}
 
 {% endfor %}
+
+{% for model in model.body -%}{% if model.base_type.full_name() == 'pydantic.BaseModel' %}
+{{ model.class_name }}.update_forward_refs()
+{%- endif %}{% endfor %}
+
 {%- endblock %}
