@@ -49,11 +49,11 @@ def _get_module_for_components_schema(classes: list[SchemaClass], path: ModulePa
     })
 
     type_checking_imports = list({
-        t
+        import_
         for schema_class in classes
         for attr in schema_class.attributes
-        for t in attr.annotation.type.imports()
-        if t not in imports and t not in template_imports
+        for import_ in attr.annotation.type.imports()
+        if import_ not in imports and import_ not in template_imports and import_ != path.str()
     })
     type_checking_imports.sort()
 
