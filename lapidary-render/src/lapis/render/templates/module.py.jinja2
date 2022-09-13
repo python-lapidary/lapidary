@@ -6,11 +6,11 @@ import typing
 import {{ imp }}
 {%- endfor %}
 
-if typing.TYPE_CHECKING:
+{#-if typing.TYPE_CHECKING:#}
 {%- for imp in model.type_checking_imports %}
-    import {{ imp }}
-{%- else %}
-    pass
+import {{ imp }}
+{#- {%- else %}#}
+{#-    pass#}
 {%- endfor %}
 
 
