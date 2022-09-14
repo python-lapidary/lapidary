@@ -1,20 +1,39 @@
-# Lapis - Python API client generator
+# Lapis - Python OpenAPI client generator
 
+Generate OpenAPI 3.0.3 client code that is easy to understand and debug.
 
+Leverages [Pydantic](https://github.com/pydantic/pydantic) as the base classes
+and [httpx](https://github.com/encode/httpx) as the HTTP client.
 
-## Future compatibility
+## Supported OpenAPI features
 
-Generated interfaces (names of API client classes and methods, request and response body classes) should be stable between versions, as long as versions of the
-API specification are compatible.
+- Parameter names: operation parameters are uniquely identified by their name the value of an `in` attribute. It is possible to have parameter named `param` in all of path, query, cookies and headers.
+  
+  Lapis uses Hungarian notation for method parameter names.
+- Enums: [TODO] there's no limitation that enum schema cannot be an object or an array.
 
-Names of interface elements must be derived only form their source elements, and be independent of existence of other elements. Can't
-have a number appended to a name just to avoid a name clash.
+  Enums might need two python classes - a subclass of `enum.Enum` and the schema class.
+- OneOf: [TODO] maps to typing.Union
+- AllOf: [TODO] maps to a separate class that uses all the schemas as superclasses.
+- AnyOf: [TODO] maps to similar class as in case of AllOf, all fields should be non-required and the object should validate against at least one of superclasses.
+- Recursive references between schemas: supported.
+- References to other schemas: unsupported.
+- Read- and write-only attributes: [TODO] Read-only attributes are considered non-existent when the object is validated before being sent to the server.
 
-Elements of interface:
+## Broken and incomplete API specifications
 
-- API client classes
-- methods corresponding to operations
-- method parameters
-- request and response body models
+TODO: pre- and postprocessing of API specification (dict- and pydantic-based models) with python code, errata (jsonpatch), etc
 
-It's not possible to generate future-proof class names for anonymous schemas defined in-line in `allOf`, `anyOf` or `oneOf`, unless 
+## Backwards compatibility
+
+Once stable, Lapis should generate code that is backwards compatible as long as the API specification is too. The following rules are used to ensure that.
+
+Names of interface elements (public functions, classes and methods) are fully deterministic and are derived only from their source elements and, in some cases, their parents.
+For example, schemas of the same name are either placed in separate modules, or their names have the parent element name prepended. 
+
+Each operation must have operationId which is used to create a unique package for its models.
+
+The structure of the API specification is roughly reflected in the generated code.
+Each schema under #/components/schemas together with all inline parameter schemas will become a single module in `<your_package>.components.schemas`.
+Each operation must define `operationId` which will be used as a sub-package name for the module containing its all inline schemas. Operation packages will be placed under `<your_package>.paths`
+
