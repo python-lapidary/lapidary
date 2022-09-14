@@ -27,6 +27,7 @@ def get_attr_annotation(
         required: bool,
         module: ModulePath,
         resolve: ResolverFunc,
+        in_: Optional[str] = None,
 ) -> AttributeAnnotationModel:
     """
     if typ is a schema, then it's a nested schema. Name should be parent_class_name+prop_name, and module is the same.
@@ -37,7 +38,7 @@ def get_attr_annotation(
     else:
         schema: openapi.Schema = typ
         name = inflection.camelize(parent_name) + inflection.camelize(name)
-    return _get_attr_annotation(schema, name, required, module, resolve)
+    return _get_attr_annotation(schema, name, required, module, resolve, in_)
 
 
 FIELD_PROPS = {
@@ -63,11 +64,15 @@ def _get_attr_annotation(
         required: bool,
         module: ModulePath,
         resolve: ResolverFunc,
+        in_: Optional[str] = None,
 ) -> AttributeAnnotationModel:
     field_props = {FIELD_PROPS[k]: getattr(schema, k) for k in schema.__fields_set__ if k in FIELD_PROPS}
     for k, v in field_props.items():
         if isinstance(v, str):
             field_props[k] = f"'{v}'"
+
+    if in_ is not None:
+        field_props['in_'] = 'lapis_client_base.ParamPlacement.' + in_
 
     if 'pattern' in schema.__fields_set__:
         field_props['regex'] = f"r'${schema.pattern}'"
