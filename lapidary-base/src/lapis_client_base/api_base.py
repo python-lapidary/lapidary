@@ -15,21 +15,28 @@ class ApiBase:
         self._client = client
 
     async def _request(self, method: str, url: str, param_model: Optional[BaseModel] = None, response_mapping: Optional[dict[str, Type]] = None):
+        request = self._build_request(method, url, param_model)
+        response = await self._client.send(request)
+        return _handle_response(response, response_mapping)
+
+    def _build_request(self, method: str, url: str, param_model: Optional[BaseModel] = None) -> httpx.Request:
         if param_model:
             params, headers, cookies = process_params(param_model)
         else:
             params = headers = cookies = None
-        response = await self._client.request(method, url, params=params, headers=headers, cookies=cookies)
+        return self._client.build_request(method, url, params=params, headers=headers, cookies=cookies)
 
-        if response_mapping:
-            response_obj = resolve_response(response, response_mapping)
-            if isinstance(response_obj, Exception):
-                raise response_obj
-            else:
-                return response_obj
+
+def _handle_response(response: httpx.Response, response_mapping: Optional[dict[str, Type]] = None) -> Any:
+    if response_mapping:
+        response_obj = resolve_response(response, response_mapping)
+        if isinstance(response_obj, Exception):
+            raise response_obj
         else:
-            response.raise_for_status()
-            return response.json()
+            return response_obj
+    else:
+        response.raise_for_status()
+        return response.json()
 
 
 def process_params(model: BaseModel) -> (httpx.QueryParams, httpx.Headers, httpx.Cookies):
@@ -50,8 +57,11 @@ def process_params(model: BaseModel) -> (httpx.QueryParams, httpx.Headers, httpx
             headers[param_name] = value
         elif placement == ParamPlacement.query:
             query[param_name] = value
-        else:
+        elif placement == ParamPlacement.path:
+            # handled by the operation method
             continue
+        else:
+            raise ValueError(placement)
 
     return httpx.QueryParams(query), headers, cookies
 
