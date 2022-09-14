@@ -23,7 +23,7 @@ def get_param_attribute(
 ) -> AttributeModel:
     return AttributeModel(
         name=param.in_[0] + '_' + param.name.replace(':', '_'),
-        annotation=get_attr_annotation(param.schema_, param.name, parent_name, param.required, module, resolver),
+        annotation=get_attr_annotation(param.schema_, param.name, parent_name, param.required, module, resolver, param.in_),
         deprecated=param.deprecated,
     )
 
