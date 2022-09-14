@@ -3,11 +3,12 @@ name = "lapis-client-base"
 version = "0.1.0"
 description = ""
 authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
-license="MIT"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-httpx = {extras = ["http2"], version = "^0.23.0"}
+httpx = { extras = ["http2"], version = "^0.23.0" }
+pydantic = "^1.10.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"
