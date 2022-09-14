@@ -15,7 +15,7 @@ class ApiClient(lapis_client_base.ApiBase):
 {%- if func.params_model_name %}
         import {{ func.params_model_name.module }}
 {%- endif %}
-        return super()._request(
+        return await super()._request(
             '{{ func.method.upper() }}',
             f'{{ func.path }}'{% if func.params_model_name %},
             {{ func.params_model_name.full_name() }}(**locals()){% endif %}
