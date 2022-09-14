@@ -4,7 +4,7 @@ import httpx
 from pydantic import BaseModel
 
 from .absent import ABSENT
-from .param_direction import ParamPlacement
+from .params import ParamPlacement
 
 PageFlowGenT: TypeAlias = Generator[httpx.Request, httpx.Response, None]
 PageFlowCallableT: TypeAlias = Callable[[Callable[[httpx.QueryParams], httpx.Request]], PageFlowGenT]
