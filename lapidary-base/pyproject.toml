@@ -4,6 +4,9 @@ version = "0.1.0"
 description = ""
 authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
 license = "MIT"
+packages = [
+    { include = "lapis_client_base", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -16,3 +19,11 @@ pytest = "^7.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+pythonpath = [
+  "src"
+]
