@@ -6,8 +6,12 @@ requires = ["poetry-core>=1.0.0"]
 authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
 description = "Python API client generator"
 license = "AGPL-3.0"
-name = "lapis"
-version = "0.1.0"
+name = "lapis-gen"
+version = "0.1.2"
+packages = [{ include = "lapis", from = "src" }]
+readme='Readme.md'
+repository='https://github.com/lapis-project/lapis'
+
 
 [tool.poetry.dependencies]
 Jinja2 = "^3.1.2"
