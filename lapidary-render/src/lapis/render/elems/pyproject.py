@@ -6,6 +6,7 @@ import tomlkit
 from pydantic import BaseModel, Extra
 
 from ...openapi import model as openapi
+from importlib.metadata import version
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +32,20 @@ def get_pyproject(info: openapi.Info) -> PyProject:
 def render_pyproject(root: Path, model: PyProject) -> None:
     target = root / 'pyproject.toml'
     if target.exists():
-        logger.info('pyproject.toml exists, skipping')
-        return
+        with open(target) as fbuf:
+            text = fbuf.read()
+    else:
+        with resources.open_text('lapis.render.templates', 'pyproject.toml') as fbuf:
+            text = fbuf.read()
 
-    with resources.open_text('lapis.render.templates', 'pyproject.toml') as fbuf:
-        d: dict = tomlkit.loads(fbuf.read())
+    d: dict = tomlkit.loads(text)
 
-    d.setdefault('tool', {}).setdefault('poetry', {}).update(model.dict())
+    poetry = d.setdefault('tool', {}).setdefault('poetry', {})
+
+    poetry.update(model.dict())
+
+    deps = poetry.setdefault('dependencies', {})
+    deps['lapis-client-base'] = '^' + version('lapis-client-base')
 
     with open(target, 'tw') as fbuf:
         fbuf.write(tomlkit.dumps(d, True))
