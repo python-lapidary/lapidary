@@ -75,7 +75,7 @@ def _get_attr_annotation(
         field_props['in_'] = 'lapis_client_base.ParamPlacement.' + in_
 
     if 'pattern' in schema.__fields_set__:
-        field_props['regex'] = f"r'${schema.pattern}'"
+        field_props['regex'] = f"r'{schema.pattern}'"
 
     if not required:
         field_props['default'] = 'lapis_client_base.absent.ABSENT'
