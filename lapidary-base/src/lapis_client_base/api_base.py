@@ -1,6 +1,8 @@
-from typing import Callable, Generator, TypeAlias, Optional, Any, Type
+from typing import Callable, Generator, TypeAlias, Optional, Type, Sequence, TypeVar
 
 import httpx
+import pydantic
+from mimeparse import best_match
 from pydantic import BaseModel
 
 from .absent import ABSENT
@@ -9,12 +11,20 @@ from .params import ParamPlacement
 PageFlowGenT: TypeAlias = Generator[httpx.Request, httpx.Response, None]
 PageFlowCallableT: TypeAlias = Callable[[Callable[[httpx.QueryParams], httpx.Request]], PageFlowGenT]
 
+T = TypeVar('T')
+
 
 class ApiBase:
     def __init__(self, client: httpx.AsyncClient):
         self._client = client
 
-    async def _request(self, method: str, url: str, param_model: Optional[BaseModel] = None, response_mapping: Optional[dict[str, Type]] = None):
+    async def _request(
+            self,
+            method: str,
+            url: str,
+            param_model: Optional[BaseModel] = None,
+            response_mapping: Optional[dict[str, dict[str, Type]]] = None
+    ) -> T:
         request = self._build_request(method, url, param_model)
         response = await self._client.send(request)
         return _handle_response(response, response_mapping)
@@ -27,7 +37,7 @@ class ApiBase:
         return self._client.build_request(method, url, params=params, headers=headers, cookies=cookies)
 
 
-def _handle_response(response: httpx.Response, response_mapping: Optional[dict[str, Type]] = None) -> Any:
+def _handle_response(response: httpx.Response, response_mapping: Optional[dict[str, dict[str, Type[T]]]] = None) -> T:
     if response_mapping:
         response_obj = resolve_response(response, response_mapping)
         if isinstance(response_obj, Exception):
@@ -66,22 +76,35 @@ def process_params(model: BaseModel) -> (httpx.QueryParams, httpx.Headers, httpx
     return httpx.QueryParams(query), headers, cookies
 
 
-def resolve_response(response: httpx.Response, mapping: dict[str, Type]) -> Any:
-    typ = find_code_mapping(str(response.status_code), mapping)
+def resolve_response(response: httpx.Response, mapping: dict[str, dict[str, Type[T]]]) -> T:
+    code_match = find_code_mapping(str(response.status_code), mapping)
+    if code_match is None:
+        response.raise_for_status()
+        return response.json()
+
+    mime_mapping = mapping[code_match]
+    mime_match = find_mime(mime_mapping.keys(), response.headers['content-type'])
+
     data = response.json()
-    if typ is not None:
-        return typ(**data)
+    if mime_match is not None:
+        typ = mime_mapping[mime_match]
+        return pydantic.parse_obj_as(typ, data)
     else:
         response.raise_for_status()
         return data
 
 
-def find_code_mapping(code: str, mapping: dict) -> Optional[Type]:
-    for match in _status_code_matches(code):
-        if match in mapping:
-            return mapping[match]
+def find_code_mapping(code: str, mapping: dict[str, dict[str, Type]]) -> Optional[str]:
+    for code_match in _status_code_matches(code):
+        if code_match in mapping:
+            return code_match
     else:
         return None
+
+
+def find_mime(supported_mimes: Sequence[str], response_mime: str) -> str:
+    match = best_match(supported_mimes, response_mime)
+    return match if match != '' else None
 
 
 def _status_code_matches(code: str) -> Generator[str, None, None]:
