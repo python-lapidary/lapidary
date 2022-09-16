@@ -63,7 +63,7 @@ def process_params(model: pydantic.BaseModel) -> (httpx.QueryParams, httpx.Heade
         if value is ABSENT:
             continue
 
-        param_name = param.field_info.extra['param_name']
+        param_name = param.alias
         placement = param.field_info.extra['in_']
         if placement == ParamPlacement.cookie:
             cookies[param_name] = value
