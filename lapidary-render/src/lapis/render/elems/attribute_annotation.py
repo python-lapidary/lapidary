@@ -14,7 +14,7 @@ class AttributeAnnotationModel:
     type: TypeRef
     field_props: dict[str, Any]
 
-    direction: Optional[str] = None
+    default: Optional[str] = None
     style: Optional[str] = None
     explode: Optional[bool] = None
     allowReserved: Optional[bool] = False
@@ -54,7 +54,6 @@ FIELD_PROPS = {
     'uniqueItems': 'unique_items',
     'maxProperties': 'max_properties',
     'minProperties': 'min_properties',
-    'default': 'default',
 }
 
 
@@ -79,12 +78,15 @@ def _get_attr_annotation(
     if 'pattern' in schema.__fields_set__:
         field_props['regex'] = f"r'{schema.pattern}'"
 
-    if not required:
-        field_props['default'] = 'lapis_client_base.absent.ABSENT'
+    default = None if required else 'lapis_client_base.absent.ABSENT'
+
+    direction = get_direction(schema.readOnly, schema.writeOnly)
+    if direction:
+        field_props['direction'] = direction
 
     return AttributeAnnotationModel(
         type=get_type_ref(schema, module, type_name, required, resolve),
-        direction=get_direction(schema.readOnly, schema.writeOnly),
+        default=default,
         field_props=field_props
     )
 
