@@ -2,8 +2,6 @@ from typing import Callable, Generator, TypeAlias, Optional, Type, Sequence, Typ
 
 import httpx
 import pydantic
-from mimeparse import best_match
-from pydantic import BaseModel
 
 from .absent import ABSENT
 from .params import ParamPlacement
@@ -22,14 +20,14 @@ class ApiBase:
             self,
             method: str,
             url: str,
-            param_model: Optional[BaseModel] = None,
+            param_model: Optional[pydantic.BaseModel] = None,
             response_mapping: Optional[dict[str, dict[str, Type]]] = None
     ) -> T:
         request = self._build_request(method, url, param_model)
         response = await self._client.send(request)
         return _handle_response(response, response_mapping)
 
-    def _build_request(self, method: str, url: str, param_model: Optional[BaseModel] = None) -> httpx.Request:
+    def _build_request(self, method: str, url: str, param_model: Optional[pydantic.BaseModel] = None) -> httpx.Request:
         if param_model:
             params, headers, cookies = process_params(param_model)
         else:
@@ -49,7 +47,7 @@ def _handle_response(response: httpx.Response, response_mapping: Optional[dict[s
         return response.json()
 
 
-def process_params(model: BaseModel) -> (httpx.QueryParams, httpx.Headers, httpx.Cookies):
+def process_params(model: pydantic.BaseModel) -> (httpx.QueryParams, httpx.Headers, httpx.Cookies):
     query = {}
     headers = httpx.Headers()
     cookies = httpx.Cookies()
@@ -103,6 +101,7 @@ def find_code_mapping(code: str, mapping: dict[str, dict[str, Type]]) -> Optiona
 
 
 def find_mime(supported_mimes: Sequence[str], response_mime: str) -> str:
+    from mimeparse import best_match
     match = best_match(supported_mimes, response_mime)
     return match if match != '' else None
 
