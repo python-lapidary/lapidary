@@ -179,5 +179,5 @@ class GenericTypeRef(TypeRef):
     def __repr__(self) -> str:
         return self.full_name()
 
-    # def full_name(self) -> str:
-    #     return f'{super().full_name()}[{", ".join(arg.full_name() for arg in self.args)}]'
+    def full_name(self) -> str:
+        return f'{super().full_name()}[{", ".join(arg.full_name() for arg in self.args)}]'
