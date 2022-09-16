@@ -34,11 +34,11 @@ def get_attr_annotation(
     Otherwise, it's a reference, schema, module and name should be resolved from it and used to generate type_ref
     """
     if isinstance(typ, openapi.Reference):
-        schema, module, name = resolve(typ, openapi.Schema)
+        schema, module, type_name = resolve(typ, openapi.Schema)
     else:
         schema: openapi.Schema = typ
-        name = inflection.camelize(parent_name) + inflection.camelize(name)
-    return _get_attr_annotation(schema, name, required, module, resolve, in_)
+        type_name = inflection.camelize(parent_name) + inflection.camelize(name)
+    return _get_attr_annotation(schema, type_name, required, module, resolve, in_, name)
 
 
 FIELD_PROPS = {
@@ -60,11 +60,12 @@ FIELD_PROPS = {
 
 def _get_attr_annotation(
         schema: openapi.Schema,
-        name: str,
+        type_name: str,
         required: bool,
         module: ModulePath,
         resolve: ResolverFunc,
         in_: Optional[str] = None,
+        name: Optional[str] = None,
 ) -> AttributeAnnotationModel:
     field_props = {FIELD_PROPS[k]: getattr(schema, k) for k in schema.__fields_set__ if k in FIELD_PROPS}
     for k, v in field_props.items():
@@ -73,15 +74,16 @@ def _get_attr_annotation(
 
     if in_ is not None:
         field_props['in_'] = 'lapis_client_base.ParamPlacement.' + in_
+        field_props['alias'] = f"'{name}'"
 
     if 'pattern' in schema.__fields_set__:
-        field_props['regex'] = f"r'${schema.pattern}'"
+        field_props['regex'] = f"r'{schema.pattern}'"
 
     if not required:
         field_props['default'] = 'lapis_client_base.absent.ABSENT'
 
     return AttributeAnnotationModel(
-        type=get_type_ref(schema, module, name, required, resolve),
+        type=get_type_ref(schema, module, type_name, required, resolve),
         direction=get_direction(schema.readOnly, schema.writeOnly),
         field_props=field_props
     )
