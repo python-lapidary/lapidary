@@ -7,7 +7,7 @@ from typing import Annotated, Any
 from uuid import UUID
 
 import inflection
-from lapis_client_base import Absent
+from lapis_client_base.absent import Absent
 from pydantic import BaseModel, Field, Extra
 
 from ..openapi import model as openapi

@@ -18,7 +18,13 @@ class ApiClient(lapis_client_base.ApiBase):
         return await super()._request(
             '{{ func.method.upper() }}',
             f'{{ func.path }}'{% if func.params_model_name %},
-            {{ func.params_model_name.full_name() }}(**locals()){% endif %}
+            param_model={{ func.params_model_name.full_name() }}(**locals()){% endif %}, {% if func.result_class_map %}
+            response_mapping={ {%- for code, media_type in func.result_class_map.items() %}
+                '{{ code }}': { {%- for mime, typ in media_type.items() %}
+                    '{{ mime }}': {{ typ.full_name() }},
+                    {%- endfor %}
+                },
+            {%- endfor -%} }{%- endif %}
         )
 {% else %}
     pass
