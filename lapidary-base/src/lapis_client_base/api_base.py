@@ -106,7 +106,7 @@ def find_code_mapping(code: str, mapping: dict[str, dict[str, Type]]) -> Optiona
         return None
 
 
-def find_mime(supported_mimes: Sequence[str], response_mime: str) -> str:
+def find_mime(supported_mimes: Iterable[str], response_mime: str) -> str:
     from mimeparse import best_match
     match = best_match(supported_mimes, response_mime)
     return match if match != '' else None
