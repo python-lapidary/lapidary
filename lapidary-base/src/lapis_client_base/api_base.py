@@ -1,4 +1,5 @@
-from typing import Callable, Generator, TypeAlias, Optional, Type, Sequence, TypeVar
+import logging
+from typing import Callable, Generator, TypeAlias, Optional, Type, TypeVar, Iterable
 
 import httpx
 import pydantic
@@ -10,6 +11,7 @@ PageFlowGenT: TypeAlias = Generator[httpx.Request, httpx.Response, None]
 PageFlowCallableT: TypeAlias = Callable[[Callable[[httpx.QueryParams], httpx.Request]], PageFlowGenT]
 
 T = TypeVar('T')
+logger = logging.getLogger(__name__)
 
 
 class ApiBase:
@@ -24,6 +26,10 @@ class ApiBase:
             response_mapping: Optional[dict[str, dict[str, Type]]] = None
     ) -> T:
         request = self._build_request(method, url, param_model)
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s", f'{request.method} {request.url} {request.headers}')
+
         response = await self._client.send(request)
         return _handle_response(response, response_mapping)
 
