@@ -22,7 +22,7 @@ class OperationFunctionModel:
     path: str
     params: list[AttributeModel]
     params_model_name: Optional[TypeRef]
-    result_class_map: dict[str, TypeRef]
+    result_class_map: dict[str, dict[str, TypeRef]]
     docstr: Optional[str] = None
 
 
@@ -50,8 +50,6 @@ def get_operation_param(param: Union[openapi.Parameter, openapi.Reference], pare
     field_props = {k: (getattr(param, k) or _FIELD_PROPS[k]) for k in _FIELD_PROPS}
     param_name = param.in_[0] + '_' + sanitise_param_name(param.name)
 
-    field_props['alias'] = param.name
-
     return AttributeModel(
         name=param_name,
         annotation=AttributeAnnotationModel(
@@ -77,9 +75,12 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
     params = [get_operation_param(oapi_param, op.operationId, module, resolver) for oapi_param in op.parameters] if op.parameters else []
 
     result_class_map = {
-        resp_code: resolve_type_ref(list(typ.content.values())[0].schema_, module, inflection.camelize(op.operationId) + resp_code + 'Response', resolver)
-        for resp_code, typ in op.responses.__root__.items()
-        if typ.content
+        resp_code: {
+            mime: resolve_type_ref(media_type.schema_, module, response_type_name(op, resp_code), resolver)
+            for mime, media_type in response.content.items()
+        }
+        for resp_code, response in op.responses.__root__.items()
+        if response.content
     }
 
     return OperationFunctionModel(
@@ -90,3 +91,7 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
         params_model_name=TypeRef(module=(module / 'schemas').str(), name=inflection.camelize(op.operationId)) if op.parameters else None,
         result_class_map=result_class_map,
     )
+
+
+def response_type_name(op, resp_code):
+    return inflection.camelize(op.operationId) + inflection.camelize(resp_code) + 'Response'
