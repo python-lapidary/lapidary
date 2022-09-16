@@ -40,11 +40,12 @@ class Test(TestCase):
                 name='bob',
                 annotation=AttributeAnnotationModel(
                     type=BuiltinTypeRef.from_type(str).union_with(TypeRef.from_type(Absent)),
-                    field_props={'default': 'lapis_client_base.absent.ABSENT'},
-                    direction=None,
+                    field_props={},
                     style=None,
                     explode=None,
-                    allowReserved=False),
+                    allowReserved=False,
+                    default='lapis_client_base.absent.ABSENT',
+                ),
                 deprecated=False
             )]
         )
