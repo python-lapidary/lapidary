@@ -15,22 +15,33 @@ class ClientModule(AbstractModule):
 def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePath, root_module: ModulePath, resolver: ResolverFunc) -> ClientModule:
     client_class = get_client_class(model, root_module, resolver)
 
-    imports = [
+    default_imports = [
         'lapis_client_base',
     ]
 
-    type_checking_imports = list({
+    response_type_imports = {
+        imp
+        for func in client_class.methods
+        for media_type in func.result_class_map.values()
+        for typ in media_type.values()
+        for imp in typ.imports()
+    }
+
+    type_hint_imports = {
         imp
         for attr in client_class.methods
         for t in attr.params
         for imp in t.annotation.type.imports()
-        if imp not in imports and imp not in template_imports
-    })
-    type_checking_imports.sort()
+        if imp not in default_imports and imp not in template_imports
+    }
+
+    imports = list({*default_imports, *response_type_imports, *type_hint_imports})
+
+    imports.sort()
 
     return ClientModule(
         path=client_module,
         imports=imports,
-        type_checking_imports=type_checking_imports,
+        type_checking_imports=[],
         body=client_class,
     )
