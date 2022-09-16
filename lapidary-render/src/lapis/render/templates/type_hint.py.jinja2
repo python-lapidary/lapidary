@@ -2,7 +2,7 @@
     {%- if type_ref.module == module_path.str() %}
         '{{- type_ref.name }}'
     {%- else %}
-        {{- type_ref.full_name() }}
+        {%- if type_ref.module != 'builtins' %}{{ type_ref.module }}.{% endif %}{{ type_ref.name }}
     {%- endif %}
     {%- if type_ref.args is defined %}
         [{% for arg in type_ref.args %}{{ type_hint(arg, module_path) }},{% endfor %}]

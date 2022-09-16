@@ -166,7 +166,12 @@ class GenericTypeRef(TypeRef):
         return []
 
     def imports(self) -> list[str]:
-        return [imp for typ in self._types() for imp in TypeRef.imports(typ)]
+        return [
+            imp
+            for typ in self._types()
+            for imp in TypeRef.imports(typ)
+            if imp != 'builtins'
+        ]
 
     def _types(self) -> list[TypeRef]:
         return [self, *[typ for arg in self.args for typ in arg._types()]]
