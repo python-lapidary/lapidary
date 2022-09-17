@@ -54,5 +54,9 @@ def load_schema(schema_path: Path, errata_path: Optional[Path] = None):
     return doc
 
 
-if __name__ == '__main__':
+def start():
     typer.run(main)
+
+
+if __name__ == '__main__':
+    start()
