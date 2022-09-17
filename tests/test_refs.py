@@ -1,8 +1,8 @@
 from unittest import TestCase
+
 from lapis.openapi import model as openapi
-from lapis.render.elems.type_ref import TypeRef
+from lapis.render.elems.refs import resolve
 from lapis.render.module_path import ModulePath
-from lapis.render.refs import resolve
 
 schema_carol = openapi.Schema()
 schema_bob = openapi.Schema(properties={'carol': schema_carol})
@@ -14,15 +14,21 @@ model = openapi.OpenApiModel(
         schemas={
             'alice': openapi.Reference(**{'$ref': '#/components/schemas/bob'}),
             'bob': schema_bob,
+
             'joker': openapi.Reference(**{'$ref': '#/components/schemas/joker'}),
+
             'batman': openapi.Reference(**{'$ref': '#/components/schemas/robin'}),
             'robin': openapi.Reference(**{'$ref': '#/components/schemas/batman'}),
+
+            'charlie': openapi.Schema(oneOf=[
+                openapi.Schema()
+            ]),
         }
     )
 )
 
 
-class Test(TestCase):
+class ReferenceTest(TestCase):
     def test_resolve_ref(self):
         self.assertEqual(
             resolve(model, 'root', openapi.Reference(**{'$ref': '#/components/schemas/alice'}), openapi.Schema),
