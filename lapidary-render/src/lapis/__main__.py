@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 import typer
 
@@ -15,24 +16,38 @@ def main(
         schema_path: Path,
         target_directory: Path,
         package_name: str,
+        errata: Optional[Path] = None,
 ):
-    logger.info('Load schema')
-    doc = load_schema(schema_path)
+    doc = load_schema(schema_path, errata)
     logger.info('Parse schema')
     tree = OpenApiModel(**doc)
     render_client(tree, target_directory, package_name)
 
 
-def load_schema(schema_path: Path):
-    import pickle
+def load_schema(schema_path: Path, errata_path: Optional[Path] = None):
+    schema_mtime = schema_path.stat().st_mtime
+    if errata_path is not None:
+        schema_mtime = max(schema_mtime, errata_path.stat().st_mtime)
     cache_path = schema_path.with_suffix('.pickle')
-    if cache_path.exists():
-        with open(cache_path, 'br') as fb:
-            return pickle.load(fb)
 
+    import pickle
+
+    if cache_path.exists():
+        cache_mtime = cache_path.stat().st_mtime
+        if cache_mtime > schema_mtime:
+            logger.info('Load spec from cache')
+            with open(cache_path, 'br') as fb:
+                return pickle.load(fb)
+
+    logger.info('Load spec')
     with open(schema_path, 'rt') as f:
         import yaml
         doc = yaml.safe_load(f)
+
+    if errata_path is not None:
+        from .errata import load_errata
+        errata = load_errata(errata_path)
+        doc = errata.apply(doc)
 
     with open(cache_path, 'wb') as fb:
         pickle.dump(doc, fb)

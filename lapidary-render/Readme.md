@@ -5,6 +5,16 @@ Generate OpenAPI 3.0.3 client code that is easy to understand and debug.
 Leverages [Pydantic](https://github.com/pydantic/pydantic) as the base classes
 and [httpx](https://github.com/encode/httpx) as the HTTP client.
 
+## Usage
+
+lapis [--errata path] spec_file target_dir root_package
+
+Lapis will create target_dir, all necessary directories and pyproject.toml if they don't exist.
+
+Generated files will be placed in <target_dir>/gen/<root_package>
+
+Errata is a JSON Patch file in JSON or YAML format; it's applied to the spec before any other processing.
+
 ## Supported OpenAPI features
 
 - Parameter names: operation parameters are uniquely identified by their name the value of an `in` attribute. It is possible to have parameter named `param` in all of path, query, cookies and headers.
@@ -13,7 +23,7 @@ and [httpx](https://github.com/encode/httpx) as the HTTP client.
 - Enums: [TODO] there's no limitation that enum schema cannot be an object or an array.
 
   Enums might need two python classes - a subclass of `enum.Enum` and the schema class.
-- OneOf: [TODO] maps to typing.Union
+- oneOf: maps to typing.Union
 - AllOf: [TODO] maps to a separate class that uses all the schemas as superclasses.
 - AnyOf: [TODO] maps to similar class as in case of AllOf, all fields should be non-required and the object should validate against at least one of superclasses.
 - Recursive references between schemas: supported.
@@ -21,6 +31,8 @@ and [httpx](https://github.com/encode/httpx) as the HTTP client.
 - Read- and write-only attributes: [TODO] Read-only attributes are considered non-existent when the object is validated before being sent to the server.
 
 ## Broken and incomplete API specifications
+
+- errata: use errata to update the specification document in cases where actual data doesn't match it, and the service provider is reluctant or slow to update it.
 
 TODO: pre- and postprocessing of API specification (dict- and pydantic-based models) with python code, errata (jsonpatch), etc
 
