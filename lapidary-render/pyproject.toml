@@ -24,3 +24,6 @@ pydantic = { extras = ["email"], version = "^1.9.2" }
 PyYAML = "^6.0"
 tomlkit = "^0.11.4"
 typer = "^0.6.1"
+
+[tool.poetry.scripts]
+lapis = "lapis.__main__:start"
