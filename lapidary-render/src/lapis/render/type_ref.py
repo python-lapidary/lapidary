@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, Extra
 from ..openapi import model as openapi
 
 if typing.TYPE_CHECKING:
-    from .elems.refs import ResolverFunc
+    from .elems.refs import ResolverFunc, SchemaOrRef
     from .module_path import ModulePath
 
 logger = logging.getLogger(__name__)
@@ -47,6 +47,25 @@ def get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, required
     return typ
 
 
+def _get_one_of_type_ref(schema: SchemaOrRef, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeRef:
+    if len(schema.oneOf) == 1:
+        return get_type_ref(schema.oneOf[0], module, name, True, resolve)
+    args = []
+    for idx, s in enumerate(schema.oneOf):
+        if isinstance(s, openapi.Reference):
+            s, module, name = resolve(s, openapi.Schema)
+        else:
+            name = name + str(idx)
+        type_ref = get_type_ref(s, module, name, True, resolve)
+        args.append(type_ref)
+
+    return GenericTypeRef(
+        module='typing',
+        name='Union',
+        args=args,
+    )
+
+
 def _get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeRef:
     if schema.enum:
         return TypeRef(module=module.str(), name=name)
@@ -58,16 +77,19 @@ def _get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolve
         return _get_type_ref_object(schema, module, name)
     elif schema.type == openapi.Type.array:
         return _get_type_ref_array(schema, module, name, resolver)
-    return TypeRef.from_type(Any)
+    elif schema.anyOf:
+        return BuiltinTypeRef.from_str('Unsupported')
+    elif schema.oneOf:
+        return _get_one_of_type_ref(schema, module, name, resolver)
+    elif schema.type is None:
+        return TypeRef.from_type(Any)
+    else:
+        return EllipsisTypeRef()
 
 
 def _get_type_ref_object(schema: openapi.Schema, module: ModulePath, name: str) -> TypeRef:
     if schema.properties or schema.allOf:
         return TypeRef(module=module.str(), name=name)
-    elif schema.anyOf:
-        return BuiltinTypeRef.from_str('Unsupported')
-    elif schema.oneOf:
-        return BuiltinTypeRef.from_str('Unsupported')
     else:
         return TypeRef(module=module.str(), name=name)
 
@@ -130,7 +152,6 @@ class TypeRef(BaseModel):
 
 class BuiltinTypeRef(TypeRef):
     module: str = 'builtins'
-    schema_type = False
 
     class Config:
         extra = Extra.forbid
@@ -149,8 +170,21 @@ class BuiltinTypeRef(TypeRef):
         return self.name
 
 
+class EllipsisTypeRef(TypeRef):
+    def full_name(self):
+        return '...'
+
+    def type_checking_imports(self) -> list[tuple[str, str]]:
+        return []
+
+    def imports(self) -> list[str]:
+        return []
+
+    def _types(self) -> list[TypeRef]:
+        return []
+
+
 class GenericTypeRef(TypeRef):
-    schema_type = False
     args: Annotated[list[TypeRef], Field(default_factory=list)]
 
     class Config:
