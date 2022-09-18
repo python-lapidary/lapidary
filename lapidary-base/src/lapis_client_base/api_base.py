@@ -92,7 +92,10 @@ def resolve_response(response: httpx.Response, mapping: dict[str, dict[str, Type
     data = response.json()
     if mime_match is not None:
         typ = mime_mapping[mime_match]
-        return pydantic.parse_obj_as(typ, data)
+        try:
+            return pydantic.parse_obj_as(typ, data)
+        except pydantic.ValidationError:
+            raise ValueError('Error parsing response as type', typ)
     else:
         response.raise_for_status()
         return data
