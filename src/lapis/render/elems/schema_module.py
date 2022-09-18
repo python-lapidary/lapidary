@@ -24,13 +24,13 @@ class SchemaModule(AbstractModule):
 def get_modules_for_components_schemas(
         schemas: dict[str, Union[openapi.Schema, openapi.Reference]], root_package: ModulePath, resolver: ResolverFunc
 ) -> list[SchemaModule]:
-    result = []
+    modules = []
     for name, schema in schemas.items():
         if isinstance(schema, openapi.Schema):
             module = get_schema_module(schema, root_package / inflection.underscore(name), resolver)
             if module is not None:
-                result.append(module)
-    return result
+                modules.append(module)
+    return modules
 
 
 def get_schema_module(schema: openapi.Schema, path: ModulePath, resolver: ResolverFunc) -> Optional[SchemaModule]:

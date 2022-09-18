@@ -15,15 +15,15 @@ class ApiClient(lapis_client_base.ApiBase):
         {{ render_param(param) }}
 {%- endfor %}{% for param in func.params if not param.required %}
         {{ render_param(param) }}
-{%- endfor %}) -> {{ type_hint(func.result_type, path) }}:
+{%- endfor %}) -> {{ type_hint(func.response_type, path) }}:
 {%- if func.params_model_name %}
         import {{ func.params_model_name.module }}
 {%- endif %}
         return await super()._request(
             '{{ func.method.upper() }}',
             f'{{ func.path }}'{% if func.params_model_name %},
-            param_model={{ func.params_model_name.full_name() }}(**locals()){% endif %}, {% if func.result_class_map %}
-            response_mapping={ {%- for code, media_type in func.result_class_map.items() %}
+            param_model={{ func.params_model_name.full_name() }}(**locals()){% endif %}, {% if func.response_class_map %}
+            response_mapping={ {%- for code, media_type in func.response_class_map.items() %}
                 '{{ code }}': { {%- for mime, typ in media_type.items() %}
                     '{{ mime }}': {{ typ.full_name() }},
                     {%- endfor %}

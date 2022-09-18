@@ -83,9 +83,9 @@ def get_enum_attribute(value: Any) -> AttributeModel:
 
 def _name_for_value(value: Any) -> str:
     if value is None: return 'none'
-    result = re.compile(r'\W+').sub('_', str(value))
-    if result == '' or not result[0].isalpha():
-        result = 'v_' + result
-    if result in PYTHON_KEYWORDS:
-        result += '_'
-    return result
+    name = re.compile(r'\W+').sub('_', str(value))
+    if name == '' or not name[0].isalpha():
+        name = 'v_' + name
+    if name in PYTHON_KEYWORDS:
+        name += '_'
+    return name
