@@ -19,7 +19,7 @@ model = openapi.OpenApiModel(
     paths=openapi.Paths(__root__={
         '/simple-response/': openapi.PathItem(
             get=openapi.Operation(
-                operationId='get_simple_result',
+                operationId='get_simple_response',
                 responses=openapi.Responses(__root__={
                     '200': openapi.Response(
                         description='test response',
@@ -71,24 +71,25 @@ model = openapi.OpenApiModel(
 resolve = get_resolver(model, 'lapis_test')
 module_path = ModulePath('lapis_test')
 union_str_absent = GenericTypeRef(module='typing', name='Union', args=[BuiltinTypeRef(name='str'), TypeRef.from_str('lapis_client_base.absent.Absent')])
-common_attributes=[
-                    AttributeModel(
-                        name='a',
-                        annotation=AttributeAnnotationModel(
-                            type=union_str_absent,
-                            field_props={},
-                            default='lapis_client_base.absent.ABSENT',
-                        ),
-                    ),
-                    AttributeModel(
-                        name='b',
-                        annotation=AttributeAnnotationModel(
-                            type=union_str_absent,
-                            field_props={},
-                            default='lapis_client_base.absent.ABSENT',
-                        ),
-                    )
-                ]
+common_attributes = [
+    AttributeModel(
+        name='a',
+        annotation=AttributeAnnotationModel(
+            type=union_str_absent,
+            field_props={},
+            default='lapis_client_base.absent.ABSENT',
+        ),
+    ),
+    AttributeModel(
+        name='b',
+        annotation=AttributeAnnotationModel(
+            type=union_str_absent,
+            field_props={},
+            default='lapis_client_base.absent.ABSENT',
+        ),
+    )
+]
+
 
 class OperationResponseTest(TestCase):
     def test_schema_test(self):
@@ -131,6 +132,3 @@ class OperationResponseTest(TestCase):
         )
 
         self.assertEqual(expected, mod)
-
-
-
