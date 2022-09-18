@@ -48,20 +48,19 @@ def _get_module_for_components_schema(classes: list[SchemaClass], path: ModulePa
         if imp not in template_imports
     })
 
-    type_checking_imports = list({
+    imports.update({
         import_
         for schema_class in classes
         for attr in schema_class.attributes
         for import_ in attr.annotation.type.imports()
         if import_ not in imports and import_ not in template_imports and import_ != path.str()
     })
-    type_checking_imports.sort()
+    imports = sorted(imports)
 
     return SchemaModule(
         path=path,
         body=classes,
         imports=imports,
-        type_checking_imports=type_checking_imports,
     )
 
 

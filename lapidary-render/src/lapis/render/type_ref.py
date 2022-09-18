@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import typing
-from typing import Annotated, Any
+from typing import Annotated, Any, Union
 from uuid import UUID
 
 import inflection
@@ -149,6 +149,18 @@ class TypeRef(BaseModel):
     def _types(self) -> list[TypeRef]:
         return [self]
 
+    def __eq__(self, other) -> bool:
+        return (
+                isinstance(other, TypeRef)
+                # generic type ref has args, so either both should be generic or none
+                and isinstance(self, GenericTypeRef) == isinstance(other, GenericTypeRef)
+                and self.module == other.module
+                and self.name == other.name
+        )
+
+    def __hash__(self) -> int:
+        return self.module.__hash__() * 14159 + self.name.__hash__()
+
 
 class BuiltinTypeRef(TypeRef):
     module: str = 'builtins'
@@ -183,6 +195,12 @@ class EllipsisTypeRef(TypeRef):
     def _types(self) -> list[TypeRef]:
         return []
 
+    def __eq__(self, other) -> bool:
+        return isinstance(other, EllipsisTypeRef)
+
+    def __hash__(self) -> int:
+        return (2 << 13) - 1
+
 
 class GenericTypeRef(TypeRef):
     args: Annotated[list[TypeRef], Field(default_factory=list)]
@@ -215,3 +233,23 @@ class GenericTypeRef(TypeRef):
 
     def full_name(self) -> str:
         return f'{super().full_name()}[{", ".join(arg.full_name() for arg in self.args)}]'
+
+    def __eq__(self, other) -> bool:
+        return (
+                isinstance(other, GenericTypeRef)
+                and self.module == other.module
+                and self.name == other.name
+                and self.args == other.args
+        )
+
+    def __hash__(self) -> int:
+        hash_ = super().__hash__()
+        for arg in self.args:
+            hash_ = hash_ << 1 + arg.__hash__()
+        return hash_
+
+
+def resolve_type_ref(typ: Union[openapi.Schema, openapi.Reference], module: ModulePath, name: str, resolver: ResolverFunc) -> TypeRef:
+    if isinstance(typ, openapi.Reference):
+        typ, module, name = resolver(typ, openapi.Schema)
+    return get_type_ref(typ, module, name, True, resolver)
