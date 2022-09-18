@@ -7,12 +7,5 @@ import lapis_client_base
 import {{ imp }}
 {%- endfor %}
 
-{#-if typing.TYPE_CHECKING:#}
-{%- for imp in model.type_checking_imports %}
-import {{ imp }}
-{#- {%- else %}#}
-{#-    pass#}
-{%- endfor %}
-
 
 {% block body required %}{% endblock %}

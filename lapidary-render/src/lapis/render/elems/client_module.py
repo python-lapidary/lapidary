@@ -22,7 +22,7 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
     response_type_imports = {
         imp
         for func in client_class.methods
-        for media_type in func.result_class_map.values()
+        for media_type in func.response_class_map.values()
         for typ in media_type.values()
         for imp in typ.imports()
     }
@@ -42,6 +42,5 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
     return ClientModule(
         path=client_module,
         imports=imports,
-        type_checking_imports=[],
         body=client_class,
     )

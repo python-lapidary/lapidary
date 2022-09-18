@@ -29,7 +29,9 @@ def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Referen
             path[2:4] = op.operationId
 
     module = ModulePath(root_package) / path[:-1] / inflection.underscore(path[-1])
-    return model.resolve(_mkref(path), typ), module, path[-1]
+    result = model.resolve(_mkref(path), typ)
+    assert isinstance(result, typ)
+    return result, module, path[-1]
 
 
 def get_resolver(model: openapi.OpenApiModel, package: str) -> ResolverFunc:

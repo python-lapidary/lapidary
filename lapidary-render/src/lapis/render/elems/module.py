@@ -15,4 +15,3 @@ template_imports = ['typing', 'builtins']
 class AbstractModule:
     path: ModulePath
     imports: list[str] = field(default_factory=list)
-    type_checking_imports: list[SchemaImport] = field(default_factory=list)
