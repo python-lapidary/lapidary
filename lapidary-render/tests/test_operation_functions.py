@@ -1,10 +1,8 @@
-from pprint import pp
 from unittest import TestCase
 
 from lapis.openapi import model as openapi
 from lapis.render.elems.attribute import AttributeModel
 from lapis.render.elems.attribute_annotation import AttributeAnnotationModel
-from lapis.render.elems.client_class import get_client_class
 from lapis.render.elems.refs import get_resolver
 from lapis.render.elems.request_body import get_request_body_module
 from lapis.render.elems.response_body import get_response_body_module
@@ -92,9 +90,6 @@ common_attributes = [
 
 
 class OperationResponseTest(TestCase):
-    def test_schema_test(self):
-        pp(get_client_class(model, module_path, resolve))
-
     def test_response_body_schema_model(self):
         expected = SchemaModule(
             path=module_path,
@@ -110,13 +105,12 @@ class OperationResponseTest(TestCase):
         )
 
         mod = get_response_body_module(model.paths.__root__['/schema-response/'].get, module_path, resolve)
-        pp(mod)
+        # pp(mod)
 
         self.assertEqual(expected, mod)
 
     def test_request_body_schema_class(self):
         mod = get_request_body_module(model.paths.__root__['/schema-request/'].get, module_path, resolve)
-        pp(mod)
 
         expected = SchemaModule(
             path=module_path,
