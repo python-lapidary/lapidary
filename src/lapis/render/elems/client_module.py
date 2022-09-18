@@ -42,6 +42,5 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
     return ClientModule(
         path=client_module,
         imports=imports,
-        type_checking_imports=[],
         body=client_class,
     )
