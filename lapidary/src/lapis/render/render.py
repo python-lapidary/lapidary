@@ -8,9 +8,12 @@ from .black import format_code
 from .elems.client_class import get_operations
 from .elems.client_module import get_client_class_module
 from .elems.module import AbstractModule
+from .elems import modules as mod_name
 from .elems.pyproject import get_pyproject, render_pyproject
 from .elems.refs import get_resolver, ResolverFunc
-from .elems.schema_module import get_modules_for_components_schemas, get_module_for_param_model_classes
+from .elems.request_body import get_request_body_module
+from .elems.response_body import get_response_body_module
+from .elems.schema_module import get_modules_for_components_schemas, get_param_model_classes_module
 from .module_path import ModulePath
 from ..openapi import model as openapi
 
@@ -25,7 +28,7 @@ def render(source: str, destination: Path, render_model: AbstractModule, env: En
         with open(destination, 'wt') as fb:
             fb.write(text)
     except Exception:
-        print(render_model)
+        print(destination)
         raise
 
 
@@ -69,9 +72,18 @@ def render_schema_modules(model: openapi.OpenApiModel, package_name: str, gen_ro
     for path, path_item in model.paths.__root__.items():
         for tpl in get_operations(path_item, True):
             method, op = tpl
+            op_root_module = root_module / 'paths' / op.operationId
             if op.parameters:
-                module_path = root_module / 'paths' / op.operationId / 'schemas'
-                mod = get_module_for_param_model_classes(op, module_path, resolver)
+                module_path = op_root_module / mod_name.PARAM_MODEL
+                mod = get_param_model_classes_module(op, module_path, resolver)
+                render('schema_class.py.jinja2', module_path.to_path(gen_root).with_suffix('.py'), mod, env)
+            if op.requestBody:
+                module_path = op_root_module / mod_name.REQUEST_BODY
+                mod = get_request_body_module(op, module_path, resolver)
+                render('schema_class.py.jinja2', module_path.to_path(gen_root).with_suffix('.py'), mod, env)
+            if op.responses:
+                module_path = op_root_module / mod_name.RESPONSE_BODY
+                mod = get_response_body_module(op, module_path, resolver)
                 render('schema_class.py.jinja2', module_path.to_path(gen_root).with_suffix('.py'), mod, env)
 
 
