@@ -2,7 +2,7 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [Unreleased]
+## [0.2.0]
 ### Added
 - Support simple oneOf schemas
 - Support errata, a JSON Patch for the specification
