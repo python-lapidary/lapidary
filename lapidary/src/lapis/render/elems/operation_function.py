@@ -26,8 +26,8 @@ class OperationFunctionModel:
     request_type: Optional[TypeRef]
     params: list[AttributeModel]
     params_model_name: Optional[TypeRef]
-    result_class_map: dict[str, dict[str, TypeRef]]
-    result_type: Optional[TypeRef]
+    response_class_map: dict[str, dict[str, TypeRef]]
+    response_type: Optional[TypeRef]
     docstr: Optional[str] = None
 
 
@@ -75,7 +75,7 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
 
     request_type = get_request_body_type(op, module, resolver) if op.requestBody else None
 
-    result_class_map = {
+    response_class_map = {
         resp_code: {
             mime: resolve_type_ref(media_type.schema_, module, response_type_name(op, resp_code), resolver)
             for mime, media_type in response.content.items()
@@ -86,15 +86,15 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
 
     response_types = {
         typ
-        for mime_map in result_class_map.values()
+        for mime_map in response_class_map.values()
         for typ in mime_map.values()
     }
     if len(response_types) == 0:
-        result_type = None
+        response_type = None
     elif len(response_types) == 1:
-        result_type = response_types.pop()
+        response_type = response_types.pop()
     else:
-        result_type = GenericTypeRef.union_of(list(response_types))
+        response_type = GenericTypeRef.union_of(list(response_types))
 
     return OperationFunctionModel(
         name=op.operationId,
@@ -103,6 +103,6 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
         request_type=request_type,
         params=params,
         params_model_name=TypeRef(module=(module / PARAM_MODEL).str(), name=inflection.camelize(op.operationId)) if op.parameters else None,
-        result_class_map=result_class_map,
-        result_type=result_type,
+        response_class_map=response_class_map,
+        response_type=response_type,
     )
