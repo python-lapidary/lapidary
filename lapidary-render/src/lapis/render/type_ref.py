@@ -214,6 +214,16 @@ class GenericTypeRef(TypeRef):
         else:
             return super().union_with(other)
 
+    @staticmethod
+    def union_of(types: list[TypeRef]) -> GenericTypeRef:
+        args = []
+        for typ in types:
+            if isinstance(typ, GenericTypeRef) and typ.module == 'typing' and typ.name == 'Union':
+                args.append(typ.args)
+            else:
+                args.append(typ)
+        return GenericTypeRef(module='typing', name='Union', args=args)
+
     def type_checking_imports(self) -> list[tuple[str, str]]:
         return []
 

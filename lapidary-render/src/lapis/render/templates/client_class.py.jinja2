@@ -3,15 +3,19 @@
 {{ param.name }}: {{ param.annotation.type.__repr__() }}{% if not param.required %} = lapis_client_base.absent.ABSENT{% endif %},
 {% endmacro %}
 {% block body -%}
+{% set path = model.path -%}
 {% set model = model.body -%}
 class ApiClient(lapis_client_base.ApiBase):
 {%- for func in model.methods %}
     async def {{ func.name }}(
-        self,{% for param in func.params if param.required %}
+        self,
+    {% if func.request_type is not none %}request_body: {{ type_hint(func.request_type, path) }}, /, {% endif %}
+    {% if func.params | length > 0 %}*, {% endif %}
+    {% for param in func.params if param.required %}
         {{ render_param(param) }}
 {%- endfor %}{% for param in func.params if not param.required %}
         {{ render_param(param) }}
-{%- endfor %}) -> dict:
+{%- endfor %}) -> {{ type_hint(func.result_type, path) }}:
 {%- if func.params_model_name %}
         import {{ func.params_model_name.module }}
 {%- endif %}
