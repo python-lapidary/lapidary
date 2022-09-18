@@ -3,6 +3,7 @@ from unittest import TestCase
 from lapis.openapi import model as openapi
 from lapis.render.elems.refs import resolve
 from lapis.render.module_path import ModulePath
+from lapis.render.type_ref import get_type_ref, TypeRef
 
 schema_carol = openapi.Schema()
 schema_bob = openapi.Schema(properties={'carol': schema_carol})
@@ -42,9 +43,17 @@ class ReferenceTest(TestCase):
         )
 
     def test_direct_recursion_fails(self):
-        self.assertRaises(RecursionError, lambda:
-        resolve(model, 'root', openapi.Reference(**{'$ref': '#/components/schemas/joker'}), openapi.Schema))
+        def raises():
+            resolve(model, 'root', openapi.Reference(**{'$ref': '#/components/schemas/joker'}), openapi.Schema)
+
+        self.assertRaises(RecursionError, raises)
 
     def test_indirect_recursion_fails(self):
-        self.assertRaises(RecursionError, lambda:
-        resolve(model, 'root', openapi.Reference(**{'$ref': '#/components/schemas/batman'}), openapi.Schema))
+        def raises():
+            resolve(model, 'root', openapi.Reference(**{'$ref': '#/components/schemas/batman'}), openapi.Schema)
+
+        self.assertRaises(RecursionError, raises)
+
+    def test_empty_schema_generate_any_type_ref(self):
+        type_ref = get_type_ref(openapi.Schema(), ModulePath('lapis_test'), 'empty_schema', True, None)
+        self.assertEqual(type_ref, TypeRef.from_str('typing.Any'))
