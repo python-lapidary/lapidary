@@ -12,8 +12,8 @@ repository = "https://github.com/lapis-project/lapis-client-base"
 [tool.poetry.dependencies]
 python = "^3.10"
 httpx = { extras = ["http2"], version = "^0.23.0" }
-lapis-mimeparse = "^0.1.5"
 pydantic = "^1.10.2"
+python-mimeparse = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"
