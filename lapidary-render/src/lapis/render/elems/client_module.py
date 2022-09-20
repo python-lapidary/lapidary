@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .client_class import ClientClass, get_client_class
 from .module import AbstractModule, template_imports
@@ -7,9 +7,10 @@ from ..module_path import ModulePath
 from ...openapi import model as openapi
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True)
 class ClientModule(AbstractModule):
     body: ClientClass
+    imports: list[str] = field(default_factory=list)
 
 
 def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePath, root_module: ModulePath, resolver: ResolverFunc) -> ClientModule:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import typing
-from typing import Annotated, Any, Union
+from typing import Annotated, Union
 from uuid import UUID
 
 import inflection
@@ -82,7 +82,7 @@ def _get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolve
     elif schema.oneOf:
         return _get_one_of_type_ref(schema, module, name, resolver)
     elif schema.type is None:
-        return TypeRef.from_type(Any)
+        return TypeRef.from_str('typing.Any')
     else:
         return EllipsisTypeRef()
 

@@ -1,8 +1,9 @@
 import functools
 import logging
-from typing import Callable, TypeVar, Union, TypeAlias, Type, cast
+from typing import Callable, TypeVar, Union, Type, cast
 
 import inflection
+from typing_extensions import TypeAlias
 
 from ..module_path import ModulePath
 from ...openapi import model as openapi
