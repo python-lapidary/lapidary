@@ -1,7 +1,11 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [unreleased]
+## [0.3.1]
+### Fixed
+- Loading resources when installed from whl
+- computing TypeRef hash
+- writing pyproject to non-existent directory
 
 ## [0.3.0]
 ### Changed
