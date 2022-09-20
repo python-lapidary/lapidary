@@ -1,6 +1,11 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [unreleased]
+
+## [0.3.0]
+### Changed
+- Support Python 3.9
 
 ## [0.2.0]
 ### Added

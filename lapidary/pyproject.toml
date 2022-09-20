@@ -7,7 +7,7 @@ authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
 description = "Python API client generator"
 license = "AGPL-3.0"
 name = "lapis-gen"
-version = "0.2.0"
+version = "0.3.0"
 packages = [{ include = "lapis", from = "src" }]
 readme = 'Readme.md'
 repository = 'https://github.com/lapis-project/lapis'
