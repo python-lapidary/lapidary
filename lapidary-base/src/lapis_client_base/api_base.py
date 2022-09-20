@@ -1,5 +1,10 @@
 import logging
-from typing import Callable, Generator, TypeAlias, Optional, Type, TypeVar, Iterable
+from typing import Callable, Generator, Optional, Type, TypeVar, Iterable
+
+try:
+    from typing import TypeAlias
+except ImportError:
+    TypeAlias = TypeVar('TypeAlias')
 
 import httpx
 import pydantic
