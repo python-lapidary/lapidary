@@ -38,10 +38,10 @@ def render_client(model: openapi.OpenApiModel, target: Path, package_name: str) 
         loader=PackageLoader("lapis.render"),
     )
 
-    render_pyproject(target, get_pyproject(model.info))
-
     gen_root = target / 'gen'
     gen_root.mkdir(parents=True, exist_ok=True)
+
+    render_pyproject(target, get_pyproject(model.info))
 
     resolver = get_resolver(model, package_name)
 

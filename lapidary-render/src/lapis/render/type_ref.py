@@ -255,7 +255,7 @@ class GenericTypeRef(TypeRef):
     def __hash__(self) -> int:
         hash_ = super().__hash__()
         for arg in self.args:
-            hash_ = hash_ << 1 + arg.__hash__()
+            hash_ = (hash_ << 1) + arg.__hash__()
         return hash_
 
 
