@@ -19,6 +19,7 @@ class SchemaModule(AbstractModule):
     One schema module for inline request and for response body for each operation
     """
     body: list[SchemaClass] = field(default_factory=list)
+    imports: list[str] = field(default_factory=list)
 
 
 def get_modules_for_components_schemas(
