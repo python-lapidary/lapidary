@@ -1,14 +1,14 @@
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 from jinja2 import Environment, PackageLoader
 
 from .black import format_code
+from .elems import modules as mod_name
 from .elems.client_class import get_operations
 from .elems.client_module import get_client_class_module
-from .elems.module import AbstractModule
-from .elems import modules as mod_name
 from .elems.pyproject import get_pyproject, render_pyproject
 from .elems.refs import get_resolver, ResolverFunc
 from .elems.request_body import get_request_body_module
@@ -20,7 +20,7 @@ from ..openapi import model as openapi
 logger = logging.getLogger(__name__)
 
 
-def render(source: str, destination: Path, render_model: AbstractModule, env: Environment):
+def render(source: str, destination: Path, render_model: Any, env: Environment):
     try:
         destination.parent.mkdir(parents=True, exist_ok=True)
         text = env.get_template(source).render(model=render_model)
