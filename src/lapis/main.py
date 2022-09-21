@@ -1,8 +1,10 @@
 import logging
+import pickle
 from pathlib import Path
 from typing import Optional
 
 import typer
+import yaml
 
 from .config import load_config, Config
 from .openapi.model import OpenApiModel
@@ -42,38 +44,50 @@ def init(
 
 
 def update_project(project_root: Path, config: Config) -> OpenApiModel:
-    doc = load_schema(config.specification.resolve(project_root), config.errata)
+    doc = load_spec(project_root, config)
     logger.info('Parse schema')
     model = OpenApiModel(**doc)
     render_client(model, project_root, config)
     return model
 
 
-def load_schema(schema_path: Path, errata_path: Optional[Path] = None):
-    schema_mtime = schema_path.stat().st_mtime
+def load_spec(project_root: Path, config: Config):
+    spec_path = project_root / config.specification
+    errata_path = project_root / config.errata if config.errata is not None else None
+
+    import hashlib
+    digester = hashlib.new('sha224')
+
+    with open(spec_path, 'rt') as fb:
+        spec_text = fb.read()
+
+    digester.update(spec_text.encode())
+
     if errata_path is not None:
-        schema_mtime = max(schema_mtime, errata_path.stat().st_mtime)
-    cache_path = schema_path.with_suffix('.pickle')
+        with open(errata_path, 'rt') as fb:
+            errata_text = fb.read()
+            digester.update(errata_text.encode())
 
-    import pickle
-
+    cache_path = project_root / '.cache' / Path(digester.hexdigest()).with_suffix('.pickle')
     if cache_path.exists():
-        cache_mtime = cache_path.stat().st_mtime
-        if cache_mtime > schema_mtime:
-            logger.info('Load spec from cache')
-            with open(cache_path, 'br') as fb:
-                return pickle.load(fb)
+        logger.info('Load spec from cache')
+        with open(cache_path, 'br') as fb:
+            return pickle.load(fb)
 
-    logger.info('Load spec')
-    with open(schema_path, 'rt') as f:
-        import yaml
-        doc = yaml.safe_load(f)
+    # no up-to-date cache available
 
-    if errata_path is not None:
-        from .errata import load_errata
-        errata = load_errata(errata_path)
-        doc = errata.apply(doc)
+    logger.info('Parse spec')
+    spec_dict = yaml.safe_load(spec_text)
 
+    if errata_text is not None:
+        logger.info('Parse errata')
+        patch_dict = yaml.safe_load(errata_text)
+        from jsonpatch import JsonPatch
+        errata = JsonPatch(patch_dict)
+        spec_dict = errata.apply(spec_dict)
+
+    cache_path.parent.mkdir(exist_ok=True)
     with open(cache_path, 'wb') as fb:
-        pickle.dump(doc, fb)
-    return doc
+        pickle.dump(spec_dict, fb)
+
+    return spec_dict
