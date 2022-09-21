@@ -5,6 +5,7 @@ from pathlib import Path
 import tomlkit
 from pydantic import BaseModel, Extra
 
+from ...config import Config
 from ...openapi import model as openapi
 from importlib.metadata import version
 
@@ -29,7 +30,7 @@ def get_pyproject(info: openapi.Info) -> PyProject:
     )
 
 
-def render_pyproject(root: Path, model: PyProject) -> None:
+def render_pyproject(root: Path, model: PyProject, config: Config) -> None:
     target = root / 'pyproject.toml'
     if target.exists():
         with open(target) as fbuf:
@@ -40,12 +41,20 @@ def render_pyproject(root: Path, model: PyProject) -> None:
 
     d: dict = tomlkit.loads(text)
 
-    poetry = d.setdefault('tool', {}).setdefault('poetry', {})
-
-    poetry.update(model.dict())
-
-    deps = poetry.setdefault('dependencies', {})
-    deps['lapis-client-base'] = '^' + version('lapis-client-base')
+    update_poetry_config(d, model)
+    update_lapis_config(d, config)
 
     with open(target, 'tw') as fbuf:
         fbuf.write(tomlkit.dumps(d, True))
+
+
+def update_poetry_config(d: dict, model: PyProject):
+    poetry = d.setdefault('tool', {}).setdefault('poetry', {})
+    poetry.update(model.dict())
+    deps = poetry.setdefault('dependencies', {})
+    deps['lapis-client-base'] = '^' + version('lapis-client-base')
+
+
+def update_lapis_config(d: dict, model: Config) -> None:
+    lapis_config = d.setdefault('tool', {}).setdefault('lapis', {})
+    lapis_config.update(model.dict(exclude_none=True, exclude_unset=True))
