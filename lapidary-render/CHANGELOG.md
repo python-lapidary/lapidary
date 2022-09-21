@@ -1,13 +1,18 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.3.1]
+## [Next]
+### Added
+- add subcommands update and init
+- update reads configuration from pyproject.toml
+
+## [0.3.1] 2022-09-20
 ### Fixed
 - Loading resources when installed from whl
 - computing TypeRef hash
 - writing pyproject to non-existent directory
 
-## [0.3.0]
+## [0.3.0] 2022-09-20
 ### Changed
 - Support Python 3.9
 
