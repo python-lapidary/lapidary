@@ -230,6 +230,8 @@ class APIKeySecurityScheme(BaseModel):
     in_: Annotated[In4, Field(alias='in')]
     description: Optional[str]
 
+    lapis_value_prefix: Annotated[Optional[str], Field(alias='x-lapis-value-prefix')] = None
+
 
 class Type2(Enum):
     http = 'http'
@@ -351,6 +353,7 @@ class Server(BaseModel):
 class Schema(BaseModel):
     class Config:
         extra = Extra.forbid
+        allow_population_by_field_name = True
 
     title: Optional[str]
     multipleOf: Annotated[Optional[float], Field(gt=0.0)]
@@ -506,6 +509,12 @@ class Components(BaseModel):
     securitySchemes: Optional[Dict[str, Union[Reference, SecurityScheme]]]
     links: Optional[Dict[str, Union[Reference, Link]]]
     callbacks: Optional[Dict[str, Union[Reference, Callback]]]
+
+    lapis_headers_global: Annotated[
+        Optional[Union[
+            dict[str, Union[str, list[str]]],
+            list[tuple[str, str]]
+        ]], Field(alias='x-lapis-headers-global')] = None
 
 
 class Response(BaseModel):

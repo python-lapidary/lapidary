@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Union, Generator
 
+from .client_init import ClientInit, get_client_init
 from .operation_function import OperationFunctionModel, get_operation_func
 from .refs import ResolverFunc
 from ..module_path import ModulePath
@@ -9,6 +10,7 @@ from ...openapi import model as openapi
 
 @dataclass(frozen=True)
 class ClientClass:
+    init_method: ClientInit
     methods: list[OperationFunctionModel] = field(default_factory=list)
 
 
@@ -20,7 +22,8 @@ def get_client_class(openapi_model: openapi.OpenApiModel, module: ModulePath, re
     ]
 
     return ClientClass(
-        methods=functions
+        init_method=get_client_init(openapi_model),
+        methods=functions,
     )
 
 

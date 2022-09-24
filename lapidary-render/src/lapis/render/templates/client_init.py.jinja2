@@ -1,0 +1,34 @@
+{%- from 'type_hint.py.jinja2' import type_hint %}
+{%- set model = model.init_method %}
+    def __init__(
+        self,
+{%- for param_name, param_type in model.init_auth_params.items() %}
+        {{ param_name }}: {{ type_hint(param_type, path) }},
+{%- endfor %}
+        base_url=
+{%- if model.base_urls | length > 0 -%}
+        '{{ model.base_urls[0] }}',
+{%- else -%}
+        None,
+{%- endif %}
+    ):
+        super().__init__(
+            httpx.AsyncClient(
+                base_url=base_url,
+                headers=[
+{%- for header in model.headers %}
+                    ('{{ header[0] }}', '{{ header[1] }}'),
+{%- endfor %}
+                ]
+            ),
+        )
+
+{%- for auth_model in model.auth_models %}
+        self.auth_{{ auth_model.auth_name }} = lapis_client_base.ApiKeyAuth(
+            name='{{ auth_model.key }}',
+            api_key={{ auth_model.param_name }},
+            placement=lapis_client_base.{{ auth_model.placement }},
+            {%- if auth_model.value_prefix %}
+            value_prefix='{{ auth_model.value_prefix }}'{% endif %}
+    )
+{%- endfor %}

@@ -18,6 +18,7 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
 
     default_imports = [
         'lapis_client_base',
+        'httpx',
     ]
 
     response_type_imports = {

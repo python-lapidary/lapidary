@@ -6,6 +6,7 @@
 {% set path = model.path -%}
 {% set model = model.body -%}
 class ApiClient(lapis_client_base.ApiBase):
+{%- include 'client_init.py.jinja2' %}
 {%- for func in model.methods %}
     async def {{ func.name }}(
         self,
@@ -18,17 +19,24 @@ class ApiClient(lapis_client_base.ApiBase):
 {%- endfor %}) -> {{ type_hint(func.response_type, path) }}:
 {%- if func.params_model_name %}
         import {{ func.params_model_name.module }}
+        param_model = {{ func.params_model_name.full_name() }}(**locals())
+{%- else %}
+        param_model = None
 {%- endif %}
         return await super()._request(
             '{{ func.method.upper() }}',
-            f'{{ func.path }}'{% if func.params_model_name %},
-            param_model={{ func.params_model_name.full_name() }}(**locals()){% endif %}, {% if func.response_class_map %}
-            response_mapping={ {%- for code, media_type in func.response_class_map.items() %}
+            f'{{ func.path }}',
+            param_model=param_model,
+            {%- if func.request_type is not none %}
+            request_body=request_body,{% endif %}
+            {% if func.response_class_map %}response_mapping={ {%- for code, media_type in func.response_class_map.items() %}
                 '{{ code }}': { {%- for mime, typ in media_type.items() %}
                     '{{ mime }}': {{ typ.full_name() }},
                     {%- endfor %}
                 },
-            {%- endfor -%} }{%- endif %}
+            {% endfor -%} },{%- endif %}
+            {%- if func.auth_name %}
+            auth=self.auth_{{ func.auth_name }},{% endif %}
         )
 {% else %}
     pass
