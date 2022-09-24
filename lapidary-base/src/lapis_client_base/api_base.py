@@ -1,19 +1,11 @@
 import logging
-from typing import Callable, Generator, Optional, Type, TypeVar, Iterable
-
-try:
-    from typing import TypeAlias
-except ImportError:
-    TypeAlias = TypeVar('TypeAlias')
+from typing import Generator, Optional, Type, TypeVar, Iterable
 
 import httpx
 import pydantic
 
 from .absent import ABSENT
 from .params import ParamPlacement
-
-PageFlowGenT: TypeAlias = Generator[httpx.Request, httpx.Response, None]
-PageFlowCallableT: TypeAlias = Callable[[Callable[[httpx.QueryParams], httpx.Request]], PageFlowGenT]
 
 T = TypeVar('T')
 logger = logging.getLogger(__name__)
@@ -28,22 +20,33 @@ class ApiBase:
             method: str,
             url: str,
             param_model: Optional[pydantic.BaseModel] = None,
-            response_mapping: Optional[dict[str, dict[str, Type]]] = None
+            request_body: Optional[pydantic.BaseModel] = None,
+            response_mapping: Optional[dict[str, dict[str, Type]]] = None,
+            auth: Optional[httpx.Auth] = None,
     ) -> T:
-        request = self._build_request(method, url, param_model)
+        request = self._build_request(method, url, param_model, request_body)
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s", f'{request.method} {request.url} {request.headers}')
 
-        response = await self._client.send(request)
+        response = await self._client.send(request, auth=auth)
         return _handle_response(response, response_mapping)
 
-    def _build_request(self, method: str, url: str, param_model: Optional[pydantic.BaseModel] = None) -> httpx.Request:
+    def _build_request(
+            self,
+            method: str,
+            url: str,
+            param_model: Optional[pydantic.BaseModel] = None,
+            request_body: Optional[pydantic.BaseModel] = None,
+    ) -> httpx.Request:
         if param_model:
             params, headers, cookies = process_params(param_model)
         else:
             params = headers = cookies = None
-        return self._client.build_request(method, url, params=params, headers=headers, cookies=cookies)
+
+        data = request_body.dict(by_alias=True, exclude_unset=True, exclude_defaults=True) if request_body is not None else None
+
+        return self._client.build_request(method, url, data=data, params=params, headers=headers, cookies=cookies)
 
 
 def _handle_response(response: httpx.Response, response_mapping: Optional[dict[str, dict[str, Type[T]]]] = None) -> T:
