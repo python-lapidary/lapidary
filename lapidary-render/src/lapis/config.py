@@ -10,6 +10,7 @@ class Config(BaseSettings):
     package: str
     errata: Optional[Path] = None
     format = True
+    cache = True
 
 
 def load_config(config_path: Path) -> Config:
