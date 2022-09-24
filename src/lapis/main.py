@@ -20,9 +20,13 @@ app = typer.Typer()
 
 @app.command()
 def update(
-        project_root: Path = Path('.')
+        project_root: Path = Path('.'),
+        format_: bool = typer.Option(True, '--format/--no-format'),
+        cache: bool = True
 ):
     config = load_config(project_root / 'pyproject.toml')
+    config.format = format_
+    config.cache = cache
     update_project(project_root, config)
 
 
@@ -61,15 +65,17 @@ def load_spec(project_root: Path, config: Config):
     with open(spec_path, 'rt') as fb:
         spec_text = fb.read()
 
-    digester.update(spec_text.encode())
+    if config.cache:
+        digester.update(spec_text.encode())
 
     if errata_path is not None:
         with open(errata_path, 'rt') as fb:
             errata_text = fb.read()
-            digester.update(errata_text.encode())
+            if config.cache:
+                digester.update(errata_text.encode())
 
-    cache_path = project_root / '.cache' / Path(digester.hexdigest()).with_suffix('.pickle')
-    if cache_path.exists():
+    cache_path = project_root / '.lapis_cache' / Path(digester.hexdigest()).with_suffix('.pickle')
+    if config.cache and cache_path.exists():
         logger.info('Load spec from cache')
         with open(cache_path, 'br') as fb:
             return pickle.load(fb)
