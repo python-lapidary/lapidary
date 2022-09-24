@@ -28,6 +28,7 @@ class OperationFunctionModel:
     params_model_name: Optional[TypeRef]
     response_class_map: dict[str, dict[str, TypeRef]]
     response_type: Optional[TypeRef]
+    auth_name: Optional[str]
     docstr: Optional[str] = None
 
 
@@ -96,6 +97,12 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
     else:
         response_type = GenericTypeRef.union_of(list(response_types))
 
+    auth_name = None
+    if op.security is not None and len(op.security) > 0:
+        requirement = next(iter(op.security)).__root__
+        if len(requirement) > 0:
+            auth_name = next(iter(requirement.keys()))
+
     return OperationFunctionModel(
         name=op.operationId,
         method=method,
@@ -105,4 +112,5 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
         params_model_name=TypeRef(module=(module / PARAM_MODEL).str(), name=inflection.camelize(op.operationId)) if op.parameters else None,
         response_class_map=response_class_map,
         response_type=response_type,
+        auth_name=auth_name,
     )

@@ -3,12 +3,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
 ### Added
-- add subcommands update and init
-- update reads configuration from pyproject.toml
+- Added subcommands `update` and `init`, `update` reads configuration from pyproject.toml .
+- ApiClient accepts base URL, the first server declared in schema is used as the default.
+- Extended schema with global headers element; passing it as headers to httpx.AsyncClient().
+- Added support for a single API Key authentication.
 
 ## [0.3.1] 2022-09-20
 ### Fixed
-- Loading resources when installed from whl
+- loading resources when installed from whl
 - computing TypeRef hash
 - writing pyproject to non-existent directory
 
