@@ -48,6 +48,13 @@ def get_schema_classes(
                 if not isinstance(prop_schema, openapi.Schema):
                     continue
                 yield from get_schema_classes(prop_schema, name + inflection.camelize(prop_name), module, resolver)
+    for key in ['oneOf', 'anyOf', 'allOf']:
+        inheritance_elem = getattr(schema, key)
+        if inheritance_elem is not None:
+            for idx, sub_schema in enumerate(inheritance_elem):
+                if not isinstance(sub_schema, openapi.Schema):
+                    continue
+                yield from get_schema_classes(sub_schema, name + str(idx), module, resolver)
 
 
 def get_schema_class(
@@ -63,6 +70,9 @@ def get_schema_class(
 
     base_type = TypeRef.from_str('pydantic.BaseModel')
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
+
+    if schema.lapis_type_name is not None:
+        name = schema.lapis_type_name
 
     return SchemaClass(
         class_name=name,

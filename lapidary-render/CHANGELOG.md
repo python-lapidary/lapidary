@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - ApiClient accepts base URL, the first server declared in schema is used as the default.
 - Extended schema with global headers element; passing it as headers to httpx.AsyncClient().
 - Added support for a single API Key authentication.
+- Added support for naming schema classes
+- Generate classes for schemas declared in-line under allOf, onyOf and oneOf.
 
 ## [0.3.1] 2022-09-20
 ### Fixed
