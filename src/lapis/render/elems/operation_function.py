@@ -78,7 +78,7 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
 
     response_class_map = {
         resp_code: {
-            mime: resolve_type_ref(media_type.schema_, module, response_type_name(op, resp_code), resolver)
+            mime: resolve_type_ref(media_type.schema_, module / 'response_body', response_type_name(op, resp_code), resolver)
             for mime, media_type in response.content.items()
         }
         for resp_code, response in op.responses.__root__.items()

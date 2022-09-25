@@ -10,6 +10,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added support for naming schema classes
 - Generate classes for schemas declared in-line under allOf, onyOf and oneOf.
 
+### Fixed
+- module name for response body schema class
+
 ## [0.3.1] 2022-09-20
 ### Fixed
 - loading resources when installed from whl
