@@ -48,15 +48,18 @@ def get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, required
 
 
 def _get_one_of_type_ref(schema: SchemaOrRef, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeRef:
-    if len(schema.oneOf) == 1:
-        return get_type_ref(schema.oneOf[0], module, name, True, resolve)
     args = []
-    for idx, s in enumerate(schema.oneOf):
-        if isinstance(s, openapi.Reference):
-            s, module, name = resolve(s, openapi.Schema)
+    for idx, sub_schema in enumerate(schema.oneOf):
+        if isinstance(sub_schema, openapi.Reference):
+            sub_schema, sub_module, sub_name = resolve(sub_schema, openapi.Schema)
         else:
-            name = name + str(idx)
-        type_ref = get_type_ref(s, module, name, True, resolve)
+            sub_name = name + str(idx)
+            sub_module = module
+
+        if sub_schema.lapis_type_name is not None:
+            sub_name = sub_schema.lapis_type_name
+
+        type_ref = get_type_ref(sub_schema, sub_module, sub_name, True, resolve)
         args.append(type_ref)
 
     return GenericTypeRef(
@@ -216,12 +219,12 @@ class GenericTypeRef(TypeRef):
 
     @staticmethod
     def union_of(types: list[TypeRef]) -> GenericTypeRef:
-        args = []
+        args = set()
         for typ in types:
             if isinstance(typ, GenericTypeRef) and typ.module == 'typing' and typ.name == 'Union':
-                args.append(typ.args)
+                args.update(typ.args)
             else:
-                args.append(typ)
+                args.add(typ)
         return GenericTypeRef(module='typing', name='Union', args=args)
 
     def type_checking_imports(self) -> list[tuple[str, str]]:
