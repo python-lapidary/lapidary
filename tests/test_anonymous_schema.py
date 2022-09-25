@@ -6,7 +6,7 @@ from lapis.openapi import model as openapi
 from lapis.render.elems.attribute import AttributeModel
 from lapis.render.elems.attribute_annotation import AttributeAnnotationModel
 from lapis.render.elems.refs import get_resolver
-from lapis.render.elems.schema_class import get_schema_class, SchemaClass
+from lapis.render.elems.schema_class import get_schema_class, SchemaClass, get_schema_classes
 from lapis.render.module_path import ModulePath
 from lapis.render.type_ref import TypeRef, BuiltinTypeRef
 
@@ -23,6 +23,24 @@ model = openapi.OpenApiModel(
                         type=openapi.Type.string
                     )
                 }
+            ),
+            'charlie': openapi.Schema(
+                oneOf=[
+                    openapi.Schema(
+                        type=openapi.Type.object,
+                        lapis_type_name='FirstSchemaClass',
+                        properties={
+                            'a': openapi.Schema()
+                        },
+                    ),
+                    openapi.Schema(
+                        lapis_type_name='SecondSchemaClass',
+                        type=openapi.Type.object,
+                        properties={
+                            'a': openapi.Schema()
+                        },
+                    ),
+                ]
             )
         }
     )
@@ -51,3 +69,8 @@ class Test(TestCase):
         )
 
         self.assertEqual(schema, a)
+
+    def test_schema_type_name(self):
+        classes = [cls for cls in get_schema_classes(model.components.schemas['charlie'], 'alice', ModulePath('test'), get_resolver(model, 'test'))]
+        class_names = [cls.class_name for cls in classes]
+        self.assertEqual(class_names, ['FirstSchemaClass', 'SecondSchemaClass'])

@@ -391,6 +391,8 @@ class Schema(BaseModel):
     deprecated: Optional[bool] = False
     xml: Optional[XML]
 
+    lapis_type_name: Annotated[Optional[str], Field(alias='x-lapis-type-name')] = None
+
 
 class Tag(BaseModel):
     class Config:
