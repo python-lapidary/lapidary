@@ -1,23 +1,34 @@
+import enum
 import logging
 from dataclasses import dataclass, field
 from typing import Optional, Generator
 
 import inflection
+from lapis_client_base import ABSENT
 
 from .attribute import AttributeModel, get_attributes, get_enum_attribute
 from .attribute_annotation import AttributeAnnotationModel
 from .refs import ResolverFunc
 from ..module_path import ModulePath
-from ..type_ref import TypeRef, BuiltinTypeRef
+from ..type_ref import BuiltinTypeRef, TypeRef
 from ...openapi import model as openapi
+from ...openapi.model import LapisType
 
 logger = logging.getLogger(__name__)
+
+
+class ModelType(enum.Enum):
+    model = 'model'
+    exception = 'exception'
+    enum = 'enum'
 
 
 @dataclass(frozen=True)
 class SchemaClass:
     class_name: str
     base_type: TypeRef
+    model_type: ModelType
+
     docstr: Optional[str] = None
     attributes: list[AttributeModel] = field(default_factory=list)
 
@@ -74,7 +85,7 @@ def get_schema_class(
 
     logger.debug(name)
 
-    base_type = TypeRef.from_str('pydantic.BaseModel')
+    base_type = TypeRef.from_str('pydantic.BaseModel') if schema.lapis_model_type is LapisType.model else BuiltinTypeRef.from_str('Exception')
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
 
     if schema.lapis_type_name is not None:
@@ -85,6 +96,7 @@ def get_schema_class(
         base_type=base_type,
         attributes=attributes,
         docstr=schema.description or None,
+        model_type=ModelType[schema.lapis_model_type.name],
     )
 
 
@@ -97,11 +109,14 @@ def get_enum_class(
         base_type=TypeRef.from_str('enum.Enum'),
         attributes=[get_enum_attribute(v) for v in schema.enum],
         docstr=schema.description or None,
+        model_type=ModelType.enum,
     )
 
 
 def get_enum_value(value, schema: openapi.Schema) -> AttributeModel:
-    # if schema.type == openapi.Type.string:
+    if schema.lapis_model_type is not ABSENT:
+        import warnings
+        warnings.warn('Enum schemas must not declare x-model-type')
     if value is None:
         name = 'none'
     elif value == '':
