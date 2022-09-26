@@ -14,6 +14,9 @@ from .response_body import response_type_name
 from ..module_path import ModulePath
 from ..type_ref import TypeRef, get_type_ref, GenericTypeRef, resolve_type_ref
 from ...openapi import model as openapi
+from ...openapi.model import LapisType
+
+RESPONSE_BODY = 'response_body'
 
 logger = logging.getLogger(__name__)
 
@@ -78,18 +81,14 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
 
     response_class_map = {
         resp_code: {
-            mime: resolve_type_ref(media_type.schema_, module / 'response_body', response_type_name(op, resp_code), resolver)
+            mime: resolve_type_ref(media_type.schema_, module / RESPONSE_BODY, response_type_name(op, resp_code), resolver)
             for mime, media_type in response.content.items()
         }
         for resp_code, response in op.responses.__root__.items()
         if response.content
     }
 
-    response_types = {
-        typ
-        for mime_map in response_class_map.values()
-        for typ in mime_map.values()
-    }
+    response_types = get_response_types(op, module, resolver)
     if len(response_types) == 0:
         response_type = None
     elif len(response_types) == 1:
@@ -114,3 +113,25 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
         response_type=response_type,
         auth_name=auth_name,
     )
+
+
+def get_response_types(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> set[TypeRef]:
+    """
+    Generate unique collection of types that may be returned by the operation. Skip types that are marked as exceptions as those are raised instead.
+    """
+    response_types = set()
+    for resp_code, response in op.responses.__root__.items():
+        if response.content is None:
+            continue
+        for media_type in response.content.values():
+            schema = media_type.schema_
+            if isinstance(schema, openapi.Reference):
+                schema, resp_module, name = resolve(schema, openapi.Schema)
+            else:
+                name = response_type_name(op, resp_code)
+                resp_module = module
+            if schema.lapis_model_type is LapisType.exception:
+                continue
+            typ = resolve_type_ref(schema, resp_module / RESPONSE_BODY, name, resolve)
+            response_types.add(typ)
+    return response_types
