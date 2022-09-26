@@ -34,16 +34,16 @@ def get_param_model_classes(
         module: ModulePath,
         resolver: ResolverFunc,
 ) -> Generator[SchemaClass, None, None]:
-    schema_class = get_param_model_class(operation, name, module, resolver)
-    if schema_class is not None:
-        yield schema_class
-
     # handle sub schemas
     for param in operation.parameters:
         schema = param.schema_
         if not isinstance(schema, openapi.Schema):
             continue
         yield from get_schema_classes(schema, inflection.camelize(name) + inflection.camelize(param.name), module, resolver)
+
+    schema_class = get_param_model_class(operation, name, module, resolver)
+    if schema_class is not None:
+        yield schema_class
 
 
 def get_param_model_class(
