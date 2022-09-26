@@ -28,13 +28,12 @@ def get_schema_classes(
         module: ModulePath,
         resolver: ResolverFunc,
 ) -> Generator[SchemaClass, None, None]:
+    # First handle the enum case, so that the model class has suffixed name, and all sub-schemas use it as their prefix
     if schema.enum is not None:
-        yield get_enum_class(schema, name)
+        enum_class = get_enum_class(schema, name)
         name = name + 'Value'
-
-    schema_class = get_schema_class(schema, name, module, resolver)
-    if schema_class is not None:
-        yield schema_class
+    else:
+        enum_class = None
 
     # handle sub schemas
 
@@ -55,6 +54,13 @@ def get_schema_classes(
                 if not isinstance(sub_schema, openapi.Schema):
                     continue
                 yield from get_schema_classes(sub_schema, name + str(idx), module, resolver)
+
+    schema_class = get_schema_class(schema, name, module, resolver)
+    if schema_class is not None:
+        yield schema_class
+
+    if enum_class is not None:
+        yield enum_class
 
 
 def get_schema_class(
