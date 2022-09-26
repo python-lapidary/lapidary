@@ -26,7 +26,8 @@
             param_model=param_model,
 {%- if func.request_type is not none %}
             request_body=request_body,{% endif %}
-{%- if func.response_class_map %}response_mapping={ {%- for code, media_type in func.response_class_map.items() %}
+{%- if func.response_class_map %}
+            response_mapping={ {%- for code, media_type in func.response_class_map.items() %}
                 '{{ code }}': { {%- for mime, typ in media_type.items() %}
                     '{{ mime }}': {{ typ.full_name() }},
         {%- endfor %}
