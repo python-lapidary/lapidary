@@ -616,9 +616,9 @@ class Parameter(BaseModel):
     name: str
     in_: Annotated[str, Field(alias='in')]
     description: Optional[str]
-    required: Optional[bool] = False
-    deprecated: Optional[bool] = False
-    allowEmptyValue: Optional[bool] = False
+    required: bool = False
+    deprecated: bool = False
+    allowEmptyValue: bool = False
     style: Optional[str]
     explode: Optional[bool]
     allowReserved: Optional[bool] = False
