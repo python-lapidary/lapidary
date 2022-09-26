@@ -48,7 +48,7 @@ def init(
 
 def update_project(project_root: Path, config: Config) -> OpenApiModel:
     doc = load_spec(project_root, config)
-    logger.info('Parse schema')
+    logger.info('Prepare client model')
     model = OpenApiModel(**doc)
     render_client(model, project_root, config)
     return model
