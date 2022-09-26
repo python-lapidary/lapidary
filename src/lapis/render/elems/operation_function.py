@@ -129,9 +129,9 @@ def get_response_types(op: openapi.Operation, module: ModulePath, resolve: Resol
                 schema, resp_module, name = resolve(schema, openapi.Schema)
             else:
                 name = response_type_name(op, resp_code)
-                resp_module = module
+                resp_module = module / RESPONSE_BODY
             if schema.lapis_model_type is LapisType.exception:
                 continue
-            typ = resolve_type_ref(schema, resp_module / RESPONSE_BODY, name, resolve)
+            typ = resolve_type_ref(schema, resp_module, name, resolve)
             response_types.add(typ)
     return response_types
