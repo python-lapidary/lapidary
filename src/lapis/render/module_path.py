@@ -14,7 +14,7 @@ class ModulePath:
         return ModulePath._SEP.join(self.parts)
 
     def to_path(self, root: pathlib.Path):
-        return root.joinpath(*self.parts)
+        return root.joinpath(*self.parts).with_suffix('.py')
 
     def __truediv__(self, other: Union[str, Iterable[str]]):
         if isinstance(other, str):

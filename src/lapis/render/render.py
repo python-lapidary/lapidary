@@ -56,7 +56,7 @@ def render_client_module(model: openapi.OpenApiModel, config: Config, gen_root: 
     client_module = root_mod / 'client.py'
     client_class_module = get_client_class_module(model, client_module, root_mod, resolver)
     path = client_module.to_path(gen_root)
-    render('client_class.py.jinja2', path, client_class_module, env, config)
+    render('client_module.py.jinja2', path, client_class_module, env, config)
 
 
 def render_schema_modules(model: openapi.OpenApiModel, config: Config, gen_root: Path, resolver: ResolverFunc, env: Environment):
@@ -66,7 +66,7 @@ def render_schema_modules(model: openapi.OpenApiModel, config: Config, gen_root:
         logger.info('Render schema modules')
         modules = get_modules_for_components_schemas(model.components.schemas, root_module / 'components' / 'schemas', resolver)
         for module in modules:
-            render('schema_class.py.jinja2', module.path.to_path(gen_root).with_suffix('.py'), module, env, config)
+            render('schema_module.py.jinja2', module.path.to_path(gen_root), module, env, config)
 
     for path, path_item in model.paths.__root__.items():
         for tpl in get_operations(path_item, True):
@@ -75,15 +75,18 @@ def render_schema_modules(model: openapi.OpenApiModel, config: Config, gen_root:
             if op.parameters:
                 module_path = op_root_module / mod_name.PARAM_MODEL
                 mod = get_param_model_classes_module(op, module_path, resolver)
-                render('schema_class.py.jinja2', module_path.to_path(gen_root).with_suffix('.py'), mod, env, config)
+                if len(mod.body) > 0:
+                    render('schema_module.py.jinja2', module_path.to_path(gen_root), mod, env, config)
             if op.requestBody:
                 module_path = op_root_module / mod_name.REQUEST_BODY
                 mod = get_request_body_module(op, module_path, resolver)
-                render('schema_class.py.jinja2', module_path.to_path(gen_root).with_suffix('.py'), mod, env, config)
-            if op.responses:
+                if len(mod.body) > 0:
+                    render('schema_module.py.jinja2', module_path.to_path(gen_root), mod, env, config)
+            if len(op.responses.__root__):
                 module_path = op_root_module / mod_name.RESPONSE_BODY
                 mod = get_response_body_module(op, module_path, resolver)
-                render('schema_class.py.jinja2', module_path.to_path(gen_root).with_suffix('.py'), mod, env, config)
+                if len(mod.body) > 0:
+                    render('schema_module.py.jinja2', module_path.to_path(gen_root), mod, env, config)
 
 
 def ensure_init_py(gen_root, package_name):

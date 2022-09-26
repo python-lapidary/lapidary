@@ -1,0 +1,19 @@
+{% from 'type_hint.py.jinja2' import type_hint -%}
+from __future__ import annotations
+
+import typing
+import lapis_client_base
+import pydantic
+{%- for imp in model.imports %}
+import {{ imp }}
+{%- endfor %}
+{% set path = model.path -%}
+{% set model = model.body %}
+
+class ApiClient(lapis_client_base.ApiBase):
+{%- include 'client_init.py.jinja2' %}
+{%- for func in model.methods %}
+{%- include 'client_op_method.py.jinja2' %}
+{%- else %}
+    pass
+{%- endfor %}
