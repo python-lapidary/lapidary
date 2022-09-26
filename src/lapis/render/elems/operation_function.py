@@ -66,6 +66,7 @@ def get_operation_param(param: Union[openapi.Parameter, openapi.Reference], pare
             field_props=field_props,
         ),
         deprecated=param.deprecated,
+        required=param.required,
     )
 
 

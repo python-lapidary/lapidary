@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 from .attribute_annotation import AttributeAnnotationModel, get_attr_annotation
 from .refs import ResolverFunc, SchemaOrRef
@@ -50,6 +50,10 @@ class AttributeModel:
     name: str
     annotation: AttributeAnnotationModel
     deprecated: bool = False
+    """Currently not used"""
+
+    required: Optional[bool] = None
+    """Used for op method params. Required params are rendered before optional, and optional have default value ABSENT"""
 
 
 def get_attributes(parent_schema: openapi.Schema, parent_class_name: str, module: ModulePath, resolver: ResolverFunc) -> list[AttributeModel]:
