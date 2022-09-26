@@ -28,14 +28,14 @@ def get_modules_for_components_schemas(
     modules = []
     for name, schema in schemas.items():
         if isinstance(schema, openapi.Schema):
-            module = get_schema_module(schema, root_package / inflection.underscore(name), resolver)
+            module = get_schema_module(schema, name, root_package / inflection.underscore(name), resolver)
             if module is not None:
                 modules.append(module)
     return modules
 
 
-def get_schema_module(schema: openapi.Schema, path: ModulePath, resolver: ResolverFunc) -> Optional[SchemaModule]:
-    classes = [cls for cls in get_schema_classes(schema, inflection.camelize(path.parts[-1]), path, resolver)]
+def get_schema_module(schema: openapi.Schema, name: str, path: ModulePath, resolver: ResolverFunc) -> Optional[SchemaModule]:
+    classes = [cls for cls in get_schema_classes(schema, name, path, resolver)]
     if len(classes) > 0:
         return _get_schema_module(classes, path)
 
