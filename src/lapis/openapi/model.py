@@ -3,10 +3,16 @@
 
 from __future__ import annotations
 
+import enum
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Optional, Union, Mapping
 
 from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field
+
+
+class LapisType(enum.Enum):
+    model = 'model'
+    exception = 'exception'
 
 
 class Reference(BaseModel):
@@ -392,6 +398,7 @@ class Schema(BaseModel):
     xml: Optional[XML]
 
     lapis_type_name: Annotated[Optional[str], Field(alias='x-lapis-type-name')] = None
+    lapis_model_type: Annotated[LapisType, Field(alias='x-lapis-model-type')] = LapisType.model
 
 
 class Tag(BaseModel):

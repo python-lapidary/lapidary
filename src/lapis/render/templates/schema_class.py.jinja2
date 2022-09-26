@@ -2,18 +2,7 @@
 {% block body -%}
 {% set path = model.path %}
 {% for model in model.body -%}
-class {{ model.class_name }}({{ model.base_type.__repr__() }}):
-{%- if model.docstr %}
-    """
-    {{ model.docstr | indent }}
-    """
-{% endif -%}
-{% if model.base_type.__repr__() == 'pydantic.BaseModel' %}
-{% include 'schema_class_object.py.jinja2' %}
-{% elif model.base_type.__repr__() == 'enum.Enum' %}
-{% include 'schema_class_enum.py.jinja2' %}
-{% endif %}
-
+{% include 'schema_class_'+model.model_type.name+'.py.jinja2' %}
 {% endfor %}
 
 {% for model in model.body -%}{% if model.base_type.full_name() == 'pydantic.BaseModel' %}

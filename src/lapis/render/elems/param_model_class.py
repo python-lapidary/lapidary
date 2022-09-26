@@ -5,7 +5,7 @@ import inflection
 from .attribute import AttributeModel
 from .attribute_annotation import get_attr_annotation
 from .refs import ResolverFunc
-from .schema_class import SchemaClass, get_schema_classes
+from .schema_class import SchemaClass, get_schema_classes, ModelType
 from ..module_path import ModulePath
 from ..type_ref import TypeRef
 from ...openapi import model as openapi
@@ -61,4 +61,5 @@ def get_param_model_class(
         base_type=base_type,
         attributes=attributes,
         docstr=operation.description or None,
+        model_type=ModelType.model,
     )

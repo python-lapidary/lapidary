@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import typing
 import lapis_client_base
+import pydantic
 {%- for imp in model.imports %}
 import {{ imp }}
 {%- endfor %}
