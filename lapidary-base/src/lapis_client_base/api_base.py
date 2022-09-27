@@ -8,12 +8,16 @@ from .absent import ABSENT
 from .params import ParamPlacement
 
 T = TypeVar('T')
+
 logger = logging.getLogger(__name__)
 
 
 class ApiBase:
-    def __init__(self, client: httpx.AsyncClient):
+    def __init__(
+            self, client: httpx.AsyncClient, global_response_map: Optional[dict[str, dict[str, Type]]] = None
+    ):
         self._client = client
+        self._global_response_map = global_response_map
 
     async def _request(
             self,
@@ -21,7 +25,7 @@ class ApiBase:
             url: str,
             param_model: Optional[pydantic.BaseModel] = None,
             request_body: Optional[pydantic.BaseModel] = None,
-            response_mapping: Optional[dict[str, dict[str, Type]]] = None,
+            response_map: Optional[dict[str, dict[str, Type]]] = None,
             auth: Optional[httpx.Auth] = None,
     ) -> T:
         request = self._build_request(method, url, param_model, request_body)
@@ -30,7 +34,14 @@ class ApiBase:
             logger.debug("%s", f'{request.method} {request.url} {request.headers}')
 
         response = await self._client.send(request, auth=auth)
-        return _handle_response(response, response_mapping)
+
+        if self._global_response_map is not None:
+            full_response_map = self._global_response_map.copy()
+            full_response_map.update(response_map)
+        else:
+            full_response_map = response_map
+
+        return _handle_response(response, full_response_map)
 
     def _build_request(
             self,
