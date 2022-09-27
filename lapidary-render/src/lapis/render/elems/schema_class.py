@@ -27,10 +27,10 @@ class ModelType(enum.Enum):
 class SchemaClass:
     class_name: str
     base_type: TypeRef
-    model_type: ModelType
 
     docstr: Optional[str] = None
     attributes: list[AttributeModel] = field(default_factory=list)
+    model_type: ModelType = ModelType.model
 
 
 def get_schema_classes(

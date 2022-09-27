@@ -18,6 +18,7 @@ class LapisType(enum.Enum):
 class Reference(BaseModel):
     class Config:
         extra = Extra.forbid
+        allow_population_by_field_name = True
 
     ref: Annotated[str, Field(alias='$ref')]
 
@@ -461,6 +462,7 @@ class OpenApiModel(BaseModel):
 
     class Config:
         extra = Extra.forbid
+        allow_population_by_field_name = True
 
     openapi: Annotated[str, Field(regex='^3\\.0\\.\\d(-.+)?$')]
     info: Info
@@ -470,6 +472,22 @@ class OpenApiModel(BaseModel):
     tags: Annotated[Optional[List[Tag]], Field(unique_items=True)]
     paths: Paths
     components: Optional[Components]
+
+    lapis_headers_global: Annotated[
+        Optional[Union[
+            dict[str, Union[str, list[str]]],
+            list[tuple[str, str]]
+        ]],
+        Field(
+            alias='x-lapis-headers-global',
+            description='Headers to add to every request.'
+        )
+    ] = None
+
+    lapis_responses_global: Optional[Responses] = Field(
+        alias='x-lapis-responses-global',
+        description='Base Responses. Values in Responses declared in Operations override values in this one.',
+    )
 
     def resolve(self, ref: str, t: Optional[type]) -> Any:
         result = self._schema_get(self.recursive_resolve(ref))
@@ -518,12 +536,6 @@ class Components(BaseModel):
     securitySchemes: Optional[Dict[str, Union[Reference, SecurityScheme]]]
     links: Optional[Dict[str, Union[Reference, Link]]]
     callbacks: Optional[Dict[str, Union[Reference, Callback]]]
-
-    lapis_headers_global: Annotated[
-        Optional[Union[
-            dict[str, Union[str, list[str]]],
-            list[tuple[str, str]]
-        ]], Field(alias='x-lapis-headers-global')] = None
 
 
 class Response(BaseModel):

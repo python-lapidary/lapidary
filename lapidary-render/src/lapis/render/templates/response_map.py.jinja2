@@ -1,0 +1,13 @@
+{%- macro response_map(model) %}
+{%- if model -%}
+{
+    {%- for code, media_type in model.items() %}
+    '{{ code }}': {
+        {%- for mime, typ in media_type.items() %}
+        '{{ mime }}': {{ typ.full_name() }},
+        {%- endfor %}
+    },
+    {%- endfor %}
+}
+{%- endif %}
+{%- endmacro -%}
