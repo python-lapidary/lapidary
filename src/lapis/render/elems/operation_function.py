@@ -7,6 +7,7 @@ import inflection
 
 from .attribute import AttributeModel
 from .attribute_annotation import AttributeAnnotationModel
+from .client_func_response_map import get_response_map
 from .modules import PARAM_MODEL
 from .refs import ResolverFunc
 from .request_body import get_request_body_type
@@ -29,7 +30,7 @@ class OperationFunctionModel:
     request_type: Optional[TypeRef]
     params: list[AttributeModel]
     params_model_name: Optional[TypeRef]
-    response_class_map: dict[str, dict[str, TypeRef]]
+    response_map: dict[str, dict[str, TypeRef]]
     response_type: Optional[TypeRef]
     auth_name: Optional[str]
     docstr: Optional[str] = None
@@ -80,14 +81,12 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
 
     request_type = get_request_body_type(op, module, resolver) if op.requestBody else None
 
-    response_class_map = {
-        resp_code: {
-            mime: resolve_type_ref(media_type.schema_, module / RESPONSE_BODY, response_type_name(op, resp_code), resolver)
-            for mime, media_type in response.content.items()
-        }
-        for resp_code, response in op.responses.__root__.items()
-        if response.content
-    }
+    response_map = get_response_map(
+        op.responses,
+        op.operationId,
+        module,
+        resolver
+    )
 
     response_types = get_response_types(op, module, resolver)
     if len(response_types) == 0:
@@ -110,7 +109,7 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
         request_type=request_type,
         params=params,
         params_model_name=TypeRef(module=(module / PARAM_MODEL).str(), name=inflection.camelize(op.operationId)) if op.parameters else None,
-        response_class_map=response_class_map,
+        response_map=response_map,
         response_type=response_type,
         auth_name=auth_name,
     )

@@ -22,7 +22,7 @@ def get_client_class(openapi_model: openapi.OpenApiModel, module: ModulePath, re
     ]
 
     return ClientClass(
-        init_method=get_client_init(openapi_model),
+        init_method=get_client_init(openapi_model, module, resolver),
         methods=functions,
     )
 
