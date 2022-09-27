@@ -26,7 +26,7 @@ def load_as_dict(path: Path, cache_root: Path) -> dict:
     return d
 
 
-def load_spec(project_root: Path, config: Config):
+def load_spec(project_root: Path, config: Config) -> dict:
     spec_path = project_root / config.specification
     errata_path = project_root / config.errata if config.errata is not None else None
     cache_path = project_root / '.lapis_cache'

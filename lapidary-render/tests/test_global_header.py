@@ -1,26 +1,26 @@
 import unittest
 
-import pydantic
-from pydantic import ValidationError
 from lapis.openapi import model as openapi
+from lapis.render.elems.client_module import get_client_class_module
+from lapis.render.elems.refs import get_resolver
+from lapis.render.module_path import ModulePath
 
 
-class MyTestCase(unittest.TestCase):
-    def test_extra_prop_x(self):
-        model: openapi.Components = pydantic.parse_obj_as(openapi.Components, {
-            'x-lapis-headers-global': {
-                'Accept': 'application/json; version=2.3.5'
+class GlobalHeadersTest(unittest.TestCase):
+    def test_global_headers_in_output_model(self):
+        model = openapi.OpenApiModel(
+            openapi='3.0.3',
+            info=openapi.Info(
+                title='',
+                version=''
+            ),
+            paths=openapi.Paths(__root__={}),
+            lapis_headers_global={
+                'user-agent': 'james-bond',
             }
-        })
+        )
 
-        self.assertEqual(model.lapis_headers_global, {'Accept': 'application/json; version=2.3.5'})
+        module_path = ModulePath('test')
+        module = get_client_class_module(model, module_path / 'client.py', module_path, get_resolver(model, 'test'))
 
-    def test_extra_prop_non_x(self):
-        def raises():
-            pydantic.parse_obj_as(openapi.Components, {
-                'y-lapis-headers-global': {
-                    'Accept': 'application/json; version=2.3.5'
-                }
-            })
-
-        self.assertRaises(ValidationError, raises)
+        self.assertEqual(module.body.init_method.headers, [('user-agent', 'james-bond',)])

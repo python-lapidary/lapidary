@@ -95,7 +95,6 @@ class OperationResponseTest(TestCase):
             path=module_path,
             imports=[
                 'lapis_client_base.absent',
-                'pydantic',
             ],
             body=[SchemaClass(
                 class_name='GetSchemaResponse200Response',
@@ -116,7 +115,6 @@ class OperationResponseTest(TestCase):
             path=module_path,
             imports=[
                 'lapis_client_base.absent',
-                'pydantic',
             ],
             body=[SchemaClass(
                 class_name='GetSchemaRequestRequest',
