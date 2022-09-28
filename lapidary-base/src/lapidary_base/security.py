@@ -1,16 +1,11 @@
-from typing import Optional, TypeVar, Generator
+from typing import Optional, Generator
 
 import httpx
 import pydantic
 
 from .params import ParamPlacement
 
-try:
-    from typing import TypeAlias
-except ImportError:
-    TypeAlias = TypeVar('TypeAlias')
-
-PageFlowGenT: TypeAlias = Generator[httpx.Request, httpx.Response, None]
+PageFlowGenT = Generator[httpx.Request, httpx.Response, None]
 
 
 class ApiKeyAuth(httpx.Auth, pydantic.BaseSettings):
