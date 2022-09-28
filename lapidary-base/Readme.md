@@ -1,1 +1,1 @@
-Base classes for [Lapis](https://github.com/lapis-project/lapis) OpenAPI client generator
+Base classes for [Lapidary](https://github.com/pytohon-lapidary/lapidary) async OpenAPI client generator.

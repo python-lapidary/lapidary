@@ -3,7 +3,7 @@ from typing import Optional, TypeVar, Generator
 import httpx
 import pydantic
 
-from lapis_client_base import ParamPlacement
+from .params import ParamPlacement
 
 try:
     from typing import TypeAlias
