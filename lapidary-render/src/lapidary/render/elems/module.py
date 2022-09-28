@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from lapis.render.module_path import ModulePath
+from ..module_path import ModulePath
 
 template_imports = [
     'builtins',

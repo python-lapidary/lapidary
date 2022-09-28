@@ -28,10 +28,10 @@
         )
 
 {%- for auth_model in model.auth_models %}
-        self.auth_{{ auth_model.auth_name }} = lapis_client_base.ApiKeyAuth(
+        self.auth_{{ auth_model.auth_name }} = lapidary_base.ApiKeyAuth(
             name='{{ auth_model.key }}',
             api_key={{ auth_model.param_name }},
-            placement=lapis_client_base.{{ auth_model.placement }},
+            placement=lapidary_base.{{ auth_model.placement }},
             {%- if auth_model.value_prefix %}
             value_prefix='{{ auth_model.value_prefix }}'{% endif %}
     )

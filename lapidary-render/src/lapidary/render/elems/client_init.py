@@ -1,14 +1,14 @@
 from functools import singledispatch
 from typing import Collection, Mapping, Any, Optional, Union
 
-from lapis_client_base import ParamPlacement
+from lapidary_base import ParamPlacement
 from pydantic import BaseModel, Field
 
-from lapis.openapi import model as openapi
-from lapis.render.elems.refs import ResolverFunc
-from lapis.render.elems.client_func_response_map import get_response_map
-from lapis.render.module_path import ModulePath
-from lapis.render.type_ref import TypeRef, BuiltinTypeRef
+from .client_func_response_map import get_response_map
+from .refs import ResolverFunc
+from ..module_path import ModulePath
+from ..type_ref import TypeRef, BuiltinTypeRef
+from ...openapi import model as openapi
 
 
 class AuthModel(BaseModel):
@@ -39,17 +39,17 @@ def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath, res
         auth_params = {}
 
     response_map = get_response_map(
-        openapi_model.lapis_responses_global,
-        'LapisGlobalResponses',
+        openapi_model.lapidary_responses_global,
+        'LapidaryGlobalResponses',
         module,
         resolve
-    ) if openapi_model.lapis_responses_global else None
+    ) if openapi_model.lapidary_responses_global else None
 
     return ClientInit(
         auth_models=auth_models,
         init_auth_params=auth_params,
         base_urls=[server.url for server in openapi_model.servers] if openapi_model.servers else [],
-        headers=get_global_headers(openapi_model.lapis_headers_global),
+        headers=get_global_headers(openapi_model.lapidary_headers_global),
         response_map=response_map,
     )
 
@@ -95,7 +95,7 @@ def _(scheme: openapi.APIKeySecurityScheme, name: str):
         key=scheme.name,
         placement=ParamPlacement[scheme.in_.value],
         param_name=name + '_' + scheme.name.lower(),
-        value_prefix=scheme.lapis_value_prefix
+        value_prefix=scheme.lapidary_value_prefix
     )
 
 

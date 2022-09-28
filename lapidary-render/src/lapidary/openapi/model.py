@@ -10,7 +10,7 @@ from typing import Annotated, Any, Dict, List, Optional, Union, Mapping
 from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field
 
 
-class LapisType(enum.Enum):
+class LapidaryModelType(enum.Enum):
     model = 'model'
     exception = 'exception'
 
@@ -237,7 +237,7 @@ class APIKeySecurityScheme(BaseModel):
     in_: Annotated[In4, Field(alias='in')]
     description: Optional[str]
 
-    lapis_value_prefix: Annotated[Optional[str], Field(alias='x-lapis-value-prefix')] = None
+    lapidary_value_prefix: Annotated[Optional[str], Field(alias='x-lapidary-value-prefix')] = None
 
 
 class Type2(Enum):
@@ -398,8 +398,8 @@ class Schema(BaseModel):
     deprecated: Optional[bool] = False
     xml: Optional[XML]
 
-    lapis_type_name: Annotated[Optional[str], Field(alias='x-lapis-type-name')] = None
-    lapis_model_type: Annotated[LapisType, Field(alias='x-lapis-model-type')] = LapisType.model
+    lapidary_type_name: Annotated[Optional[str], Field(alias='x-lapidary-type-name')] = None
+    lapidary_model_type: Annotated[LapidaryModelType, Field(alias='x-lapidary-model-type')] = LapidaryModelType.model
 
 
 class Tag(BaseModel):
@@ -473,19 +473,19 @@ class OpenApiModel(BaseModel):
     paths: Paths
     components: Optional[Components]
 
-    lapis_headers_global: Annotated[
+    lapidary_headers_global: Annotated[
         Optional[Union[
             dict[str, Union[str, list[str]]],
             list[tuple[str, str]]
         ]],
         Field(
-            alias='x-lapis-headers-global',
+            alias='x-lapidary-headers-global',
             description='Headers to add to every request.'
         )
     ] = None
 
-    lapis_responses_global: Optional[Responses] = Field(
-        alias='x-lapis-responses-global',
+    lapidary_responses_global: Optional[Responses] = Field(
+        alias='x-lapidary-responses-global',
         description='Base Responses. Values in Responses declared in Operations override values in this one.',
     )
 

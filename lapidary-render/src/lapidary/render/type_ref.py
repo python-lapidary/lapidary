@@ -7,7 +7,7 @@ from typing import Annotated, Union
 from uuid import UUID
 
 import inflection
-from lapis_client_base.absent import Absent
+from lapidary_base.absent import Absent
 from pydantic import BaseModel, Field, Extra
 
 from ..openapi import model as openapi
@@ -56,8 +56,8 @@ def _get_one_of_type_ref(schema: SchemaOrRef, module: ModulePath, name: str, res
             sub_name = name + str(idx)
             sub_module = module
 
-        if sub_schema.lapis_type_name is not None:
-            sub_name = sub_schema.lapis_type_name
+        if sub_schema.lapidary_type_name is not None:
+            sub_name = sub_schema.lapidary_type_name
 
         type_ref = get_type_ref(sub_schema, sub_module, sub_name, True, resolve)
         args.append(type_ref)

@@ -72,13 +72,13 @@ def _get_attr_annotation(
             field_props[k] = f"'{v}'"
 
     if in_ is not None:
-        field_props['in_'] = 'lapis_client_base.ParamPlacement.' + in_
+        field_props['in_'] = 'lapidary_base.ParamPlacement.' + in_
         field_props['alias'] = f"'{name}'"
 
     if 'pattern' in schema.__fields_set__:
         field_props['regex'] = f"r'{schema.pattern}'"
 
-    default = None if required else 'lapis_client_base.absent.ABSENT'
+    default = None if required else 'lapidary_base.absent.ABSENT'
 
     direction = get_direction(schema.readOnly, schema.writeOnly)
     if direction:
@@ -96,9 +96,9 @@ def get_direction(read_only: Optional[bool], write_only: Optional[bool]) -> Opti
         if write_only:
             raise ValueError()
         else:
-            return 'lapis_client_base.ParamDirection.read'
+            return 'lapidary_base.ParamDirection.read'
     else:
         if write_only:
-            return 'lapis_client_base.ParamDirection.write'
+            return 'lapidary_base.ParamDirection.write'
         else:
             return None

@@ -1,19 +1,19 @@
 from unittest import TestCase
 
-from lapis.openapi import model as openapi
-from lapis.render.elems.attribute import AttributeModel
-from lapis.render.elems.attribute_annotation import AttributeAnnotationModel
-from lapis.render.elems.refs import get_resolver
-from lapis.render.elems.request_body import get_request_body_module
-from lapis.render.elems.response_body import get_response_body_module
-from lapis.render.elems.schema_class import SchemaClass
-from lapis.render.elems.schema_module import SchemaModule
-from lapis.render.module_path import ModulePath
-from lapis.render.type_ref import TypeRef, GenericTypeRef, BuiltinTypeRef
+from lapidary.openapi import model as openapi
+from lapidary.render.elems.attribute import AttributeModel
+from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
+from lapidary.render.elems.refs import get_resolver
+from lapidary.render.elems.request_body import get_request_body_module
+from lapidary.render.elems.response_body import get_response_body_module
+from lapidary.render.elems.schema_class import SchemaClass
+from lapidary.render.elems.schema_module import SchemaModule
+from lapidary.render.module_path import ModulePath
+from lapidary.render.type_ref import TypeRef, GenericTypeRef, BuiltinTypeRef
 
 model = openapi.OpenApiModel(
     openapi='3.0.3',
-    info=openapi.Info(title='Lapis test schema', version='1.0.0'),
+    info=openapi.Info(title='Lapidary test schema', version='1.0.0'),
     paths=openapi.Paths(__root__={
         '/simple-response/': openapi.PathItem(
             get=openapi.Operation(
@@ -66,16 +66,16 @@ model = openapi.OpenApiModel(
         ),
     }))
 
-resolve = get_resolver(model, 'lapis_test')
-module_path = ModulePath('lapis_test')
-union_str_absent = GenericTypeRef(module='typing', name='Union', args=[BuiltinTypeRef(name='str'), TypeRef.from_str('lapis_client_base.absent.Absent')])
+resolve = get_resolver(model, 'lapidary_test')
+module_path = ModulePath('lapidary_test')
+union_str_absent = GenericTypeRef(module='typing', name='Union', args=[BuiltinTypeRef(name='str'), TypeRef.from_str('lapidary_base.absent.Absent')])
 common_attributes = [
     AttributeModel(
         name='a',
         annotation=AttributeAnnotationModel(
             type=union_str_absent,
             field_props={},
-            default='lapis_client_base.absent.ABSENT',
+            default='lapidary_base.absent.ABSENT',
         ),
     ),
     AttributeModel(
@@ -83,7 +83,7 @@ common_attributes = [
         annotation=AttributeAnnotationModel(
             type=union_str_absent,
             field_props={},
-            default='lapis_client_base.absent.ABSENT',
+            default='lapidary_base.absent.ABSENT',
         ),
     )
 ]
@@ -94,7 +94,7 @@ class OperationResponseTest(TestCase):
         expected = SchemaModule(
             path=module_path,
             imports=[
-                'lapis_client_base.absent',
+                'lapidary_base.absent',
             ],
             body=[SchemaClass(
                 class_name='GetSchemaResponse200Response',
@@ -114,7 +114,7 @@ class OperationResponseTest(TestCase):
         expected = SchemaModule(
             path=module_path,
             imports=[
-                'lapis_client_base.absent',
+                'lapidary_base.absent',
             ],
             body=[SchemaClass(
                 class_name='GetSchemaRequestRequest',

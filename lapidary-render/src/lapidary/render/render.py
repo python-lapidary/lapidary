@@ -36,7 +36,7 @@ def render(source: str, destination: Path, render_model: Any, env: Environment, 
 def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> None:
     env = Environment(
         keep_trailing_newline=True,
-        loader=PackageLoader("lapis.render"),
+        loader=PackageLoader("lapidary.render"),
     )
 
     gen_root = target / 'gen'

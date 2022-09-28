@@ -1,14 +1,14 @@
 from unittest import TestCase
 
-from lapis_client_base import Absent
+from lapidary_base import Absent
 
-from lapis.openapi import model as openapi
-from lapis.render.elems.attribute import AttributeModel
-from lapis.render.elems.attribute_annotation import AttributeAnnotationModel
-from lapis.render.elems.refs import get_resolver
-from lapis.render.elems.schema_class import get_schema_class, SchemaClass, get_schema_classes
-from lapis.render.module_path import ModulePath
-from lapis.render.type_ref import TypeRef, BuiltinTypeRef
+from lapidary.openapi import model as openapi
+from lapidary.render.elems.attribute import AttributeModel
+from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
+from lapidary.render.elems.refs import get_resolver
+from lapidary.render.elems.schema_class import get_schema_class, SchemaClass, get_schema_classes
+from lapidary.render.module_path import ModulePath
+from lapidary.render.type_ref import TypeRef, BuiltinTypeRef
 
 model = openapi.OpenApiModel(
     openapi='3.0.3',
@@ -28,13 +28,13 @@ model = openapi.OpenApiModel(
                 oneOf=[
                     openapi.Schema(
                         type=openapi.Type.object,
-                        lapis_type_name='FirstSchemaClass',
+                        lapidary_type_name='FirstSchemaClass',
                         properties={
                             'a': openapi.Schema()
                         },
                     ),
                     openapi.Schema(
-                        lapis_type_name='SecondSchemaClass',
+                        lapidary_type_name='SecondSchemaClass',
                         type=openapi.Type.object,
                         properties={
                             'a': openapi.Schema()
@@ -62,7 +62,7 @@ class Test(TestCase):
                     style=None,
                     explode=None,
                     allowReserved=False,
-                    default='lapis_client_base.absent.ABSENT',
+                    default='lapidary_base.absent.ABSENT',
                 ),
                 deprecated=False
             )]

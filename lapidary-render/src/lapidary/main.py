@@ -11,7 +11,7 @@ from .render import render_client
 from .render.elems.pyproject import render_pyproject, get_pyproject
 
 logging.basicConfig()
-logger = logging.getLogger('lapis')
+logger = logging.getLogger('lapidary')
 logger.setLevel(logging.INFO)
 
 app = typer.Typer()
