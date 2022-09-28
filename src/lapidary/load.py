@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from lapis.config import Config
+from lapidary.config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def load_as_dict(path: Path, cache_root: Path) -> dict:
 def load_spec(project_root: Path, config: Config) -> dict:
     spec_path = project_root / config.specification
     errata_path = project_root / config.errata if config.errata is not None else None
-    cache_path = project_root / '.lapis_cache'
+    cache_path = project_root / '.lapidary_cache'
 
     logger.info('Load schema')
     spec_dict = load_as_dict(spec_path, cache_path)

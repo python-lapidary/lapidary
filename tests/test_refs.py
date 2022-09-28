@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from lapis.openapi import model as openapi
-from lapis.render.elems.refs import resolve
-from lapis.render.module_path import ModulePath
-from lapis.render.type_ref import get_type_ref, TypeRef
+from lapidary.openapi import model as openapi
+from lapidary.render.elems.refs import resolve
+from lapidary.render.module_path import ModulePath
+from lapidary.render.type_ref import get_type_ref, TypeRef
 
 schema_carol = openapi.Schema()
 schema_bob = openapi.Schema(properties={'carol': schema_carol})
@@ -55,5 +55,5 @@ class ReferenceTest(TestCase):
         self.assertRaises(RecursionError, raises)
 
     def test_empty_schema_generate_any_type_ref(self):
-        type_ref = get_type_ref(openapi.Schema(), ModulePath('lapis_test'), 'empty_schema', True, None)
+        type_ref = get_type_ref(openapi.Schema(), ModulePath('lapidary_test'), 'empty_schema', True, None)
         self.assertEqual(type_ref, TypeRef.from_str('typing.Any'))

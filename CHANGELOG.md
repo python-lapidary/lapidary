@@ -9,7 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added support for a single API Key authentication.
 - Added support for naming schema classes
 - Generate classes for schemas declared in-line under allOf, onyOf and oneOf.
-- global responses 
+- global responses
+
+### Changed
+- Rename project to Lapidary
 
 ### Fixed
 - module name for response body schema class

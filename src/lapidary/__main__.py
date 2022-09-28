@@ -1,3 +1,3 @@
 if __name__ == '__main__':
-    from lapis.main import app
+    from lapidary.main import app
     app()

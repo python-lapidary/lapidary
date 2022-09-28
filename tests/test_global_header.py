@@ -1,9 +1,9 @@
 import unittest
 
-from lapis.openapi import model as openapi
-from lapis.render.elems.client_module import get_client_class_module
-from lapis.render.elems.refs import get_resolver
-from lapis.render.module_path import ModulePath
+from lapidary.openapi import model as openapi
+from lapidary.render.elems.client_module import get_client_class_module
+from lapidary.render.elems.refs import get_resolver
+from lapidary.render.module_path import ModulePath
 
 
 class GlobalHeadersTest(unittest.TestCase):
@@ -15,7 +15,7 @@ class GlobalHeadersTest(unittest.TestCase):
                 version=''
             ),
             paths=openapi.Paths(__root__={}),
-            lapis_headers_global={
+            lapidary_headers_global={
                 'user-agent': 'james-bond',
             }
         )

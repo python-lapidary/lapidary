@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Generator
 
 import inflection
-from lapis_client_base import ABSENT
+from lapidary_base import ABSENT
 
 from .attribute import AttributeModel, get_attributes, get_enum_attribute
 from .attribute_annotation import AttributeAnnotationModel
@@ -12,7 +12,7 @@ from .refs import ResolverFunc
 from ..module_path import ModulePath
 from ..type_ref import BuiltinTypeRef, TypeRef
 from ...openapi import model as openapi
-from ...openapi.model import LapisType
+from ...openapi.model import LapidaryModelType
 
 logger = logging.getLogger(__name__)
 
@@ -85,18 +85,18 @@ def get_schema_class(
 
     logger.debug(name)
 
-    base_type = TypeRef.from_str('pydantic.BaseModel') if schema.lapis_model_type is LapisType.model else BuiltinTypeRef.from_str('Exception')
+    base_type = TypeRef.from_str('pydantic.BaseModel') if schema.lapidary_model_type is LapidaryModelType.model else BuiltinTypeRef.from_str('Exception')
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
 
-    if schema.lapis_type_name is not None:
-        name = schema.lapis_type_name
+    if schema.lapidary_type_name is not None:
+        name = schema.lapidary_type_name
 
     return SchemaClass(
         class_name=name,
         base_type=base_type,
         attributes=attributes,
         docstr=schema.description or None,
-        model_type=ModelType[schema.lapis_model_type.name],
+        model_type=ModelType[schema.lapidary_model_type.name],
     )
 
 
@@ -114,7 +114,7 @@ def get_enum_class(
 
 
 def get_enum_value(value, schema: openapi.Schema) -> AttributeModel:
-    if schema.lapis_model_type is not ABSENT:
+    if schema.lapidary_model_type is not ABSENT:
         import warnings
         warnings.warn('Enum schemas must not declare x-model-type')
     if value is None:

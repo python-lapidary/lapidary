@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from lapis.openapi import model as openapi
-from lapis.render.elems.refs import get_resolver
-from lapis.render.module_path import ModulePath
-from lapis.render.type_ref import get_type_ref, GenericTypeRef, BuiltinTypeRef
+from lapidary.openapi import model as openapi
+from lapidary.render.elems.refs import get_resolver
+from lapidary.render.module_path import ModulePath
+from lapidary.render.type_ref import get_type_ref, GenericTypeRef, BuiltinTypeRef
 
 schema_carol = openapi.Schema()
 schema_bob = openapi.Schema(properties={'carol': schema_carol})

@@ -36,13 +36,13 @@ def render_pyproject(root: Path, model: PyProject, config: Config) -> None:
         with open(target) as fbuf:
             text = fbuf.read()
     else:
-        with resources.open_text('lapis.render.templates', 'pyproject.toml') as fbuf:
+        with resources.open_text('lapidary.render.templates', 'pyproject.toml') as fbuf:
             text = fbuf.read()
 
     d: dict = tomlkit.loads(text)
 
     update_poetry_config(d, model)
-    update_lapis_config(d, config)
+    update_lapidary_config(d, config)
 
     with open(target, 'tw') as fbuf:
         fbuf.write(tomlkit.dumps(d, True))
@@ -52,9 +52,9 @@ def update_poetry_config(d: dict, model: PyProject):
     poetry = d.setdefault('tool', {}).setdefault('poetry', {})
     poetry.update(model.dict())
     deps = poetry.setdefault('dependencies', {})
-    deps['lapis-client-base'] = '^' + version('lapis-client-base')
+    deps['lapidary-base'] = '^' + version('lapidary-base')
 
 
-def update_lapis_config(d: dict, model: Config) -> None:
-    lapis_config = d.setdefault('tool', {}).setdefault('lapis', {})
-    lapis_config.update(model.dict(exclude_none=True, exclude_unset=True))
+def update_lapidary_config(d: dict, model: Config) -> None:
+    lapidary_config = d.setdefault('tool', {}).setdefault('lapidary', {})
+    lapidary_config.update(model.dict(exclude_none=True, exclude_unset=True))

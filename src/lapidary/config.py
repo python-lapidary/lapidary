@@ -20,7 +20,7 @@ def load_config(config_path: Path) -> Config:
     with open(config_path, 'br') as fb:
         pyproject = tomli.load(fb)
         try:
-            config_dict = pyproject['tool']['lapis']
+            config_dict = pyproject['tool']['lapidary']
         except KeyError:
-            raise SystemExit('Lapis not configured for the project')
+            raise SystemExit('Lapidary not configured for the project')
         return Config(**config_dict)

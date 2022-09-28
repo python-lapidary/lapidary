@@ -2,11 +2,11 @@ import dataclasses
 import unittest
 from pprint import pp
 
-from lapis.openapi import model as openapi
-from lapis.render.elems.client_module import get_client_class_module
-from lapis.render.elems.refs import get_resolver
-from lapis.render.module_path import ModulePath
-from lapis.render.type_ref import TypeRef
+from lapidary.openapi import model as openapi
+from lapidary.render.elems.client_module import get_client_class_module
+from lapidary.render.elems.refs import get_resolver
+from lapidary.render.module_path import ModulePath
+from lapidary.render.type_ref import TypeRef
 
 
 class GlobalResponsesTest(unittest.TestCase):
@@ -41,7 +41,7 @@ class GlobalResponsesTest(unittest.TestCase):
                     )
                 },
             ),
-            lapis_responses_global=openapi.Responses(__root__={
+            lapidary_responses_global=openapi.Responses(__root__={
                 '4XX': openapi.Reference(ref='#/components/responses/error-response'),
                 '5XX': openapi.Reference(ref='#/components/responses/error-response'),
             })
@@ -79,7 +79,7 @@ class GlobalResponsesTest(unittest.TestCase):
                     )
                 }
             ),
-            lapis_responses_global=openapi.Responses(__root__={
+            lapidary_responses_global=openapi.Responses(__root__={
                 '4XX': openapi.Response(
                     description='Client error',
                     content={
@@ -131,7 +131,7 @@ class GlobalResponsesTest(unittest.TestCase):
                     )
                 }
             ),
-            'x-lapis-responses-global': openapi.Responses(__root__={
+            'x-lapidary-responses-global': openapi.Responses(__root__={
                 '4XX': openapi.Response(
                     description='Client error',
                     content={
