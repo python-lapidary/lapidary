@@ -30,6 +30,7 @@ def load_spec(project_root: Path, config: Config) -> dict:
     spec_path = project_root / config.specification
     errata_path = project_root / config.errata if config.errata is not None else None
     cache_path = project_root / '.lapidary_cache'
+    cache_path.mkdir(exist_ok=True)
 
     logger.info('Load schema')
     spec_dict = load_as_dict(spec_path, cache_path)
