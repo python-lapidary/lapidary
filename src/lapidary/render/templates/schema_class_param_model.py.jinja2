@@ -11,11 +11,4 @@ class {{ model.class_name }}({{ type_hint(model.base_type, path) }}):
     ]{% if attr.annotation.default is not none %} = {{ attr.annotation.default }}{% endif %}
 {% endfor %}
     class Config(pydantic.BaseConfig):
-{%- if model.has_aliases %}
         allow_population_by_field_name = True
-{%- endif %}
-{%- if model.allow_extra %}
-        extra = pydantic.Extra.allow
-{%- else %}
-        extra = pydantic.Extra.forbid
-{%- endif %}

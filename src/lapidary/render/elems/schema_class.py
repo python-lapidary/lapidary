@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class ModelType(enum.Enum):
     model = 'model'
+    param_model = 'param_model'
     exception = 'exception'
     enum = 'enum'
 
@@ -28,6 +29,8 @@ class SchemaClass:
     class_name: str
     base_type: TypeRef
 
+    allow_extra: bool = False
+    has_aliases: bool = False
     docstr: Optional[str] = None
     attributes: list[AttributeModel] = field(default_factory=list)
     model_type: ModelType = ModelType.model
@@ -94,6 +97,8 @@ def get_schema_class(
     return SchemaClass(
         class_name=name,
         base_type=base_type,
+        allow_extra=schema.additionalProperties is not False,
+        has_aliases=any(['alias' in attr.annotation.field_props for attr in attributes]),
         attributes=attributes,
         docstr=schema.description or None,
         model_type=ModelType[schema.lapidary_model_type.name],
