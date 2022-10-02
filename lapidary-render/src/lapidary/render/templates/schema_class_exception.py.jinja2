@@ -3,7 +3,7 @@
 class {{ model.class_name }}({{ type_hint(model.base_type, path) }}):
 {%- for attr in model.attributes %}
     {{ attr.name }}: {{ type_hint(attr.annotation.type, path) }} = pydantic.dataclasses.Field(
-    {%- for key, value in attr.annotation.field_props.items() -%}
+    {%- for key, value in attr.annotation.field_props.items() | sort -%}
         {{ key }}={{ value }},
     {%- endfor -%}
     {%- if attr.annotation.default is not none %}

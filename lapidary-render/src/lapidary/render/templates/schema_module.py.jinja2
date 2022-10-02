@@ -7,12 +7,10 @@ import pydantic
 {%- for imp in model.imports %}
 import {{ imp }}
 {%- endfor %}
-
-{%- set path = model.path %}
-{%- for model in model.body -%}
-{%- include 'schema_class_' + model.model_type.name + '.py.jinja2' %}
+{% set path = model.path %}
+{%- for model in model.body %}
+{% include 'schema_class_' + model.model_type.name + '.py.jinja2' %}
 {%- endfor %}
-
-{%- for model in model.body -%}{% if model.base_type.full_name() == 'pydantic.BaseModel' %}
+{% for model in model.body %}{% if model.base_type.full_name() == 'pydantic.BaseModel' %}
 {{ model.class_name }}.update_forward_refs()
 {%- endif %}{% endfor %}
