@@ -21,6 +21,13 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
         'httpx',
     ]
 
+    global_response_type_imports = {
+        imp
+        for media_type in client_class.init_method.response_map.values()
+        for typ in media_type.values()
+        for imp in typ.imports()
+    }
+
     response_type_imports = {
         imp
         for func in client_class.methods
@@ -37,7 +44,12 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
         if imp not in default_imports and imp not in template_imports
     }
 
-    imports = list({*default_imports, *response_type_imports, *type_hint_imports})
+    imports = list({
+        *default_imports,
+        *global_response_type_imports,
+        *response_type_imports,
+        *type_hint_imports,
+    })
 
     imports.sort()
 
