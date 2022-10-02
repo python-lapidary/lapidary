@@ -4,7 +4,7 @@ class {{ model.class_name }}({{ type_hint(model.base_type, path) }}):
     {{ attr.name }}: typing.Annotated[
         {{ type_hint(attr.annotation.type, path) }},
         pydantic.Field(
-    {%- for key, value in attr.annotation.field_props.items() %}
+    {%- for key, value in attr.annotation.field_props.items() | sort %}
             {{ key }}={{ value }},
     {%- endfor %}
         )

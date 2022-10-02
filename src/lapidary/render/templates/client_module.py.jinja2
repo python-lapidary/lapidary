@@ -14,7 +14,7 @@ class ApiClient(lapidary_base.ApiBase):
 {%- include 'client_init.py.jinja2' %}
     async def __aenter__(self) -> 'ApiClient':
         return await super().__aenter__()
-{%- for func in model.methods %}
+{% for func in model.methods | sort(attribute='name') %}
 {%- include 'client_op_method.py.jinja2' %}
 {%- else %}
     pass

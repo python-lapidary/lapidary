@@ -8,7 +8,7 @@
 {%- if func.request_type is not none %}
         request_body: {{ type_hint(func.request_type, path) }}, /, {% endif %}
 {%- if func.params | length > 0 %}
-        *, {% endif %}
+        *,{% endif %}
 {%- for param in func.params if param.required %}
         {{- render_param(param) }}
 {%- endfor %}{% for param in func.params if not param.required %}
