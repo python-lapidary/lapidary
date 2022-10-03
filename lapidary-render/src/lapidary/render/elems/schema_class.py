@@ -67,7 +67,11 @@ def get_schema_class(
 
     logger.debug(name)
 
-    base_type = TypeRef.from_str('pydantic.BaseModel') if schema.lapidary_model_type is LapidaryModelType.model else BuiltinTypeRef.from_str('Exception')
+    base_type = (
+        BuiltinTypeRef.from_str('Exception')
+        if schema.lapidary_model_type is LapidaryModelType.exception
+        else TypeRef.from_str('pydantic.BaseModel')
+    )
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
 
     if schema.lapidary_type_name is not None:
@@ -80,5 +84,5 @@ def get_schema_class(
         has_aliases=any(['alias' in attr.annotation.field_props for attr in attributes]),
         attributes=attributes,
         docstr=schema.description or None,
-        model_type=ModelType[schema.lapidary_model_type.name],
+        model_type=ModelType[schema.lapidary_model_type.name] if schema.lapidary_model_type else ModelType.model,
     )
