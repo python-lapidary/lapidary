@@ -7,7 +7,8 @@ from .module import AbstractModule, template_imports
 from .modules import PARAM_MODEL
 from .param_model_class import get_param_model_classes
 from .refs import ResolverFunc
-from .schema_class import SchemaClass, get_schema_classes
+from .schema_class import get_schema_classes
+from .schema_class_model import SchemaClass
 from ..module_path import ModulePath
 from ...openapi import model as openapi
 

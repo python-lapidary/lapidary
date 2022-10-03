@@ -4,7 +4,8 @@ import inflection
 from mimeparse import best_match
 
 from .refs import ResolverFunc
-from .schema_class import SchemaClass, get_schema_classes
+from .schema_class import get_schema_classes
+from .schema_class_model import SchemaClass
 from .schema_module import _get_schema_module, SchemaModule
 from ..module_path import ModulePath
 from ..type_ref import TypeRef, resolve_type_ref

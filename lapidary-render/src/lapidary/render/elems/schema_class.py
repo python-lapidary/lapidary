@@ -1,39 +1,18 @@
-import enum
 import logging
-from dataclasses import dataclass, field
 from typing import Optional, Generator
 
 import inflection
-from lapidary_base import ABSENT
 
-from .attribute import AttributeModel, get_attributes, get_enum_attribute
-from .attribute_annotation import AttributeAnnotationModel
+from .attribute import get_attributes
 from .refs import ResolverFunc
+from .schema_class_enum import get_enum_class
+from .schema_class_model import SchemaClass, ModelType
 from ..module_path import ModulePath
 from ..type_ref import BuiltinTypeRef, TypeRef
 from ...openapi import model as openapi
 from ...openapi.model import LapidaryModelType
 
 logger = logging.getLogger(__name__)
-
-
-class ModelType(enum.Enum):
-    model = 'model'
-    param_model = 'param_model'
-    exception = 'exception'
-    enum = 'enum'
-
-
-@dataclass(frozen=True)
-class SchemaClass:
-    class_name: str
-    base_type: TypeRef
-
-    allow_extra: bool = False
-    has_aliases: bool = False
-    docstr: Optional[str] = None
-    attributes: list[AttributeModel] = field(default_factory=list)
-    model_type: ModelType = ModelType.model
 
 
 def get_schema_classes(
@@ -103,30 +82,3 @@ def get_schema_class(
         docstr=schema.description or None,
         model_type=ModelType[schema.lapidary_model_type.name],
     )
-
-
-def get_enum_class(
-        schema: openapi.Schema,
-        name: str
-):
-    return SchemaClass(
-        class_name=name,
-        base_type=TypeRef.from_str('enum.Enum'),
-        attributes=[get_enum_attribute(v) for v in schema.enum],
-        docstr=schema.description or None,
-        model_type=ModelType.enum,
-    )
-
-
-def get_enum_value(value, schema: openapi.Schema) -> AttributeModel:
-    if schema.lapidary_model_type is not ABSENT:
-        import warnings
-        warnings.warn('Enum schemas must not declare x-model-type')
-    if value is None:
-        name = 'none'
-    elif value == '':
-        name = 'empty'
-    else:
-        name = value
-    value = "'" + value.replace("'", r"\'") + "'" if value is not None else None
-    return AttributeModel(name, AttributeAnnotationModel(BuiltinTypeRef(name='__ignored__'), dict(default=value)))
