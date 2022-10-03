@@ -1,7 +1,23 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Next]
+## [0.5.0] 2022-10-03
+### Added
+- Exception types
+- limited support for allOf schemas
+- optional explicit names for enum values
+
+### Changed
+- Generated clients are now context managers
+- Sort model attributes
+
+### Fixed
+- cache directory doesn't exist
+- pydantic model Config classes
+- read- and writeOnly properties were required
+- inclusive/exclusive minimum mixed
+
+## [0.4.0] 2022-09-29
 ### Added
 - Added subcommands `update` and `init`, `update` reads configuration from pyproject.toml .
 - ApiClient accepts base URL, the first server declared in schema is used as the default.
