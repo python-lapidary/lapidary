@@ -47,7 +47,7 @@ def get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, required
     return typ
 
 
-def _get_one_of_type_ref(schema: SchemaOrRef, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeRef:
+def _get_one_of_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeRef:
     args = []
     for idx, sub_schema in enumerate(schema.oneOf):
         if isinstance(sub_schema, openapi.Reference):
@@ -69,6 +69,13 @@ def _get_one_of_type_ref(schema: SchemaOrRef, module: ModulePath, name: str, res
     )
 
 
+def _get_all_of_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeRef:
+    if len(schema.allOf) != 1:
+        raise NotImplementedError(name, 'len(allOf) != 1')
+
+    return resolve_type_ref(schema.allOf[0], module, name, resolve)
+
+
 def _get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeRef:
     if schema.enum:
         return TypeRef(module=module.str(), name=name)
@@ -84,6 +91,8 @@ def _get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolve
         return BuiltinTypeRef.from_str('Unsupported')
     elif schema.oneOf:
         return _get_one_of_type_ref(schema, module, name, resolver)
+    elif schema.allOf:
+        return _get_all_of_type_ref(schema, module, name, resolver)
     elif schema.type is None:
         return TypeRef.from_str('typing.Any')
     else:
