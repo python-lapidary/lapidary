@@ -1,4 +1,5 @@
 import logging
+from types import TracebackType
 from typing import Generator, Optional, Type, TypeVar, Iterable
 
 import httpx
@@ -18,6 +19,21 @@ class ApiBase:
     ):
         self._client = client
         self._global_response_map = global_response_map
+
+    async def __aenter__(self) -> 'ApiBase':
+        await self._client.__aenter__()
+        return self
+
+    async def __aexit__(
+            self,
+            __exc_type: Optional[Type[BaseException]] = None,
+            __exc_value: Optional[BaseException] = None,
+            __traceback: Optional[TracebackType] = None,
+    ) -> Optional[bool]:
+        return await self._client.__aexit__(__exc_type, __exc_value, __traceback)
+
+    async def aclose(self) -> None:
+        await self.__aexit__()
 
     async def _request(
             self,
