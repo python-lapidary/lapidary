@@ -19,7 +19,7 @@ black = "^22.8.0"
 inflection = "^0.5.1"
 Jinja2 = "^3.1.2"
 jsonpatch = "^1.32"
-lapidary-base = "^0.3.0"
+lapidary-base = "^0.4.0"
 pydantic = { extras = ["email"], version = "^1.9.2" }
 python-mimeparse = "^1.6.0"
 PyYAML = "^6.0"
