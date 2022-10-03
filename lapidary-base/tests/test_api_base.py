@@ -1,6 +1,6 @@
 import unittest
 
-from lapidary_base.api_base import _status_code_matches
+from lapidary_base.response import _status_code_matches
 
 
 class ApiBaseTest(unittest.TestCase):
