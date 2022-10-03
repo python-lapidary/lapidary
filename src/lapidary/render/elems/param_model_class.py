@@ -5,7 +5,8 @@ import inflection
 from .attribute import AttributeModel
 from .attribute_annotation import get_attr_annotation
 from .refs import ResolverFunc
-from .schema_class import SchemaClass, get_schema_classes, ModelType
+from .schema_class import get_schema_classes
+from .schema_class_model import SchemaClass, ModelType
 from ..module_path import ModulePath
 from ..type_ref import TypeRef
 from ...openapi import model as openapi

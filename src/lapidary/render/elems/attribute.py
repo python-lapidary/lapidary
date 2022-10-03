@@ -73,8 +73,8 @@ def get_attribute(typ: SchemaOrRef, name: str, parent_name: str, required: bool,
     )
 
 
-def get_enum_attribute(value: Any) -> AttributeModel:
-    name = _name_for_value(value)
+def get_enum_attribute(value: Any, name: Optional[str] = None) -> AttributeModel:
+    name = _name_for_value(value) if name is None else name
     value = "'" + value.replace("'", r"\'") + "'" if value is not None else None
     return AttributeModel(
         name=name,

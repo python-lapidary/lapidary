@@ -6,7 +6,7 @@ from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
 from lapidary.render.elems.refs import get_resolver
 from lapidary.render.elems.request_body import get_request_body_module
 from lapidary.render.elems.response_body import get_response_body_module
-from lapidary.render.elems.schema_class import SchemaClass
+from lapidary.render.elems.schema_class_model import SchemaClass
 from lapidary.render.elems.schema_module import SchemaModule
 from lapidary.render.module_path import ModulePath
 from lapidary.render.type_ref import TypeRef, GenericTypeRef, BuiltinTypeRef
