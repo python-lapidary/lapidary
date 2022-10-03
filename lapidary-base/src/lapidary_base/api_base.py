@@ -117,20 +117,26 @@ def process_params(model: pydantic.BaseModel) -> (httpx.QueryParams, httpx.Heade
 
 def resolve_response(response: httpx.Response, mapping: dict[str, dict[str, Type[T]]]) -> T:
     code_match = find_code_mapping(str(response.status_code), mapping)
+    data = response.json()
+
     if code_match is None:
         response.raise_for_status()
-        return response.json()
+        return data
 
     mime_mapping = mapping[code_match]
     mime_match = find_mime(mime_mapping.keys(), response.headers['content-type'])
 
-    data = response.json()
     if mime_match is not None:
         typ = mime_mapping[mime_match]
+
+        if Exception in typ.mro():
+            return typ(data)
+
         try:
             return pydantic.parse_obj_as(typ, data)
         except pydantic.ValidationError:
             raise ValueError('Error parsing response as type', typ)
+
     else:
         response.raise_for_status()
         return data
