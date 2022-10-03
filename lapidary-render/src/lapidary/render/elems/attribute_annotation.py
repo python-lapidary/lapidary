@@ -78,11 +78,13 @@ def _get_attr_annotation(
     if 'pattern' in schema.__fields_set__:
         field_props['regex'] = f"r'{schema.pattern}'"
 
-    default = None if required else 'lapidary_base.absent.ABSENT'
-
     direction = get_direction(schema.readOnly, schema.writeOnly)
     if direction:
         field_props['direction'] = direction
+        # TODO better handle direction
+        required = False
+
+    default = None if required else 'lapidary_base.absent.ABSENT'
 
     return AttributeAnnotationModel(
         type=get_type_ref(schema, module, type_name, required, resolve),
