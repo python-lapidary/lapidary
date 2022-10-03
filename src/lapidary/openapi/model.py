@@ -400,7 +400,7 @@ class Schema(BaseModel):
 
     lapidary_enum_names: Annotated[Optional[dict[str, Any]], Field(alias='x-lapidary-enum-names')] = None
     lapidary_type_name: Annotated[Optional[str], Field(alias='x-lapidary-type-name')] = None
-    lapidary_model_type: Annotated[LapidaryModelType, Field(alias='x-lapidary-model-type')] = LapidaryModelType.model
+    lapidary_model_type: Annotated[Optional[LapidaryModelType], Field(alias='x-lapidary-model-type')] = None
 
 
 class Tag(BaseModel):
