@@ -129,7 +129,7 @@ def resolve_response(response: httpx.Response, mapping: dict[str, dict[str, Type
     if mime_match is not None:
         typ = mime_mapping[mime_match]
 
-        if Exception in typ.mro():
+        if hasattr(typ, 'mro') and Exception in typ.mro():
             return typ(data)
 
         try:
