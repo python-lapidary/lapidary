@@ -1,6 +1,6 @@
 import logging
 from types import TracebackType
-from typing import Optional, Type
+from typing import Optional, Type, Any
 
 import httpx
 import pydantic
@@ -39,7 +39,7 @@ class ApiBase:
             method: str,
             url: str,
             param_model: Optional[pydantic.BaseModel] = None,
-            request_body: Optional[pydantic.BaseModel] = None,
+            request_body: Any = None,
             response_map: Optional[dict[str, dict[str, Type]]] = None,
             auth: Optional[httpx.Auth] = None,
     ) -> T:
@@ -70,9 +70,19 @@ class ApiBase:
         else:
             params = headers = cookies = None
 
-        data = request_body.dict(by_alias=True, exclude_unset=True, exclude_defaults=True) if request_body is not None else None
+        if not isinstance(request_body, pydantic.BaseModel):
+            from pydantic.tools import _get_parsing_type
+            model_type = _get_parsing_type(type(request_body))
+            request_body = model_type(__root__=request_body)
 
-        return self._client.build_request(method, url, data=data, params=params, headers=headers, cookies=cookies)
+        content = (
+            request_body.json(by_alias=True, exclude_unset=True, exclude_defaults=True)
+            if request_body is not None
+            else None)
+
+        return self._client.build_request(
+            method, url, content=content, params=params, headers=headers, cookies=cookies,
+        )
 
 
 def process_params(model: pydantic.BaseModel) -> (httpx.QueryParams, httpx.Headers, httpx.Cookies):
