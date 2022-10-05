@@ -1,4 +1,11 @@
 class Absent:
+    __singleton = None
+
+    def __new__(cls):
+        if cls.__singleton is None:
+            cls.__singleton = super().__new__(cls)
+        return cls.__singleton
+
     @classmethod
     def __get_validators__(cls):
         yield Absent._validate
