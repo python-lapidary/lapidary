@@ -18,6 +18,15 @@ app = typer.Typer()
 
 
 @app.command()
+def version():
+    """Print version and exit."""
+
+    from importlib.metadata import version
+    package = 'lapidary'
+    print(f'{package}, {version(package)}')
+
+
+@app.command()
 def update(
         project_root: Path = Path('.'),
         format_: bool = typer.Option(True, '--format/--no-format'),
