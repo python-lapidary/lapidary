@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Next]
+### Changed
+- Use multiprocessing to speed-up code generation.
+
 ## [0.5.0] 2022-10-03
 ### Added
 - Exception types
