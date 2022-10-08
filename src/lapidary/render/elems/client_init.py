@@ -25,9 +25,9 @@ class ApiKeyAuthModel(AuthModel):
 class ClientInit(BaseModel):
     auth_models: list[AuthModel] = Field(default_factory=list)
     base_urls: list[str] = Field(default_factory=list)
-    headers: list[tuple[str, str]]
-    init_auth_params: dict[str, TypeRef]
-    response_map: Optional[dict[str, dict[str, TypeRef]]]
+    headers: list[tuple[str, str]] = Field(default_factory=list)
+    init_auth_params: dict[str, TypeRef] = Field(default_factory=dict)
+    response_map: dict[str, dict[str, TypeRef]] = Field(default_factory=dict)
 
 
 def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath, resolve: ResolverFunc) -> ClientInit:
@@ -43,7 +43,7 @@ def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath, res
         'LapidaryGlobalResponses',
         module,
         resolve
-    ) if openapi_model.lapidary_responses_global else None
+    ) if openapi_model.lapidary_responses_global else {}
 
     return ClientInit(
         auth_models=auth_models,

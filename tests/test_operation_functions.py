@@ -41,6 +41,7 @@ model = openapi.OpenApiModel(
                                     a=openapi.Schema(type=openapi.Type.string),
                                     b=openapi.Schema(type=openapi.Type.string),
                                 ),
+                                additionalProperties=False,
                             ),
                         )}
                     )
@@ -59,6 +60,7 @@ model = openapi.OpenApiModel(
                                 a=openapi.Schema(type=openapi.Type.string),
                                 b=openapi.Schema(type=openapi.Type.string),
                             ),
+                            additionalProperties=False,
                         ),
                     )}
                 ),
@@ -68,7 +70,8 @@ model = openapi.OpenApiModel(
 
 resolve = get_resolver(model, 'lapidary_test')
 module_path = ModulePath('lapidary_test')
-union_str_absent = GenericTypeRef(module='typing', name='Union', args=[BuiltinTypeRef(name='str'), TypeRef.from_str('lapidary_base.absent.Absent')])
+union_str_absent = GenericTypeRef(module='typing', name='Union',
+                                  args=[BuiltinTypeRef(name='str'), TypeRef.from_str('lapidary_base.absent.Absent')])
 common_attributes = [
     AttributeModel(
         name='a',
