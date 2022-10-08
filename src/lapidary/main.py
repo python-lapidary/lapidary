@@ -28,7 +28,7 @@ def version():
 
 @app.command()
 def update(
-        project_root: Path = Path('.'),
+        project_root: Path = typer.Argument(Path('.')),
         format_: bool = typer.Option(True, '--format/--no-format'),
         cache: bool = True
 ):
