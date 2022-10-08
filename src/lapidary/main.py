@@ -32,6 +32,8 @@ def update(
         format_: bool = typer.Option(True, '--format/--no-format'),
         cache: bool = True
 ):
+    """Update existing project. Read configuration from pyproject.yaml ."""
+
     config = load_config(project_root / 'pyproject.toml')
     config.format = format_
     config.cache = cache
@@ -45,6 +47,8 @@ def init(
         project_root=Path('.'),
         errata: Optional[Path] = None,
 ):
+    """Create a new project from scratch."""
+
     config = Config(
         specification=schema_path,
         package=package_name,
