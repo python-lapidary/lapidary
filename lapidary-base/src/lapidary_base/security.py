@@ -3,7 +3,7 @@ from typing import Optional, Generator
 import httpx
 import pydantic
 
-from .params import ParamPlacement
+from .params import ParamLocation
 
 PageFlowGenT = Generator[httpx.Request, httpx.Response, None]
 
@@ -11,7 +11,7 @@ PageFlowGenT = Generator[httpx.Request, httpx.Response, None]
 class ApiKeyAuth(httpx.Auth, pydantic.BaseSettings):
     api_key: str
     name: str
-    placement: ParamPlacement
+    placement: ParamLocation
     value_prefix: Optional[str] = None
 
     def auth_flow(self, request: httpx.Request) -> PageFlowGenT:

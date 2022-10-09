@@ -6,8 +6,11 @@ class ParamDirection(enum.Flag):
     write = enum.auto()
 
 
-class ParamPlacement(enum.Enum):
+class ParamLocation(enum.Enum):
     cookie = 'cookie'
     header = 'header'
     path = 'path'
     query = 'query'
+
+
+ParamPlacement = ParamLocation
