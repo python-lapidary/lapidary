@@ -1,20 +1,22 @@
 import logging
-from types import TracebackType
-from typing import Optional, Type, Any
+from typing import Optional, Any, TypeVar
 
 import httpx
-import pydantic
+import pydantic.json
 
-from .absent import ABSENT
-from .params import ParamPlacement
-from .response import _handle_response, T
+from ._params import process_params
+from .pydantic_utils import to_model
+from .request import get_accept_header
+from .response import _handle_response, ResponseMap
+
+T = TypeVar('T')
 
 logger = logging.getLogger(__name__)
 
 
 class ApiBase:
     def __init__(
-            self, client: httpx.AsyncClient, global_response_map: Optional[dict[str, dict[str, Type]]] = None
+            self, client: httpx.AsyncClient, global_response_map: Optional[ResponseMap] = None
     ):
         self._client = client
         self._global_response_map = global_response_map
@@ -23,12 +25,7 @@ class ApiBase:
         await self._client.__aenter__()
         return self
 
-    async def __aexit__(
-            self,
-            __exc_type: Optional[Type[BaseException]] = None,
-            __exc_value: Optional[BaseException] = None,
-            __traceback: Optional[TracebackType] = None,
-    ) -> Optional[bool]:
+    async def __aexit__(self, __exc_type=None, __exc_value=None, __traceback=None, ) -> Optional[bool]:
         return await self._client.__aexit__(__exc_type, __exc_value, __traceback)
 
     async def aclose(self) -> None:
@@ -40,73 +37,52 @@ class ApiBase:
             url: str,
             param_model: Optional[pydantic.BaseModel] = None,
             request_body: Any = None,
-            response_map: Optional[dict[str, dict[str, Type]]] = None,
+            response_map: Optional[ResponseMap] = None,
             auth: Optional[httpx.Auth] = None,
     ) -> T:
-        request = self._build_request(method, url, param_model, request_body)
+        request = self._build_request(method, url, param_model, request_body, response_map)
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s", f'{request.method} {request.url} {request.headers}')
 
         response = await self._client.send(request, auth=auth)
 
-        if self._global_response_map is not None:
-            full_response_map = self._global_response_map.copy()
-            full_response_map.update(response_map)
-        else:
-            full_response_map = response_map
-
-        return _handle_response(response, full_response_map)
+        return self._handle_response(response, response_map)
 
     def _build_request(
             self,
             method: str,
             url: str,
-            param_model: Optional[pydantic.BaseModel] = None,
-            request_body: Optional[pydantic.BaseModel] = None,
+            param_model: Optional[pydantic.BaseModel],
+            request_body: Any,
+            response_map: Optional[ResponseMap],
     ) -> httpx.Request:
         if param_model:
             params, headers, cookies = process_params(param_model)
         else:
-            params = headers = cookies = None
+            params = cookies = None
+            headers = httpx.Headers()
 
-        if not isinstance(request_body, pydantic.BaseModel):
-            from pydantic.tools import _get_parsing_type
-            model_type = _get_parsing_type(type(request_body))
-            request_body = model_type(__root__=request_body)
+        if request_body is not None:
+            headers['content-type'] = 'application/json'
+
+        if (accept := get_accept_header(response_map, self._global_response_map)) is not None:
+            headers['accept'] = accept
+
+        if not isinstance(request_body, pydantic.BaseModel) and request_body is not None:
+            request_body = to_model(request_body)
 
         content = (
             request_body.json(by_alias=True, exclude_unset=True, exclude_defaults=True)
             if request_body is not None
-            else None)
+            else None
+        )
 
         return self._client.build_request(
             method, url, content=content, params=params, headers=headers, cookies=cookies,
         )
 
-
-def process_params(model: pydantic.BaseModel) -> (httpx.QueryParams, httpx.Headers, httpx.Cookies):
-    query = {}
-    headers = httpx.Headers()
-    cookies = httpx.Cookies()
-
-    for attr_name, param in model.__fields__.items():
-        value = getattr(model, attr_name)
-        if value is ABSENT:
-            continue
-
-        param_name = param.alias
-        placement = param.field_info.extra['in_']
-        if placement == ParamPlacement.cookie:
-            cookies[param_name] = value
-        elif placement == ParamPlacement.header:
-            headers[param_name] = value
-        elif placement == ParamPlacement.query:
-            query[param_name] = value
-        elif placement == ParamPlacement.path:
-            # handled by the operation method
-            continue
-        else:
-            raise ValueError(placement)
-
-    return httpx.QueryParams(query), headers, cookies
+    def _handle_response(
+            self, response: httpx.Response, response_map: Optional[ResponseMap]
+    ):
+        return _handle_response(response, response_map, self._global_response_map)
