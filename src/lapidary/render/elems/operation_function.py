@@ -1,9 +1,11 @@
 import logging
 import re
+import warnings
 from dataclasses import dataclass
 from typing import Optional, Union
 
 import inflection
+from lapidary_base import ParamPlacement
 
 from .attribute import AttributeModel
 from .attribute_annotation import AttributeAnnotationModel
@@ -46,7 +48,9 @@ _FIELD_PROPS = dict(
 )
 
 
-def get_operation_param(param: Union[openapi.Parameter, openapi.Reference], parent_name: str, module: ModulePath, resolve: ResolverFunc) -> AttributeModel:
+def get_operation_param(
+        param: Union[openapi.Parameter, openapi.Reference], parent_name: str, module: ModulePath, resolve: ResolverFunc
+) -> AttributeModel:
     if isinstance(param, openapi.Reference):
         param, module, _ = resolve(param, openapi.Parameter)
 
@@ -76,8 +80,18 @@ def sanitise_param_name(param_name: str) -> str:
     return re.compile(r'\W+').sub('_', param_name)
 
 
-def get_operation_func(op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc) -> OperationFunctionModel:
-    params = [get_operation_param(oapi_param, op.operationId, module, resolver) for oapi_param in op.parameters] if op.parameters else []
+def get_operation_func(
+        op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc
+) -> OperationFunctionModel:
+    params = []
+    if op.parameters:
+        for oapi_param in op.parameters:
+            if oapi_param.in_ == ParamPlacement.header.value and oapi_param.name.lower() in [
+                'accept', 'content-type', 'authorization'
+            ]:
+                warnings.warn(f'Header param "{oapi_param.name}" ignored')
+                continue
+            params.append(get_operation_param(oapi_param, op.operationId, module, resolver))
 
     request_type = get_request_body_type(op, module, resolver) if op.requestBody else None
 
@@ -108,7 +122,10 @@ def get_operation_func(op: openapi.Operation, method: str, url_path: str, module
         path=re.compile(r'\{([^}]+)\}').sub(r'{p_\1}', url_path),
         request_type=request_type,
         params=params,
-        params_model_name=TypeRef(module=(module / PARAM_MODEL).str(), name=inflection.camelize(op.operationId)) if op.parameters else None,
+        params_model_name=TypeRef(
+            module=(module / PARAM_MODEL).str(),
+            name=inflection.camelize(op.operationId)
+        ) if op.parameters else None,
         response_map=response_map,
         response_type=response_type,
         auth_name=auth_name,
