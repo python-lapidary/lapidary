@@ -625,6 +625,7 @@ class Responses(BaseModel):
 class Parameter(BaseModel):
     class Config:
         extra = Extra.forbid
+        allow_population_by_field_name = True
 
     name: str
     in_: Annotated[str, Field(alias='in')]

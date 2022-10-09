@@ -1,8 +1,11 @@
 from unittest import TestCase
 
+from lapidary_base import ParamPlacement
+
 from lapidary.openapi import model as openapi
 from lapidary.render.elems.attribute import AttributeModel
 from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
+from lapidary.render.elems.operation_function import get_operation_func
 from lapidary.render.elems.refs import get_resolver
 from lapidary.render.elems.request_body import get_request_body_module
 from lapidary.render.elems.response_body import get_response_body_module
@@ -66,6 +69,18 @@ model = openapi.OpenApiModel(
                 ),
             ),
         ),
+        '/ignored-header/': openapi.PathItem(
+            get=openapi.Operation(
+                operationId='ignored_header',
+                responses=openapi.Responses(__root__={}),
+                parameters=[
+                    openapi.Parameter(
+                        name='accept',
+                        in_=ParamPlacement.header.value,
+                    )
+                ]
+            ),
+        ),
     }))
 
 resolve = get_resolver(model, 'lapidary_test')
@@ -127,3 +142,8 @@ class OperationResponseTest(TestCase):
         )
 
         self.assertEqual(expected, mod)
+
+    def test_ignored_header(self):
+        op_def = model.paths.__root__['/ignored-header/'].get
+        op_model = get_operation_func(op_def, 'GET', '/', module_path, resolve)
+        self.assertEquals([], op_model.params)
