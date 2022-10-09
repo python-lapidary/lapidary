@@ -155,6 +155,10 @@ class ParameterLocationItem(BaseModel):
     style: Optional[Style1] = 'simple'
     required: Required
 
+    class Config:
+        extra = Extra.forbid
+        allow_population_by_field_name = True
+
 
 class In1(Enum):
     query = 'query'
@@ -175,6 +179,10 @@ class ParameterLocationItem1(BaseModel):
     in_: Annotated[Optional[In1], Field(alias='in')]
     style: Optional[Style2] = 'form'
 
+    class Config:
+        extra = Extra.forbid
+        allow_population_by_field_name = True
+
 
 class In2(Enum):
     header = 'header'
@@ -187,6 +195,10 @@ class ParameterLocationItem2(BaseModel):
 
     in_: Annotated[Optional[In2], Field(alias='in')]
     style: Optional[Style] = 'simple'
+
+    class Config:
+        extra = Extra.forbid
+        allow_population_by_field_name = True
 
 
 class In3(Enum):
@@ -204,6 +216,10 @@ class ParameterLocationItem3(BaseModel):
 
     in_: Annotated[Optional[In3], Field(alias='in')]
     style: Optional[Style4] = 'form'
+
+    class Config:
+        extra = Extra.forbid
+        allow_population_by_field_name = True
 
 
 class ParameterLocation(BaseModel):
@@ -231,6 +247,7 @@ class In4(Enum):
 class APIKeySecurityScheme(BaseModel):
     class Config:
         extra = Extra.forbid
+        allow_population_by_field_name = True
 
     type: Type1
     name: str
