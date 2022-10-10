@@ -2,10 +2,18 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
+### Added
+- version command
+- pytest for testing
+
 ### Changed
 - Use multiprocessing to speed-up code generation.
+- Made 
 
-## [0.5.0] 2022-10-03
+### Fixed
+- Added Config.use_enum_values to all models.
+
+## [0.5.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.5.0) - 2022-10-03
 ### Added
 - Exception types
 - limited support for allOf schemas
@@ -21,7 +29,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - read- and writeOnly properties were required
 - inclusive/exclusive minimum mixed
 
-## [0.4.0] 2022-09-29
+## [0.4.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.4.0) - 2022-09-29
 ### Added
 - Added subcommands `update` and `init`, `update` reads configuration from pyproject.toml .
 - ApiClient accepts base URL, the first server declared in schema is used as the default.
@@ -38,17 +46,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - module name for response body schema class
 - required params had default value ABSENT
 
-## [0.3.1] 2022-09-20
+## [0.3.1](https://github.com/python-lapidary/lapidary/releases/tag/v0.3.1) - 2022-09-20
 ### Fixed
 - loading resources when installed from whl
 - computing TypeRef hash
 - writing pyproject to non-existent directory
 
-## [0.3.0] 2022-09-20
+## [0.3.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.3.0) - 2022-09-20
 ### Changed
 - Support Python 3.9
 
-## [0.2.0]
+## [0.2.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.2.0) - 2022-09-18
 ### Added
 - Support simple oneOf schemas
 - Support errata, a JSON Patch for the specification
@@ -61,12 +69,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Regex field value
 - handling of type hints and imports
 
-## [0.1.2] - 2022-09-14
+## [0.1.2](https://github.com/python-lapidary/lapidary/releases/tag/v0.1.2) - 2022-09-14
 ### Changed
 - Renamed project due to a name conflict in PyPY
 
 
-## [0.1.0] - 2022-09-14
+## [0.1.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.1.0) - 2022-09-14
 ### Added
 - Generate classes for schemas under components/schemas
 - Generate partial client class with methods based on /paths/*/*
