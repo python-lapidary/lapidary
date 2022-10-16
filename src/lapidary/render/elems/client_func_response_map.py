@@ -2,8 +2,8 @@ import inflection
 
 from .modules import RESPONSE_BODY
 from .refs import ResolverFunc
+from .type_hint import resolve_type_hint
 from ..module_path import ModulePath
-from ..type_ref import resolve_type_ref
 from ...openapi import model as openapi
 
 
@@ -19,7 +19,7 @@ def get_response_map(responses: openapi.Responses, name: str, module: ModulePath
             continue
         mime_map = {}
         for mime, media_type in response.content.items():
-            mime_map[mime] = resolve_type_ref(media_type.schema_, sub_module, sub_name, resolve)
+            mime_map[mime] = resolve_type_hint(media_type.schema_, sub_module, sub_name, resolve)
         result[resp_code] = mime_map
 
     return result

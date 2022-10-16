@@ -14,8 +14,8 @@ from .modules import PARAM_MODEL
 from .refs import ResolverFunc
 from .request_body import get_request_body_type
 from .response_body import response_type_name
+from .type_hint import TypeHint, resolve_type_hint, get_type_hint, GenericTypeHint
 from ..module_path import ModulePath
-from ..type_ref import TypeRef, get_type_ref, GenericTypeRef, resolve_type_ref
 from ...openapi import model as openapi
 from ...openapi.model import LapidaryModelType
 
@@ -29,11 +29,11 @@ class OperationFunctionModel:
     name: str
     method: str
     path: str
-    request_type: Optional[TypeRef]
+    request_type: Optional[TypeHint]
     params: list[AttributeModel]
-    params_model_name: Optional[TypeRef]
-    response_map: dict[str, dict[str, TypeRef]]
-    response_type: Optional[TypeRef]
+    params_model_name: Optional[TypeHint]
+    response_map: dict[str, dict[str, TypeHint]]
+    response_type: Optional[TypeHint]
     auth_name: Optional[str]
     docstr: Optional[str] = None
 
@@ -67,7 +67,7 @@ def get_operation_param(
     return AttributeModel(
         name=param_name,
         annotation=AttributeAnnotationModel(
-            type=get_type_ref(schema, module, schema_name, param.required, resolve),
+            type=get_type_hint(schema, module, schema_name, param.required, resolve),
             field_props=field_props,
         ),
         deprecated=param.deprecated,
@@ -108,7 +108,7 @@ def get_operation_func(
     elif len(response_types) == 1:
         response_type = response_types.pop()
     else:
-        response_type = GenericTypeRef.union_of(list(response_types))
+        response_type = GenericTypeHint.union_of(list(response_types))
 
     auth_name = None
     if op.security is not None and len(op.security) > 0:
@@ -122,7 +122,7 @@ def get_operation_func(
         path=re.compile(r'\{([^}]+)\}').sub(r'{p_\1}', url_path),
         request_type=request_type,
         params=params,
-        params_model_name=TypeRef(
+        params_model_name=TypeHint(
             module=(module / PARAM_MODEL).str(),
             name=inflection.camelize(op.operationId)
         ) if op.parameters else None,
@@ -132,7 +132,7 @@ def get_operation_func(
     )
 
 
-def get_response_types(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> set[TypeRef]:
+def get_response_types(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> set[TypeHint]:
     """
     Generate unique collection of types that may be returned by the operation. Skip types that are marked as exceptions as those are raised instead.
     """
@@ -149,6 +149,6 @@ def get_response_types(op: openapi.Operation, module: ModulePath, resolve: Resol
                 resp_module = module / RESPONSE_BODY
             if schema.lapidary_model_type is LapidaryModelType.exception:
                 continue
-            typ = resolve_type_ref(schema, resp_module, name, resolve)
+            typ = resolve_type_hint(schema, resp_module, name, resolve)
             response_types.add(typ)
     return response_types

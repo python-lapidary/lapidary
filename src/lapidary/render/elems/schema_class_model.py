@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from .attribute import AttributeModel
-from ..type_ref import TypeRef
+from .type_hint import TypeHint
 
 
 class ModelType(enum.Enum):
@@ -16,7 +16,7 @@ class ModelType(enum.Enum):
 @dataclass(frozen=True)
 class SchemaClass:
     class_name: str
-    base_type: TypeRef
+    base_type: TypeHint
 
     allow_extra: bool = False
     has_aliases: bool = False

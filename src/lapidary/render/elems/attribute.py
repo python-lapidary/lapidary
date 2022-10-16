@@ -4,8 +4,8 @@ from typing import Any, Optional
 
 from .attribute_annotation import AttributeAnnotationModel, get_attr_annotation
 from .refs import ResolverFunc, SchemaOrRef
+from .type_hint import BuiltinTypeHint
 from ..module_path import ModulePath
-from ..type_ref import BuiltinTypeRef
 from ...openapi import model as openapi
 
 PYTHON_KEYWORDS = [
@@ -79,14 +79,15 @@ def get_enum_attribute(value: Any, name: Optional[str] = None) -> AttributeModel
     return AttributeModel(
         name=name,
         annotation=AttributeAnnotationModel(
-            type=BuiltinTypeRef.from_type(type(value)),
+            type=BuiltinTypeHint.from_type(type(value)),
             field_props={'default': value},
         )
     )
 
 
 def _name_for_value(value: Any) -> str:
-    if value is None: return 'none'
+    if value is None:
+        return 'none'
     name = re.compile(r'\W+').sub('_', str(value))
     if name == '' or not name[0].isalpha():
         name = 'v_' + name

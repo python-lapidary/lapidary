@@ -8,7 +8,7 @@ from .refs import ResolverFunc
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass, ModelType
 from ..module_path import ModulePath
-from ..type_ref import TypeRef
+from .type_hint import TypeHint
 from ...openapi import model as openapi
 
 """
@@ -55,7 +55,7 @@ def get_param_model_class(
 ) -> SchemaClass:
     attributes = [get_param_attribute(param, name, module, resolver) for param in
                   operation.parameters] if operation.parameters else []
-    base_type = TypeRef.from_str('pydantic.BaseModel')
+    base_type = TypeHint.from_str('pydantic.BaseModel')
 
     return SchemaClass(
         class_name=inflection.camelize(name),

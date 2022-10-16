@@ -1,7 +1,7 @@
 from .attribute import AttributeModel, get_enum_attribute
 from .attribute_annotation import AttributeAnnotationModel
 from .schema_class_model import SchemaClass, ModelType
-from ..type_ref import BuiltinTypeRef, TypeRef
+from .type_hint import BuiltinTypeHint, TypeHint
 from ...openapi import model as openapi
 
 
@@ -24,7 +24,7 @@ def get_enum_value(value, schema: openapi.Schema) -> AttributeModel:
     else:
         name = value
     value = "'" + value.replace("'", r"\'") + "'" if value is not None else None
-    return AttributeModel(name, AttributeAnnotationModel(BuiltinTypeRef(name='__ignored__'), dict(default=value)))
+    return AttributeModel(name, AttributeAnnotationModel(BuiltinTypeHint(name='__ignored__'), dict(default=value)))
 
 
 def get_enum_class(
@@ -37,7 +37,7 @@ def get_enum_class(
 
     return SchemaClass(
         class_name=name,
-        base_type=TypeRef.from_str('enum.Enum'),
+        base_type=TypeHint.from_str('enum.Enum'),
         attributes=[*named_attrs, *unnamed_attrs],
         docstr=schema.description or None,
         model_type=ModelType.enum,

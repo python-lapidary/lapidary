@@ -7,8 +7,8 @@ from .refs import ResolverFunc
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
 from .schema_module import _get_schema_module, SchemaModule
+from .type_hint import TypeHint, resolve_type_hint
 from ..module_path import ModulePath
-from ..type_ref import TypeRef, resolve_type_ref
 from ...openapi import model as openapi
 
 
@@ -36,12 +36,12 @@ def get_request_body_module(op: openapi.Operation, module: ModulePath, resolve: 
     return _get_schema_module(classes, module)
 
 
-def get_request_body_type(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Optional[TypeRef]:
+def get_request_body_type(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Optional[TypeHint]:
     mime_json = best_match(op.requestBody.content.keys(), 'application/json')
     if mime_json == '':
         return None
     schema = op.requestBody.content[mime_json].schema_
-    return resolve_type_ref(schema, module, request_type_name(op.operationId), resolve)
+    return resolve_type_hint(schema, module, request_type_name(op.operationId), resolve)
 
 
 def request_type_name(name):

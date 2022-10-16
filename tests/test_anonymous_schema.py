@@ -8,8 +8,8 @@ from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
 from lapidary.render.elems.refs import get_resolver
 from lapidary.render.elems.schema_class import get_schema_class, get_schema_classes
 from lapidary.render.elems.schema_class_model import SchemaClass
+from lapidary.render.elems.type_hint import BuiltinTypeHint, TypeHint
 from lapidary.render.module_path import ModulePath
-from lapidary.render.type_ref import TypeRef, BuiltinTypeRef
 
 model = openapi.OpenApiModel(
     openapi='3.0.3',
@@ -55,12 +55,12 @@ class Test(TestCase):
                              get_resolver(model, 'bob'))
         schema = SchemaClass(
             class_name='alice',
-            base_type=TypeRef.from_str('pydantic.BaseModel'),
+            base_type=TypeHint.from_str('pydantic.BaseModel'),
             docstr=None,
             attributes=[AttributeModel(
                 name='bob',
                 annotation=AttributeAnnotationModel(
-                    type=BuiltinTypeRef.from_type(str).union_with(TypeRef.from_type(Absent)),
+                    type=BuiltinTypeHint.from_type(str).union_with(TypeHint.from_type(Absent)),
                     field_props={},
                     style=None,
                     explode=None,

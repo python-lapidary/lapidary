@@ -7,8 +7,8 @@ from .attribute import get_attributes
 from .refs import ResolverFunc
 from .schema_class_enum import get_enum_class
 from .schema_class_model import SchemaClass, ModelType
+from .type_hint import BuiltinTypeHint, TypeHint
 from ..module_path import ModulePath
-from ..type_ref import BuiltinTypeRef, TypeRef
 from ...openapi import model as openapi
 from ...openapi.model import LapidaryModelType
 
@@ -68,9 +68,9 @@ def get_schema_class(
     logger.debug(name)
 
     base_type = (
-        BuiltinTypeRef.from_str('Exception')
+        BuiltinTypeHint.from_str('Exception')
         if schema.lapidary_model_type is LapidaryModelType.exception
-        else TypeRef.from_str('pydantic.BaseModel')
+        else TypeHint.from_str('pydantic.BaseModel')
     )
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
 

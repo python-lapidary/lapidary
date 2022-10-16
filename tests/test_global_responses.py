@@ -5,8 +5,8 @@ from pprint import pp
 from lapidary.openapi import model as openapi
 from lapidary.render.elems.client_module import get_client_class_module
 from lapidary.render.elems.refs import get_resolver
+from lapidary.render.elems.type_hint import TypeHint
 from lapidary.render.module_path import ModulePath
-from lapidary.render.type_ref import TypeRef
 
 
 class GlobalResponsesTest(unittest.TestCase):
@@ -52,8 +52,8 @@ class GlobalResponsesTest(unittest.TestCase):
         pp(dataclasses.asdict(module))
 
         expected = {
-            '4XX': {'application/json; version=2.3.5': TypeRef(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
-            '5XX': {'application/json; version=2.3.5': TypeRef(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            '5XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
         }
 
         self.assertEqual(expected, module.body.init_method.response_map)
@@ -104,8 +104,8 @@ class GlobalResponsesTest(unittest.TestCase):
         pp(dataclasses.asdict(module))
 
         expected = {
-            '4XX': {'application/json; version=2.3.5': TypeRef(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
-            '5XX': {'application/json; version=2.3.5': TypeRef(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            '5XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
         }
 
         self.assertEqual(expected, module.body.init_method.response_map)
@@ -156,8 +156,8 @@ class GlobalResponsesTest(unittest.TestCase):
         pp(dataclasses.asdict(module))
 
         expected = {
-            '4XX': {'application/json; version=2.3.5': TypeRef(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
-            '5XX': {'application/json; version=2.3.5': TypeRef(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            '5XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
         }
 
         self.assertEqual(expected, module.body.init_method.response_map)

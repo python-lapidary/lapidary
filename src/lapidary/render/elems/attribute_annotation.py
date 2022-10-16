@@ -5,13 +5,13 @@ import inflection
 
 from .refs import SchemaOrRef, ResolverFunc
 from ..module_path import ModulePath
-from ..type_ref import TypeRef, get_type_ref
+from .type_hint import TypeHint, get_type_hint
 from ...openapi import model as openapi
 
 
 @dataclass(frozen=True)
 class AttributeAnnotationModel:
-    type: TypeRef
+    type: TypeHint
     field_props: dict[str, Any]
 
     default: Optional[str] = None
@@ -87,7 +87,7 @@ def _get_attr_annotation(
     default = None if required else 'lapidary_base.absent.ABSENT'
 
     return AttributeAnnotationModel(
-        type=get_type_ref(schema, module, type_name, required, resolve),
+        type=get_type_hint(schema, module, type_name, required, resolve),
         default=default,
         field_props=field_props
     )
