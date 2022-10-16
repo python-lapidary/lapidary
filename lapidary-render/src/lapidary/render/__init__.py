@@ -28,8 +28,11 @@ def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> 
     with (
         concurrent.futures.ProcessPoolExecutor() as executor
     ):
-        executor.submit(render_client_module, model, config, gen_root, resolver, env)
-        render_schema_modules(model, config, gen_root, resolver, env, executor)
+        client_future = executor.submit(render_client_module, model, config, gen_root, resolver, env)
+        schema_futures = render_schema_modules(model, config, gen_root, resolver, env, executor)
+
+        for f in [*schema_futures, client_future]:
+            f.result()
 
     ensure_init_py(gen_root, config.package)
     logger.info('Done.')

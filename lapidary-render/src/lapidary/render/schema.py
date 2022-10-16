@@ -1,7 +1,9 @@
+import functools
 import logging
-from concurrent.futures import Executor
+from collections.abc import Iterable
+from concurrent.futures import Executor, Future
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Any
 
 from jinja2 import Environment
 
@@ -41,8 +43,13 @@ def get_schema_modules(model, root_module, resolver) -> Generator[SchemaModule, 
                     yield mod
 
 
+def render_(source: str, env: Environment, gen_root: Path, format_: bool, render_model: Any):
+    render(render_model, source, render_model.path.to_path(gen_root), env, format_)
+
+
 def render_schema_modules(
-        model: openapi.OpenApiModel, config: Config, gen_root: Path, resolver: ResolverFunc, env: Environment, executor: Executor
-) -> None:
-    for module in get_schema_modules(model, ModulePath(config.package), resolver):
-        executor.submit(render, module, 'schema_module.py.jinja2', module.path.to_path(gen_root), env, config.format)
+        model: openapi.OpenApiModel, config: Config, gen_root: Path, resolver: ResolverFunc, env: Environment,
+        executor: Executor
+) -> Iterable[Future]:
+    fn = functools.partial(render_, 'schema_module.py.jinja2', env, gen_root, config.format)
+    return [executor.submit(fn, x) for x in get_schema_modules(model, ModulePath(config.package), resolver)]
