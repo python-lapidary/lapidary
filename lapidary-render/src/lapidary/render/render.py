@@ -13,7 +13,7 @@ def render(render_model: Any, source: str, destination: Path, env: Environment, 
         if format_:
             code = format_code(code)
 
-        destination.parent.mkdir(exist_ok=True)
+        destination.parent.mkdir(parents=True, exist_ok=True)
         with open(destination, 'wt') as fb:
             fb.write(code)
     except Exception:
