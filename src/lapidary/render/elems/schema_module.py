@@ -4,7 +4,6 @@ from typing import Union, Optional
 import inflection
 
 from .module import AbstractModule, template_imports
-from .modules import PARAM_MODEL
 from .param_model_class import get_param_model_classes
 from .refs import ResolverFunc
 from .schema_class import get_schema_classes
@@ -67,6 +66,5 @@ def _get_schema_module(classes: list[SchemaClass], path: ModulePath) -> SchemaMo
 
 
 def get_param_model_classes_module(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> SchemaModule:
-    mod = module / PARAM_MODEL
-    classes = [cls for cls in get_param_model_classes(op, op.operationId, mod, resolve)]
-    return _get_schema_module(classes, mod)
+    classes = [cls for cls in get_param_model_classes(op, op.operationId, module, resolve)]
+    return _get_schema_module(classes, module)
