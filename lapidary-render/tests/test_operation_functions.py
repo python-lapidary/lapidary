@@ -11,8 +11,8 @@ from lapidary.render.elems.request_body import get_request_body_module
 from lapidary.render.elems.response_body import get_response_body_module
 from lapidary.render.elems.schema_class_model import SchemaClass
 from lapidary.render.elems.schema_module import SchemaModule
+from lapidary.render.elems.type_hint import GenericTypeHint, BuiltinTypeHint, TypeHint
 from lapidary.render.module_path import ModulePath
-from lapidary.render.type_ref import TypeRef, GenericTypeRef, BuiltinTypeRef
 
 model = openapi.OpenApiModel(
     openapi='3.0.3',
@@ -85,8 +85,14 @@ model = openapi.OpenApiModel(
 
 resolve = get_resolver(model, 'lapidary_test')
 module_path = ModulePath('lapidary_test')
-union_str_absent = GenericTypeRef(module='typing', name='Union',
-                                  args=[BuiltinTypeRef(name='str'), TypeRef.from_str('lapidary_base.absent.Absent')])
+union_str_absent = GenericTypeHint(
+    module='typing',
+    name='Union',
+    args=[
+        BuiltinTypeHint(name='str'),
+        TypeHint.from_str('lapidary_base.absent.Absent')
+    ]
+)
 common_attributes = [
     AttributeModel(
         name='a',
@@ -116,7 +122,7 @@ class OperationResponseTest(TestCase):
             ],
             body=[SchemaClass(
                 class_name='GetSchemaResponse200Response',
-                base_type=TypeRef.from_str('pydantic.BaseModel'),
+                base_type=TypeHint.from_str('pydantic.BaseModel'),
                 attributes=common_attributes
             )]
         )
@@ -136,7 +142,7 @@ class OperationResponseTest(TestCase):
             ],
             body=[SchemaClass(
                 class_name='GetSchemaRequestRequest',
-                base_type=TypeRef.from_str('pydantic.BaseModel'),
+                base_type=TypeHint.from_str('pydantic.BaseModel'),
                 attributes=common_attributes
             )]
         )

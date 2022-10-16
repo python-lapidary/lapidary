@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from lapidary.openapi import model as openapi
 from lapidary.render.elems.refs import get_resolver
+from lapidary.render.elems.type_hint import GenericTypeHint, BuiltinTypeHint, get_type_hint
 from lapidary.render.module_path import ModulePath
-from lapidary.render.type_ref import get_type_ref, GenericTypeRef, BuiltinTypeRef
 
 schema_carol = openapi.Schema()
 schema_bob = openapi.Schema(properties={'carol': schema_carol})
@@ -28,14 +28,14 @@ model = openapi.OpenApiModel(
 )
 
 
-class OneOfTypeRefTest(TestCase):
+class OneOfTypeHintTest(TestCase):
     def test_get_type_ref(self):
         self.assertEqual(
-            GenericTypeRef(module='typing', name='Union', args=[
-                BuiltinTypeRef(name='str'),
-                BuiltinTypeRef(name='int'),
+            GenericTypeHint(module='typing', name='Union', args=[
+                BuiltinTypeHint(name='str'),
+                BuiltinTypeHint(name='int'),
             ]),
-            get_type_ref(
+            get_type_hint(
                 model.components.schemas['alice'],
                 ModulePath('mymodule'),
                 'Alice',
@@ -46,11 +46,11 @@ class OneOfTypeRefTest(TestCase):
 
     def test_get_type_ref_references(self):
         self.assertEqual(
-            GenericTypeRef(module='typing', name='Union', args=[
-                BuiltinTypeRef(name='str'),
-                BuiltinTypeRef(name='int'),
+            GenericTypeHint(module='typing', name='Union', args=[
+                BuiltinTypeHint(name='str'),
+                BuiltinTypeHint(name='int'),
             ]),
-            get_type_ref(
+            get_type_hint(
                 model.components.schemas['bob'],
                 ModulePath('mymodule'),
                 'Bob',

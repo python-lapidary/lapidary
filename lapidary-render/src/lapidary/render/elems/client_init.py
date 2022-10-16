@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 
 from .client_func_response_map import get_response_map
 from .refs import ResolverFunc
+from .type_hint import TypeHint, BuiltinTypeHint
 from ..module_path import ModulePath
-from ..type_ref import TypeRef, BuiltinTypeRef
 from ...openapi import model as openapi
 
 
@@ -26,8 +26,8 @@ class ClientInit(BaseModel):
     auth_models: list[AuthModel] = Field(default_factory=list)
     base_urls: list[str] = Field(default_factory=list)
     headers: list[tuple[str, str]] = Field(default_factory=list)
-    init_auth_params: dict[str, TypeRef] = Field(default_factory=dict)
-    response_map: dict[str, dict[str, TypeRef]] = Field(default_factory=dict)
+    init_auth_params: dict[str, TypeHint] = Field(default_factory=dict)
+    response_map: dict[str, dict[str, TypeHint]] = Field(default_factory=dict)
 
 
 def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath, resolve: ResolverFunc) -> ClientInit:
@@ -99,12 +99,12 @@ def _(scheme: openapi.APIKeySecurityScheme, name: str):
     )
 
 
-def get_init_auth_params(schemes: dict[str, openapi.SecurityScheme]) -> dict[str, TypeRef]:
-    params: dict[str, TypeRef] = {}
+def get_init_auth_params(schemes: dict[str, openapi.SecurityScheme]) -> dict[str, TypeHint]:
+    params: dict[str, TypeHint] = {}
     for scheme_name, scheme in schemes.items():
         if isinstance(scheme, openapi.Reference):
             raise NotImplementedError(type(scheme))
-        params[get_auth_params(scheme.__root__, scheme_name)] = BuiltinTypeRef.from_str('str')
+        params[get_auth_params(scheme.__root__, scheme_name)] = BuiltinTypeHint.from_str('str')
 
     return params
 

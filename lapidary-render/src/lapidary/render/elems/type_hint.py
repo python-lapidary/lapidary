@@ -10,11 +10,9 @@ import inflection
 from lapidary_base.absent import Absent
 from pydantic import BaseModel, Field, Extra
 
-from ..openapi import model as openapi
-
-if typing.TYPE_CHECKING:
-    from .elems.refs import ResolverFunc, SchemaOrRef
-    from .module_path import ModulePath
+from .refs import ResolverFunc
+from ..module_path import ModulePath
+from ...openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 
@@ -36,18 +34,18 @@ def module_name(path: list[str]) -> str:
     return '.'.join([*path[:-1], inflection.underscore(path[-1])])
 
 
-def get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, required: bool, resolver: ResolverFunc) -> TypeRef:
-    typ = _get_type_ref(schema, module, name, resolver)
+def get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, required: bool, resolver: ResolverFunc) -> TypeHint:
+    typ = _get_type_hint(schema, module, name, resolver)
 
     if schema.nullable:
-        typ = typ.union_with(BuiltinTypeRef.from_str('None'))
+        typ = typ.union_with(BuiltinTypeHint.from_str('None'))
     if not required:
-        typ = typ.union_with(TypeRef.from_type(Absent))
+        typ = typ.union_with(TypeHint.from_type(Absent))
 
     return typ
 
 
-def _get_one_of_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeRef:
+def _get_one_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeHint:
     args = []
     for idx, sub_schema in enumerate(schema.oneOf):
         if isinstance(sub_schema, openapi.Reference):
@@ -59,65 +57,65 @@ def _get_one_of_type_ref(schema: openapi.Schema, module: ModulePath, name: str, 
         if sub_schema.lapidary_type_name is not None:
             sub_name = sub_schema.lapidary_type_name
 
-        type_ref = get_type_ref(sub_schema, sub_module, sub_name, True, resolve)
-        args.append(type_ref)
+        type_hint = get_type_hint(sub_schema, sub_module, sub_name, True, resolve)
+        args.append(type_hint)
 
-    return GenericTypeRef(
+    return GenericTypeHint(
         module='typing',
         name='Union',
         args=args,
     )
 
 
-def _get_all_of_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeRef:
+def _get_all_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeHint:
     if len(schema.allOf) != 1:
         raise NotImplementedError(name, 'len(allOf) != 1')
 
-    return resolve_type_ref(schema.allOf[0], module, name, resolve)
+    return resolve_type_hint(schema.allOf[0], module, name, resolve)
 
 
-def _get_type_ref(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeRef:
+def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeHint:
     if schema.enum:
-        return TypeRef(module=module.str(), name=name)
+        return TypeHint(module=module.str(), name=name)
     elif schema.type == openapi.Type.string:
-        return TypeRef.from_type(STRING_FORMATS.get(schema.format, str))
+        return TypeHint.from_type(STRING_FORMATS.get(schema.format, str))
     elif schema.type in PRIMITIVE_TYPES:
-        return BuiltinTypeRef.from_str(PRIMITIVE_TYPES[schema.type].__name__)
+        return BuiltinTypeHint.from_str(PRIMITIVE_TYPES[schema.type].__name__)
     elif schema.type == openapi.Type.object:
-        return _get_type_ref_object(schema, module, name)
+        return _get_type_hint_object(schema, module, name)
     elif schema.type == openapi.Type.array:
-        return _get_type_ref_array(schema, module, name, resolver)
+        return _get_type_hint_array(schema, module, name, resolver)
     elif schema.anyOf:
-        return BuiltinTypeRef.from_str('Unsupported')
+        return BuiltinTypeHint.from_str('Unsupported')
     elif schema.oneOf:
-        return _get_one_of_type_ref(schema, module, name, resolver)
+        return _get_one_of_type_hint(schema, module, name, resolver)
     elif schema.allOf:
-        return _get_all_of_type_ref(schema, module, name, resolver)
+        return _get_all_of_type_hint(schema, module, name, resolver)
     elif schema.type is None:
-        return TypeRef.from_str('typing.Any')
+        return TypeHint.from_str('typing.Any')
     else:
-        return EllipsisTypeRef()
+        return EllipsisTypeHint()
 
 
-def _get_type_ref_object(schema: openapi.Schema, module: ModulePath, name: str) -> TypeRef:
+def _get_type_hint_object(schema: openapi.Schema, module: ModulePath, name: str) -> TypeHint:
     if schema.properties or schema.allOf:
-        return TypeRef(module=module.str(), name=name)
+        return TypeHint(module=module.str(), name=name)
     else:
-        return TypeRef(module=module.str(), name=name)
+        return TypeHint(module=module.str(), name=name)
 
 
-def _get_type_ref_array(schema: openapi.Schema, module: ModulePath, parent_name: str, resolver: ResolverFunc) -> TypeRef:
+def _get_type_hint_array(schema: openapi.Schema, module: ModulePath, parent_name: str, resolver: ResolverFunc) -> TypeHint:
     if isinstance(schema.items, openapi.Reference):
         item_schema, module, name = resolver(schema.items, openapi.Schema)
     else:
         item_schema = schema.items
         name = parent_name + 'Item'
 
-    type_ref = get_type_ref(item_schema, module, name, True, resolver)
-    return type_ref.list_of()
+    type_hint = get_type_hint(item_schema, module, name, True, resolver)
+    return type_hint.list_of()
 
 
-class TypeRef(BaseModel):
+class TypeHint(BaseModel):
     module: str
     name: str
 
@@ -131,20 +129,20 @@ class TypeRef(BaseModel):
         return self.module + '.' + self.name if self.module != 'builtins' else self.name
 
     @staticmethod
-    def from_str(path: str) -> TypeRef:
+    def from_str(path: str) -> TypeHint:
         module, name = path.rsplit('.', 1)
-        return TypeRef(module=module, name=name)
+        return TypeHint(module=module, name=name)
 
     @staticmethod
-    def from_type(typ: typing.Type) -> TypeRef:
+    def from_type(typ: typing.Type) -> TypeHint:
         if hasattr(typ, '__origin__'):
             raise ValueError('Generic types unsupported', typ)
         module = typ.__module__
         name = typ.__name__
         if module == 'builtins':
-            return BuiltinTypeRef.from_str(name)
+            return BuiltinTypeHint.from_str(name)
         else:
-            return TypeRef(module=module, name=name)
+            return TypeHint(module=module, name=name)
 
     def type_checking_imports(self) -> list[tuple[str, str]]:
         return []
@@ -152,20 +150,20 @@ class TypeRef(BaseModel):
     def imports(self) -> list[str]:
         return [self.module]
 
-    def union_with(self, other: TypeRef) -> GenericTypeRef:
-        return GenericTypeRef(module='typing', name='Union', args=[self, other])
+    def union_with(self, other: TypeHint) -> GenericTypeHint:
+        return GenericTypeHint(module='typing', name='Union', args=[self, other])
 
-    def list_of(self) -> GenericTypeRef:
-        return GenericTypeRef(module='builtins', name='list', args=[self])
+    def list_of(self) -> GenericTypeHint:
+        return GenericTypeHint(module='builtins', name='list', args=[self])
 
-    def _types(self) -> list[TypeRef]:
+    def _types(self) -> list[TypeHint]:
         return [self]
 
     def __eq__(self, other) -> bool:
         return (
-                isinstance(other, TypeRef)
-                # generic type ref has args, so either both should be generic or none
-                and isinstance(self, GenericTypeRef) == isinstance(other, GenericTypeRef)
+                isinstance(other, TypeHint)
+                # generic type hint has args, so either both should be generic or none
+                and isinstance(self, GenericTypeHint) == isinstance(other, GenericTypeHint)
                 and self.module == other.module
                 and self.name == other.name
         )
@@ -174,7 +172,7 @@ class TypeRef(BaseModel):
         return self.module.__hash__() * 14159 + self.name.__hash__()
 
 
-class BuiltinTypeRef(TypeRef):
+class BuiltinTypeHint(TypeHint):
     module: str = 'builtins'
 
     class Config:
@@ -184,8 +182,8 @@ class BuiltinTypeRef(TypeRef):
         return self.full_name()
 
     @staticmethod
-    def from_str(name: str) -> BuiltinTypeRef:
-        return BuiltinTypeRef(name=name)
+    def from_str(name: str) -> BuiltinTypeHint:
+        return BuiltinTypeHint(name=name)
 
     def imports(self) -> list[str]:
         return []
@@ -194,7 +192,7 @@ class BuiltinTypeRef(TypeRef):
         return self.name
 
 
-class EllipsisTypeRef(TypeRef):
+class EllipsisTypeHint(TypeHint):
     def full_name(self):
         return '...'
 
@@ -204,37 +202,37 @@ class EllipsisTypeRef(TypeRef):
     def imports(self) -> list[str]:
         return []
 
-    def _types(self) -> list[TypeRef]:
+    def _types(self) -> list[TypeHint]:
         return []
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, EllipsisTypeRef)
+        return isinstance(other, EllipsisTypeHint)
 
     def __hash__(self) -> int:
         return (2 << 13) - 1
 
 
-class GenericTypeRef(TypeRef):
-    args: Annotated[list[TypeRef], Field(default_factory=list)]
+class GenericTypeHint(TypeHint):
+    args: Annotated[list[TypeHint], Field(default_factory=list)]
 
     class Config:
         extra = Extra.forbid
 
-    def union_with(self, other: TypeRef) -> GenericTypeRef:
+    def union_with(self, other: TypeHint) -> GenericTypeHint:
         if self.module == 'typing' and self.name == 'Union':
-            return GenericTypeRef(module=self.module, name=self.name, args=[*self.args, other])
+            return GenericTypeHint(module=self.module, name=self.name, args=[*self.args, other])
         else:
             return super().union_with(other)
 
     @staticmethod
-    def union_of(types: list[TypeRef]) -> GenericTypeRef:
+    def union_of(types: list[TypeHint]) -> GenericTypeHint:
         args = set()
         for typ in types:
-            if isinstance(typ, GenericTypeRef) and typ.module == 'typing' and typ.name == 'Union':
+            if isinstance(typ, GenericTypeHint) and typ.module == 'typing' and typ.name == 'Union':
                 args.update(typ.args)
             else:
                 args.add(typ)
-        return GenericTypeRef(module='typing', name='Union', args=args)
+        return GenericTypeHint(module='typing', name='Union', args=args)
 
     def type_checking_imports(self) -> list[tuple[str, str]]:
         return []
@@ -243,11 +241,11 @@ class GenericTypeRef(TypeRef):
         return [
             imp
             for typ in self._types()
-            for imp in TypeRef.imports(typ)
+            for imp in TypeHint.imports(typ)
             if imp != 'builtins'
         ]
 
-    def _types(self) -> list[TypeRef]:
+    def _types(self) -> list[TypeHint]:
         return [self, *[typ for arg in self.args for typ in arg._types()]]
 
     def __repr__(self) -> str:
@@ -258,7 +256,7 @@ class GenericTypeRef(TypeRef):
 
     def __eq__(self, other) -> bool:
         return (
-                isinstance(other, GenericTypeRef)
+                isinstance(other, GenericTypeHint)
                 and self.module == other.module
                 and self.name == other.name
                 and self.args == other.args
@@ -271,7 +269,7 @@ class GenericTypeRef(TypeRef):
         return hash_
 
 
-def resolve_type_ref(typ: Union[openapi.Schema, openapi.Reference], module: ModulePath, name: str, resolver: ResolverFunc) -> TypeRef:
+def resolve_type_hint(typ: Union[openapi.Schema, openapi.Reference], module: ModulePath, name: str, resolver: ResolverFunc) -> TypeHint:
     if isinstance(typ, openapi.Reference):
         typ, module, name = resolver(typ, openapi.Schema)
-    return get_type_ref(typ, module, name, True, resolver)
+    return get_type_hint(typ, module, name, True, resolver)
