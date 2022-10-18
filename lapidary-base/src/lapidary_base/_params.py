@@ -1,4 +1,5 @@
 import enum
+import uuid
 from collections.abc import Generator
 from enum import Enum, unique
 
@@ -75,7 +76,11 @@ def serialize_param(value, style: ParamStyle, explode_list: bool) -> Generator[s
         return
     elif isinstance(value, str):
         yield value
-    elif isinstance(value, (int, float)):
+    elif isinstance(value, (
+            int,
+            float,
+            uuid.UUID,
+    )):
         yield str(value)
     elif isinstance(value, enum.Enum):
         yield value.value
