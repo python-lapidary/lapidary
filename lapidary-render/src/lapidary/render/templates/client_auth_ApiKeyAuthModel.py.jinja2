@@ -1,0 +1,5 @@
+        self.auth_{{ auth_model.auth_name }} = lapidary_base.ApiKeyAuth(
+            name='{{ auth_model.key }}',
+            api_key={{ auth_model.param_name }},
+            placement=lapidary_base.{{ auth_model.placement }},
+        )

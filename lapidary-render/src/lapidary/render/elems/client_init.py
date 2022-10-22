@@ -1,5 +1,6 @@
+from collections.abc import Collection, Mapping
 from functools import singledispatch
-from typing import Collection, Mapping, Any, Optional, Union
+from typing import Any, Optional, Union
 
 from lapidary_base import ParamPlacement
 from pydantic import BaseModel, Field
@@ -19,7 +20,12 @@ class ApiKeyAuthModel(AuthModel):
     key: str
     param_name: str
     placement: ParamPlacement
-    value_prefix: Optional[str]
+
+
+class HttpAuthModel(AuthModel):
+    scheme: str
+    bearer_format: Optional[str]
+    param_name: str
 
 
 class ClientInit(BaseModel):
@@ -95,7 +101,20 @@ def _(scheme: openapi.APIKeySecurityScheme, name: str):
         key=scheme.name,
         placement=ParamPlacement[scheme.in_.value],
         param_name=name + '_' + scheme.name.lower(),
-        value_prefix=scheme.lapidary_value_prefix
+    )
+
+
+@get_auth_model.register(openapi.HTTPSecurityScheme)
+def _(scheme: openapi.HTTPSecurityScheme, name: str):
+    import enum
+    scheme_value = scheme.__root__.scheme
+    if isinstance(scheme_value, enum.Enum):
+        scheme_value = scheme_value.value
+    return HttpAuthModel(
+        auth_name=name,
+        scheme=scheme_value,
+        bearer_format=scheme.__root__.bearerFormat,
+        param_name=name + '_token'
     )
 
 
@@ -117,3 +136,8 @@ def get_auth_params(scheme: Any, _name: str):
 @get_auth_params.register(openapi.APIKeySecurityScheme)
 def _(scheme: openapi.APIKeySecurityScheme, name: str) -> str:
     return f'{name}_{scheme.name.lower()}'
+
+
+@get_auth_params.register(openapi.HTTPSecurityScheme)
+def _(_, name: str) -> str:
+    return f'{name}_token'

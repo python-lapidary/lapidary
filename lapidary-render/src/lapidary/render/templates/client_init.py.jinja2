@@ -13,6 +13,10 @@
         None,
 {%- endif %}
     ):
+{%- for auth_model in model.auth_models %}
+{% include 'client_auth_' + auth_model.__class__.__name__ + '.py.jinja2' %}
+{%- endfor %}
+
         super().__init__(
             client=httpx.AsyncClient(
                 base_url=base_url,
@@ -20,19 +24,12 @@
 {%- for header in model.headers %}
                     ('{{ header[0] }}', '{{ header[1] }}'),
 {%- endfor %}
-                ]
+                ],
+{%- if model.auth_models %}
+                auth=self.auth_{{ model.auth_models[0].auth_name }}
+{%- endif %}
             ),
 {%- if model.response_map %}
             global_response_map={{ response_map(model.response_map) | indent(12)}},
 {%- endif %}
         )
-
-{%- for auth_model in model.auth_models %}
-        self.auth_{{ auth_model.auth_name }} = lapidary_base.ApiKeyAuth(
-            name='{{ auth_model.key }}',
-            api_key={{ auth_model.param_name }},
-            placement=lapidary_base.{{ auth_model.placement }},
-            {%- if auth_model.value_prefix %}
-            value_prefix='{{ auth_model.value_prefix }}'{% endif %}
-    )
-{%- endfor %}
