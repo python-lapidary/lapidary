@@ -53,10 +53,14 @@ class AttributeModel:
     """Currently not used"""
 
     required: Optional[bool] = None
-    """Used for op method params. Required params are rendered before optional, and optional have default value ABSENT"""
+    """
+    Used for op method params. Required params are rendered before optional, and optional have default value ABSENT
+    """
 
 
-def get_attributes(parent_schema: openapi.Schema, parent_class_name: str, module: ModulePath, resolver: ResolverFunc) -> list[AttributeModel]:
+def get_attributes(
+        parent_schema: openapi.Schema, parent_class_name: str, module: ModulePath, resolver: ResolverFunc
+) -> list[AttributeModel]:
     def is_required(schema: openapi.Schema, prop_name: str) -> bool:
         return schema.required is not None and prop_name in schema.required
 
