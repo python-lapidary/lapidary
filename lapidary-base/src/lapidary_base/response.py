@@ -25,7 +25,10 @@ def _handle_response(
         response.raise_for_status()
         return response.content
 
-    obj = parse_model(response, cast(Type[T], typ))
+    try:
+        obj = parse_model(response, cast(Type[T], typ))
+    except pydantic.ValidationError:
+        raise ValueError(response.content)
 
     if isinstance(obj, Exception):
         raise obj
