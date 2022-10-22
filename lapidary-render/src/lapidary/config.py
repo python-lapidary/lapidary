@@ -2,13 +2,13 @@ from pathlib import Path
 from typing import Optional
 
 import tomli
-from pydantic import BaseSettings
+from pydantic import BaseSettings, BaseModel
 
 
-class Config(BaseSettings):
-    specification = Path('spec.yaml')
+class Config(BaseModel):
+    specification = 'openapi.yaml'
     package: str
-    errata: Optional[Path] = None
+    errata: Optional[str] = None
     format = True
     cache = True
 

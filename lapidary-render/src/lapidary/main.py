@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -43,17 +44,26 @@ def update(
 @app.command('init')
 def init(
         schema_path: Path,
+        project_root: Path,
         package_name: str,
-        project_root=Path('.'),
         errata: Optional[Path] = None,
 ):
     """Create a new project from scratch."""
 
+    if project_root.exists():
+        logger.error(f'Target "{project_root}" exists')
+        raise typer.Exit(code=1)
+
+    target_schema_file_name = Path('openapi').with_suffix(schema_path.suffix)
+    target_schema = project_root / target_schema_file_name
+    project_root.mkdir(parents=True, exist_ok=False)
+
+    logger.info('Copying %s to %s', schema_path, target_schema)
+    shutil.copy2(schema_path, target_schema)
+
     config = Config(
-        specification=schema_path,
         package=package_name,
         errata=errata,
-        format=True
     )
     model = update_project(project_root, config)
     render_pyproject(project_root, get_pyproject(model.info), config)
