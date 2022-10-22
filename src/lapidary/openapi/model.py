@@ -254,8 +254,6 @@ class APIKeySecurityScheme(BaseModel):
     in_: Annotated[In4, Field(alias='in')]
     description: Optional[str]
 
-    lapidary_value_prefix: Annotated[Optional[str], Field(alias='x-lapidary-value-prefix')] = None
-
 
 class Type2(Enum):
     http = 'http'
@@ -275,7 +273,7 @@ class Scheme(Enum):
     bearer = 'bearer'
 
 
-class HTTPSecuritySchemeItem(BaseModel):
+class HTTPSecuritySchemeItem(HTTPSecurityScheme1):
     """
     Bearer
     """
@@ -283,7 +281,7 @@ class HTTPSecuritySchemeItem(BaseModel):
     scheme: Optional[Scheme]
 
 
-class HTTPSecuritySchemeItem1(BaseModel):
+class HTTPSecuritySchemeItem1(HTTPSecurityScheme1):
     """
     Non Bearer
     """
@@ -296,7 +294,7 @@ class HTTPSecurityScheme(BaseModel):
         extra = Extra.forbid
 
     __root__: Union[
-        HTTPSecurityScheme1, HTTPSecuritySchemeItem, HTTPSecuritySchemeItem1
+        HTTPSecuritySchemeItem, HTTPSecuritySchemeItem1
     ]
 
 
