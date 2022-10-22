@@ -38,9 +38,9 @@ def _handle_response(
 
 def parse_model(response: httpx.Response, typ: Type[T]) -> T:
     if hasattr(typ, 'mro'):
-        if Exception in typ.mro():
+        if issubclass(typ, Exception):
             return typ(response.json())
-        elif pydantic.BaseModel in typ.mro():
+        elif issubclass(typ, pydantic.BaseModel):
             return typ.parse_raw(response.content)
 
     return pydantic.parse_raw_as(typ, response.content)
