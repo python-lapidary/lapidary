@@ -38,7 +38,7 @@ class ApiBase:
             param_model: Optional[pydantic.BaseModel] = None,
             request_body: Any = None,
             response_map: Optional[ResponseMap] = None,
-            auth: Optional[httpx.Auth] = None,
+            auth: Optional[httpx.Auth] = httpx.USE_CLIENT_DEFAULT,
     ) -> T:
         request = self._build_request(method, url, param_model, request_body, response_map)
 
