@@ -34,7 +34,8 @@ def module_name(path: list[str]) -> str:
     return '.'.join([*path[:-1], inflection.underscore(path[-1])])
 
 
-def get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, required: bool, resolver: ResolverFunc) -> TypeHint:
+def get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, required: bool,
+                  resolver: ResolverFunc) -> TypeHint:
     typ = _get_type_hint(schema, module, name, resolver)
 
     if schema.nullable:
@@ -104,7 +105,8 @@ def _get_type_hint_object(schema: openapi.Schema, module: ModulePath, name: str)
         return TypeHint(module=module.str(), name=name)
 
 
-def _get_type_hint_array(schema: openapi.Schema, module: ModulePath, parent_name: str, resolver: ResolverFunc) -> TypeHint:
+def _get_type_hint_array(schema: openapi.Schema, module: ModulePath, parent_name: str,
+                         resolver: ResolverFunc) -> TypeHint:
     if isinstance(schema.items, openapi.Reference):
         item_schema, module, name = resolver(schema.items, openapi.Schema)
     else:
@@ -269,7 +271,8 @@ class GenericTypeHint(TypeHint):
         return hash_
 
 
-def resolve_type_hint(typ: Union[openapi.Schema, openapi.Reference], module: ModulePath, name: str, resolver: ResolverFunc) -> TypeHint:
+def resolve_type_hint(typ: Union[openapi.Schema, openapi.Reference], module: ModulePath, name: str,
+                      resolver: ResolverFunc) -> TypeHint:
     if isinstance(typ, openapi.Reference):
         typ, module, name = resolver(typ, openapi.Schema)
     return get_type_hint(typ, module, name, True, resolver)

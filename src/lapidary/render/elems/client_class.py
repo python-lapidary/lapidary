@@ -27,7 +27,10 @@ def get_client_class(openapi_model: openapi.OpenApiModel, module: ModulePath, re
     )
 
 
-def get_operations(path_item: openapi.PathItem, skip_reference=False) -> Generator[tuple[str, Union[openapi.Operation, openapi.Reference]], None, None]:
+def get_operations(
+        path_item: openapi.PathItem,
+        skip_reference=False,
+) -> Generator[tuple[str, Union[openapi.Operation, openapi.Reference]], None, None]:
     for op_name in path_item.__fields_set__:
         v = getattr(path_item, op_name)
         if (

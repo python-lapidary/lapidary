@@ -34,7 +34,9 @@ def get_modules_for_components_schemas(
     return modules
 
 
-def get_schema_module(schema: openapi.Schema, name: str, path: ModulePath, resolver: ResolverFunc) -> Optional[SchemaModule]:
+def get_schema_module(
+        schema: openapi.Schema, name: str, path: ModulePath, resolver: ResolverFunc
+) -> Optional[SchemaModule]:
     classes = [cls for cls in get_schema_classes(schema, name, path, resolver)]
     if len(classes) > 0:
         return _get_schema_module(classes, path)
