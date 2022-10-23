@@ -1,7 +1,6 @@
-import inflection
-
 from .modules import RESPONSE_BODY
 from .refs import ResolverFunc
+from .response_body import response_type_name
 from .type_hint import resolve_type_hint
 from ..module_path import ModulePath
 from ...openapi import model as openapi
@@ -14,7 +13,7 @@ def get_response_map(responses: openapi.Responses, name: str, module: ModulePath
             response, sub_module, sub_name = resolve(response, openapi.Response)
         else:
             sub_module = module / RESPONSE_BODY
-            sub_name = inflection.camelize(name) + resp_code
+            sub_name = response_type_name(name, resp_code)
         if not response.content:
             continue
         mime_map = {}

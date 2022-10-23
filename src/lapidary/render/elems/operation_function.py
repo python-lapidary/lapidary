@@ -145,7 +145,7 @@ def get_response_types(op: openapi.Operation, module: ModulePath, resolve: Resol
             if isinstance(schema, openapi.Reference):
                 schema, resp_module, name = resolve(schema, openapi.Schema)
             else:
-                name = response_type_name(op, resp_code)
+                name = response_type_name(op.operationId, resp_code)
                 resp_module = module / RESPONSE_BODY
             if schema.lapidary_model_type is LapidaryModelType.exception:
                 continue
