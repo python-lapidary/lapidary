@@ -32,7 +32,8 @@ def get_schema_classes(
 
     if schema.type is openapi.Type.array:
         item_schema = schema.items
-        if isinstance(item_schema, openapi.Schema):
+        if isinstance(item_schema, openapi.Schema) and item_schema.type is openapi.Type.object:
+            # TODO handle nested types, e.g. list of lists of objects
             yield from get_schema_classes(item_schema, name + 'Item', module, resolver)
     elif schema.type is openapi.Type.object:
         if schema.properties:
