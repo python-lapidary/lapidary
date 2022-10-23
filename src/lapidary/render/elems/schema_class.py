@@ -40,7 +40,7 @@ def get_schema_classes(
             for prop_name, prop_schema in schema.properties.items():
                 if not isinstance(prop_schema, openapi.Schema):
                     continue
-                yield from get_schema_classes(prop_schema, name + inflection.camelize(prop_name), module, resolver)
+                yield from get_schema_classes(prop_schema, name + inflection.camelize(prop_name.replace(' ', '_')), module, resolver)
     for key in ['oneOf', 'anyOf', 'allOf']:
         inheritance_elem = getattr(schema, key)
         if inheritance_elem is not None:
