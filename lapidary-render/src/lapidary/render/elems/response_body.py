@@ -25,7 +25,7 @@ def get_response_body_classes(
             schema = media_type.schema_
             if isinstance(schema, openapi.Reference):
                 continue
-            yield from get_schema_classes(schema, response_type_name(operation, status_code), module, resolve)
+            yield from get_schema_classes(schema, response_type_name(operation.operationId, status_code), module, resolve)
 
 
 def get_response_body_module(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> SchemaModule:
@@ -33,5 +33,5 @@ def get_response_body_module(op: openapi.Operation, module: ModulePath, resolve:
     return _get_schema_module(classes, module)
 
 
-def response_type_name(op: openapi.Operation, status_code: str):
-    return inflection.camelize(op.operationId) + inflection.camelize(status_code) + 'Response'
+def response_type_name(operation_id: str, status_code: str):
+    return inflection.camelize(operation_id) + status_code + 'Response'
