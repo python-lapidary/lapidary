@@ -413,7 +413,15 @@ class Schema(BaseModel):
     deprecated: Optional[bool] = False
     xml: Optional[XML]
 
-    lapidary_enum_names: Annotated[Optional[dict[str, Any]], Field(alias='x-lapidary-enum-names')] = None
+    lapidary_names: Annotated[
+        Optional[dict[str, Any]],
+        Field(
+            alias='x-lapidary-names',
+            default_factory=dict,
+            description="Mapping of keys used in the JSON document and variable names in the generated Python code. "
+            "Applicable to enum values or object properties."
+        )
+    ]
     lapidary_type_name: Annotated[Optional[str], Field(alias='x-lapidary-type-name')] = None
     lapidary_model_type: Annotated[Optional[LapidaryModelType], Field(alias='x-lapidary-model-type')] = None
 

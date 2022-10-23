@@ -28,7 +28,8 @@ def get_modules_for_components_schemas(
     modules = []
     for name, schema in schemas.items():
         if isinstance(schema, openapi.Schema):
-            module = get_schema_module(schema, name, root_package / inflection.underscore(name), resolver)
+            class_name = name.replace(' ', '_')
+            module = get_schema_module(schema, class_name, root_package / inflection.underscore(name), resolver)
             if module is not None:
                 modules.append(module)
     return modules

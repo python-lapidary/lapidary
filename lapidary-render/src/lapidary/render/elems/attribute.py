@@ -8,42 +8,6 @@ from .type_hint import BuiltinTypeHint
 from ..module_path import ModulePath
 from ...openapi import model as openapi
 
-PYTHON_KEYWORDS = [
-    'False',
-    'None',
-    'True',
-    'and',
-    'as',
-    'assert',
-    'break',
-    'class',
-    'continue',
-    'def',
-    'del',
-    'elif',
-    'else',
-    'except',
-    'finally',
-    'for',
-    'from',
-    'global',
-    'if',
-    'import',
-    'in',
-    'is',
-    'lambda',
-    'nonlocal',
-    'not',
-    'or',
-    'pass',
-    'raise',
-    'return',
-    'try',
-    'while',
-    'with',
-    'yield',
-]
-
 
 @dataclass(frozen=True)
 class AttributeModel:
@@ -65,15 +29,29 @@ def get_attributes(
         return schema.required is not None and prop_name in schema.required
 
     return [
-        get_attribute(prop_schema, name, parent_class_name, is_required(parent_schema, name), module, resolver)
+        get_attribute(
+            prop_schema,
+            parent_schema.lapidary_names.get(name, name),
+            name,
+            parent_class_name,
+            is_required(parent_schema, name),
+            module,
+            resolver,
+        )
         for name, prop_schema in parent_schema.properties.items()
     ]
 
 
-def get_attribute(typ: SchemaOrRef, name: str, parent_name: str, required: bool, module: ModulePath, resolve: ResolverFunc) -> AttributeModel:
+def get_attribute(
+        typ: SchemaOrRef, name: str, alias: str, parent_name: str, required: bool, module: ModulePath,
+        resolve: ResolverFunc
+) -> AttributeModel:
+    if not re.match(r'^[a-zA-Z0-9]\w*$', name, re.ASCII):
+        raise ValueError(f'Illegal attribute name "{name}", use x-lapidary-names')
+    alias = alias if alias != name else None
     return AttributeModel(
-        name=name.replace(':', '_'),
-        annotation=get_attr_annotation(typ, name, parent_name, required, module, resolve),
+        name=name,
+        annotation=get_attr_annotation(typ, name, parent_name, required, module, resolve, alias=alias),
     )
 
 
@@ -95,6 +73,7 @@ def _name_for_value(value: Any) -> str:
     name = re.compile(r'\W+').sub('_', str(value))
     if name == '' or not name[0].isalpha():
         name = 'v_' + name
-    if name in PYTHON_KEYWORDS:
+    import keyword
+    if keyword.iskeyword(name):
         name += '_'
     return name

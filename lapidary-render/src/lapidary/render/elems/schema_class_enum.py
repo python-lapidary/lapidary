@@ -6,9 +6,9 @@ from ...openapi import model as openapi
 
 
 def check_named_attrs(schema: openapi.Schema) -> None:
-    if schema.lapidary_enum_names is None:
+    if schema.lapidary_names is None:
         return
-    for key, val in schema.lapidary_enum_names.items():
+    for key, val in schema.lapidary_names.items():
         if val not in schema.enum:
             raise ValueError('unknown value of', key)
 
@@ -32,13 +32,11 @@ def get_enum_class(
         name: str
 ):
     check_named_attrs(schema)
-    named_attrs = [get_enum_attribute(v, name) for name, v in schema.lapidary_enum_names.items()] if schema.lapidary_enum_names is not None else []
-    unnamed_attrs = [get_enum_attribute(v) for v in schema.enum if schema.lapidary_enum_names is None or v not in schema.lapidary_enum_names.values()]
 
     return SchemaClass(
         class_name=name,
         base_type=TypeHint.from_str('enum.Enum'),
-        attributes=[*named_attrs, *unnamed_attrs],
+        attributes=[get_enum_attribute(v, schema.lapidary_names.get(name, None)) for v in schema.enum],
         docstr=schema.description or None,
         model_type=ModelType.enum,
     )

@@ -76,22 +76,23 @@ def _get_all_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str,
 
 
 def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeHint:
+    class_name = name.replace(' ', '_')
     if schema.enum:
-        return TypeHint(module=module.str(), name=name)
+        return TypeHint(module=module.str(), name=class_name)
     elif schema.type == openapi.Type.string:
         return TypeHint.from_type(STRING_FORMATS.get(schema.format, str))
     elif schema.type in PRIMITIVE_TYPES:
         return BuiltinTypeHint.from_str(PRIMITIVE_TYPES[schema.type].__name__)
     elif schema.type == openapi.Type.object:
-        return _get_type_hint_object(schema, module, name)
+        return _get_type_hint_object(schema, module, class_name)
     elif schema.type == openapi.Type.array:
-        return _get_type_hint_array(schema, module, name, resolver)
+        return _get_type_hint_array(schema, module, class_name, resolver)
     elif schema.anyOf:
         return BuiltinTypeHint.from_str('Unsupported')
     elif schema.oneOf:
-        return _get_one_of_type_hint(schema, module, name, resolver)
+        return _get_one_of_type_hint(schema, module, class_name, resolver)
     elif schema.allOf:
-        return _get_all_of_type_hint(schema, module, name, resolver)
+        return _get_all_of_type_hint(schema, module, class_name, resolver)
     elif schema.type is None:
         return TypeHint.from_str('typing.Any')
     else:
