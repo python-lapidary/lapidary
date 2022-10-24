@@ -30,8 +30,7 @@ def get_schema_classes(
 
     if schema.type is openapi.Type.array:
         item_schema = schema.items
-        if isinstance(item_schema, openapi.Schema) and item_schema.type is openapi.Type.object:
-            # TODO handle nested types, e.g. list of lists of objects
+        if isinstance(item_schema, openapi.Schema):
             yield from get_schema_classes(item_schema, name + 'Item', module, resolver)
     elif schema.type is openapi.Type.object:
         if schema.properties:
@@ -48,9 +47,8 @@ def get_schema_classes(
                     continue
                 yield from get_schema_classes(sub_schema, name + str(idx), module, resolver)
 
-    schema_class = get_schema_class(schema, name, module, resolver)
-    if schema_class is not None:
-        yield schema_class
+    if schema.type is openapi.Type.object:
+        yield get_schema_class(schema, name, module, resolver)
 
     if enum_class is not None:
         yield enum_class
@@ -62,6 +60,8 @@ def get_schema_class(
         module: ModulePath,
         resolver: ResolverFunc,
 ) -> Optional[SchemaClass]:
+    assert isinstance(schema, openapi.Schema)
+
     if schema.lapidary_name is not None:
         name = schema.lapidary_name
 
