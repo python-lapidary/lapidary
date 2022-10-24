@@ -74,8 +74,6 @@ def get_schema_class(
     )
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
 
-
-
     return SchemaClass(
         class_name=name,
         base_type=base_type,

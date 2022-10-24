@@ -23,10 +23,14 @@ def get_subtype_name(parent_name: str, schema_name: str) -> str:
 def check_name(name: str, check_reserved=True) -> None:
     if (
             name is None
-            or (check_reserved and (
-            keyword.iskeyword(name)
-            or name in builtins.__dict__)
-    )
+            or
+            (
+                    check_reserved
+                    and (
+                            keyword.iskeyword(name)
+                            or name in builtins.__dict__
+                    )
+            )
             or not VALID_IDENTIFIER_RE.match(name)
     ):
         raise ValueError('Invalid identifier', name)
