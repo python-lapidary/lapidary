@@ -17,7 +17,6 @@ from .type_hint import TypeHint, resolve_type_hint, get_type_hint, GenericTypeHi
 from ..module_path import ModulePath
 from ..names import PARAM_MODEL, get_subtype_name, maybe_mangle_name
 from ...openapi import model as openapi
-from ...openapi.model import LapidaryModelType
 
 RESPONSE_BODY = 'response_body'
 
@@ -143,7 +142,7 @@ def get_response_types(op: openapi.Operation, module: ModulePath, resolve: Resol
             else:
                 name = response_type_name(op.operationId, resp_code)
                 resp_module = module / RESPONSE_BODY
-            if schema.lapidary_model_type is LapidaryModelType.exception:
+            if schema.lapidary_model_type is openapi.LapidaryModelType.exception:
                 continue
             typ = resolve_type_hint(schema, resp_module, name, resolve)
             response_types.add(typ)

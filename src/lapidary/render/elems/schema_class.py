@@ -9,7 +9,6 @@ from .type_hint import BuiltinTypeHint, TypeHint
 from ..module_path import ModulePath
 from ..names import get_subtype_name
 from ...openapi import model as openapi
-from ...openapi.model import LapidaryModelType
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ def get_schema_class(
 
     base_type = (
         BuiltinTypeHint.from_str('Exception')
-        if schema.lapidary_model_type is LapidaryModelType.exception
+        if schema.lapidary_model_type is openapi.LapidaryModelType.exception
         else TypeHint.from_str('pydantic.BaseModel')
     )
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
