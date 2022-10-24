@@ -76,11 +76,6 @@ def get_operation_param(
     )
 
 
-def sanitise_param_name(param_name: str) -> str:
-    # potential name clash
-    return re.compile(r'\W+').sub('_', param_name)
-
-
 def get_operation_func(
         op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc
 ) -> OperationFunctionModel:
