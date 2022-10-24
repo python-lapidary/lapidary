@@ -1,6 +1,4 @@
-import dataclasses
 import unittest
-from pprint import pp
 
 from lapidary.openapi import model as openapi
 from lapidary.render.elems.client_module import get_client_class_module
@@ -49,7 +47,7 @@ class GlobalResponsesTest(unittest.TestCase):
 
         module_path = ModulePath('test')
         module = get_client_class_module(model, module_path / 'client.py', module_path, get_resolver(model, 'test'))
-        pp(dataclasses.asdict(module))
+        # pp(dataclasses.asdict(module))
 
         expected = {
             '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
@@ -101,7 +99,7 @@ class GlobalResponsesTest(unittest.TestCase):
 
         module_path = ModulePath('test')
         module = get_client_class_module(model, module_path / 'client.py', module_path, get_resolver(model, 'test'))
-        pp(dataclasses.asdict(module))
+        # pp(dataclasses.asdict(module))
 
         expected = {
             '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
@@ -153,7 +151,7 @@ class GlobalResponsesTest(unittest.TestCase):
 
         module_path = ModulePath('test')
         module = get_client_class_module(model, module_path / 'client.py', module_path, get_resolver(model, 'test'))
-        pp(dataclasses.asdict(module))
+        # pp(dataclasses.asdict(module))
 
         expected = {
             '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},

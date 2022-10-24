@@ -122,8 +122,6 @@ class NamingTest(TestCase):
         )
 
         mod = get_schema_module(model.components.schemas['NonSpaceName'], 'NonSpaceName', module_path, resolve)
-        # from pprint import pp
-        # pp(mod)
 
         self.assertEqual(expected, mod)
 
@@ -132,8 +130,7 @@ class NamingTest(TestCase):
         resolve = get_resolver(model, 'lapidary_test')
 
         with self.assertRaises(ValueError):
-            from pprint import pp
-            pp([mod for mod in get_schema_modules(model, module_path, resolve)])
+            _ = [mod for mod in get_schema_modules(model, module_path, resolve)]
 
     def test_null_enum(self):
         model = openapi.Schema(
@@ -141,8 +138,7 @@ class NamingTest(TestCase):
             nullable=True,
         )
         with self.assertRaises(ValueError):
-            from pprint import pp
-            pp([c for c in get_schema_classes(model, 'test', module_path, None)])
+            _ = [c for c in get_schema_classes(model, 'test', module_path, None)]
 
     def test_null_enum_with_alias(self):
         model = openapi.Schema(
