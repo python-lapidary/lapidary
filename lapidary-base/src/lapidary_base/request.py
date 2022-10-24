@@ -1,6 +1,7 @@
 from typing import Optional
 
-from .mime import find_mime, MIME_JSON
+from .mime import find_mime
+from .http_consts import MIME_JSON
 from .response import ResponseMap
 
 

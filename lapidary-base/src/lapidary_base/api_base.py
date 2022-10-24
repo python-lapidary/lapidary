@@ -8,6 +8,7 @@ from ._params import process_params
 from .pydantic_utils import to_model
 from .request import get_accept_header
 from .response import _handle_response, ResponseMap
+from .http_consts import CONTENT_TYPE, MIME_JSON, ACCEPT
 
 T = TypeVar('T')
 
@@ -64,10 +65,10 @@ class ApiBase:
             headers = httpx.Headers()
 
         if request_body is not None:
-            headers['content-type'] = 'application/json'
+            headers[CONTENT_TYPE] = MIME_JSON
 
         if (accept := get_accept_header(response_map, self._global_response_map)) is not None:
-            headers['accept'] = accept
+            headers[ACCEPT] = accept
 
         if not isinstance(request_body, pydantic.BaseModel) and request_body is not None:
             request_body = to_model(request_body)

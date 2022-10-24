@@ -8,6 +8,7 @@ import pydantic
 import lapidary_base
 from lapidary_base import ApiBase
 from lapidary_base._params import process_params
+from lapidary_base.http_consts import CONTENT_TYPE, MIME_JSON
 from lapidary_base.response import _status_code_matches
 
 
@@ -33,7 +34,7 @@ class ApiBaseTest(unittest.TestCase):
             '/path/',
             content='[{"a": "a"}]',
             params=None,
-            headers={'content-type': 'application/json'},
+            headers={CONTENT_TYPE: MIME_JSON},
             cookies=None,
         )
 

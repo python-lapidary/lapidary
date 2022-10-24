@@ -5,6 +5,7 @@ from typing import Optional, Type, TypeVar, cast
 import httpx
 import pydantic
 
+from .http_consts import CONTENT_TYPE
 from .mime import find_mime
 
 T = TypeVar('T')
@@ -49,7 +50,9 @@ def parse_model(response: httpx.Response, typ: Type[T]) -> T:
 
 def find_type(response: httpx.Response, response_map, global_response_map) -> Optional[Type]:
     status_code = str(response.status_code)
-    content_type = response.headers.get('content-type', None)
+    if CONTENT_TYPE not in response.headers:
+        return None
+    content_type = response.headers[CONTENT_TYPE]
 
     if content_type is None:
         return None
