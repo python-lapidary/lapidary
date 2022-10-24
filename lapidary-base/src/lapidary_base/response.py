@@ -1,4 +1,5 @@
 import inspect
+import logging
 from collections.abc import Mapping, Generator
 from typing import Optional, Type, TypeVar, cast
 
@@ -12,6 +13,8 @@ T = TypeVar('T')
 
 MimeMap = Mapping[str, Type[T]]
 ResponseMap = dict[str, MimeMap]
+
+logger = logging.getLogger(__name__)
 
 
 def _handle_response(
@@ -42,7 +45,7 @@ def parse_model(response: httpx.Response, typ: Type[T]) -> T:
     if inspect.isclass(typ):
         if issubclass(typ, Exception):
             return typ(response.json())
-        elif issubclass(typ, pydantic.BaseModel):
+        elif pydantic.BaseModel in inspect.getmro(typ):
             return typ.parse_raw(response.content)
 
     return pydantic.parse_raw_as(typ, response.content)
