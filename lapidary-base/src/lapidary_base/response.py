@@ -1,5 +1,6 @@
-import typing
-from typing import Optional, Type, Generator, TypeVar, cast
+import inspect
+from collections.abc import Mapping, Generator
+from typing import Optional, Type, TypeVar, cast
 
 import httpx
 import pydantic
@@ -8,7 +9,7 @@ from .mime import find_mime
 
 T = TypeVar('T')
 
-MimeMap = typing.Mapping[str, Type[T]]
+MimeMap = Mapping[str, Type[T]]
 ResponseMap = dict[str, MimeMap]
 
 
@@ -37,7 +38,7 @@ def _handle_response(
 
 
 def parse_model(response: httpx.Response, typ: Type[T]) -> T:
-    if hasattr(typ, 'mro'):
+    if inspect.isclass(typ):
         if issubclass(typ, Exception):
             return typ(response.json())
         elif issubclass(typ, pydantic.BaseModel):
