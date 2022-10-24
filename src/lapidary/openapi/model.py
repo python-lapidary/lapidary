@@ -414,7 +414,7 @@ class Schema(BaseModel):
     xml: Optional[XML]
 
     lapidary_names: Annotated[
-        Optional[dict[str, Any]],
+        Optional[dict[Union[str, None], Any]],
         Field(
             alias='x-lapidary-names',
             default_factory=dict,
