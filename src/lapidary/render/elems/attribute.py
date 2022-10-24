@@ -6,7 +6,7 @@ from .attribute_annotation import AttributeAnnotationModel, get_attr_annotation
 from .refs import ResolverFunc, SchemaOrRef
 from .type_hint import BuiltinTypeHint
 from ..module_path import ModulePath
-from ..names import maybe_mangle_name
+from ..names import check_name, maybe_mangle_name
 from ...openapi import model as openapi
 
 
@@ -33,7 +33,7 @@ def get_attributes(
         get_attribute(
             prop_schema,
             parent_schema.lapidary_names.get(name, name),
-            name,
+            name if parent_schema.lapidary_names.get(name, name) != name else None,
             parent_class_name,
             is_required(parent_schema, name),
             module,
@@ -47,9 +47,11 @@ def get_attribute(
         typ: SchemaOrRef, name: str, alias: str, parent_name: str, required: bool, module: ModulePath,
         resolve: ResolverFunc
 ) -> AttributeModel:
-    if not re.match(r'^[a-zA-Z0-9]\w*$', name, re.ASCII):
-        raise ValueError(f'Illegal attribute name "{name}", use x-lapidary-names')
+    alias = alias or name
+    name = maybe_mangle_name(name)
+    check_name(name)
     alias = alias if alias != name else None
+
     return AttributeModel(
         name=name,
         annotation=get_attr_annotation(typ, name, parent_name, required, module, resolve, alias=alias),
