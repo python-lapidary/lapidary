@@ -6,6 +6,7 @@ from .attribute_annotation import AttributeAnnotationModel, get_attr_annotation
 from .refs import ResolverFunc, SchemaOrRef
 from .type_hint import BuiltinTypeHint
 from ..module_path import ModulePath
+from ..names import maybe_mangle_name
 from ...openapi import model as openapi
 
 
@@ -55,8 +56,8 @@ def get_attribute(
     )
 
 
-def get_enum_attribute(value: Any, name: Optional[str] = None) -> AttributeModel:
-    name = _name_for_value(value) if name is None else name
+def get_enum_attribute(value: Any, name: str) -> AttributeModel:
+    name = maybe_mangle_name(name)
     value = "'" + value.replace("'", r"\'") + "'" if value is not None else None
     return AttributeModel(
         name=name,

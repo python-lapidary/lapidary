@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from typing import Optional, Any
 
-import inflection
-
 from .refs import SchemaOrRef, ResolverFunc
-from ..module_path import ModulePath
 from .type_hint import TypeHint, get_type_hint
+from ..module_path import ModulePath
+from ..names import get_subtype_name
 from ...openapi import model as openapi
 
 
@@ -32,13 +31,13 @@ def get_attr_annotation(
 ) -> AttributeAnnotationModel:
     """
     if typ is a schema, then it's a nested schema. Name should be parent_class_name+prop_name, and module is the same.
-    Otherwise, it's a reference, schema, module and name should be resolved from it and used to generate type_ref
+    Otherwise, it's a reference; schema, module and name should be resolved from it and used to generate type_ref
     """
     if isinstance(typ, openapi.Reference):
         schema, module, type_name = resolve(typ, openapi.Schema)
     else:
         schema: openapi.Schema = typ
-        type_name = inflection.camelize(parent_name) + inflection.camelize(name)
+        type_name = get_subtype_name(parent_name, schema.lapidary_name or name)
     return _get_attr_annotation(schema, type_name, required, module, resolve, in_, name, alias)
 
 

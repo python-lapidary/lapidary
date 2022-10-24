@@ -9,6 +9,7 @@ from .refs import ResolverFunc
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
 from ..module_path import ModulePath
+from ..names import check_name
 from ...openapi import model as openapi
 
 
@@ -28,8 +29,9 @@ def get_modules_for_components_schemas(
     modules = []
     for name, schema in schemas.items():
         if isinstance(schema, openapi.Schema):
-            class_name = name.replace(' ', '_')
-            module = get_schema_module(schema, class_name, root_package / inflection.underscore(name), resolver)
+            name = schema.lapidary_name or name
+            check_name(name)
+            module = get_schema_module(schema, name, root_package / inflection.underscore(name), resolver)
             if module is not None:
                 modules.append(module)
     return modules

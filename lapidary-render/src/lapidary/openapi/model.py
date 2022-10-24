@@ -422,7 +422,7 @@ class Schema(BaseModel):
             "Applicable to enum values or object properties."
         )
     ]
-    lapidary_type_name: Annotated[Optional[str], Field(alias='x-lapidary-type-name')] = None
+    lapidary_name: Annotated[Optional[str], Field(alias='x-lapidary-type-name')] = None
     lapidary_model_type: Annotated[Optional[LapidaryModelType], Field(alias='x-lapidary-model-type')] = None
 
 
@@ -665,6 +665,8 @@ class Parameter(BaseModel):
     ]
     example: Optional[Any]
     examples: Optional[Dict[str, Union[Example, Reference]]]
+
+    lapidary_name: Annotated[Union[str, None], Field(alias='x-lapidary-name')] = None
 
 
 class RequestBody(BaseModel):

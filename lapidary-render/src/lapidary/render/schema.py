@@ -7,8 +7,9 @@ from typing import Generator, Any
 
 from jinja2 import Environment
 
+from . import names as mod_name
 from .elems import (
-    modules as mod_name, get_operations, ResolverFunc, get_request_body_module, get_response_body_module, SchemaModule,
+    get_operations, ResolverFunc, get_request_body_module, get_response_body_module, SchemaModule,
     get_modules_for_components_schemas, get_param_model_classes_module,
 )
 from .module_path import ModulePath

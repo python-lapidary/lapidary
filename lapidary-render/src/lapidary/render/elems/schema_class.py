@@ -1,14 +1,13 @@
 import logging
 from typing import Optional, Generator
 
-import inflection
-
 from .attribute import get_attributes
 from .refs import ResolverFunc
 from .schema_class_enum import get_enum_class
 from .schema_class_model import SchemaClass, ModelType
 from .type_hint import BuiltinTypeHint, TypeHint
 from ..module_path import ModulePath
+from ..names import get_subtype_name
 from ...openapi import model as openapi
 from ...openapi.model import LapidaryModelType
 
@@ -40,7 +39,8 @@ def get_schema_classes(
             for prop_name, prop_schema in schema.properties.items():
                 if not isinstance(prop_schema, openapi.Schema):
                     continue
-                yield from get_schema_classes(prop_schema, name + inflection.camelize(prop_name.replace(' ', '_')), module, resolver)
+                prop_name = prop_schema.lapidary_name or schema.lapidary_names.get(prop_name, prop_name)
+                yield from get_schema_classes(prop_schema, get_subtype_name(name, prop_name), module, resolver)
     for key in ['oneOf', 'anyOf', 'allOf']:
         inheritance_elem = getattr(schema, key)
         if inheritance_elem is not None:
@@ -63,8 +63,8 @@ def get_schema_class(
         module: ModulePath,
         resolver: ResolverFunc,
 ) -> Optional[SchemaClass]:
-    if schema.type is not openapi.Type.object:
-        return None
+    if schema.lapidary_name is not None:
+        name = schema.lapidary_name
 
     logger.debug(name)
 
@@ -75,8 +75,7 @@ def get_schema_class(
     )
     attributes = get_attributes(schema, name, module, resolver) if schema.properties else []
 
-    if schema.lapidary_type_name is not None:
-        name = schema.lapidary_type_name
+
 
     return SchemaClass(
         class_name=name,
