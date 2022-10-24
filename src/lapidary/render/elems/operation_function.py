@@ -10,12 +10,12 @@ from lapidary_base import ParamPlacement
 from .attribute import AttributeModel
 from .attribute_annotation import AttributeAnnotationModel
 from .client_func_response_map import get_response_map
-from .modules import PARAM_MODEL
 from .refs import ResolverFunc
 from .request_body import get_request_body_type
 from .response_body import response_type_name
 from .type_hint import TypeHint, resolve_type_hint, get_type_hint, GenericTypeHint
 from ..module_path import ModulePath
+from ..names import PARAM_MODEL, get_subtype_name, maybe_mangle_name
 from ...openapi import model as openapi
 from ...openapi.model import LapidaryModelType
 
@@ -58,11 +58,12 @@ def get_operation_param(
     if isinstance(schema, openapi.Reference):
         schema, module, schema_name = resolve(schema, openapi.Schema)
     else:
-        schema_name = inflection.camelize(parent_name) + inflection.camelize(param.name)
+        param_name = param.lapidary_name or param.name
+        schema_name = get_subtype_name(parent_name, param_name)
         module = module / PARAM_MODEL
 
     field_props = {k: (getattr(param, k) or _FIELD_PROPS[k]) for k in _FIELD_PROPS}
-    param_name = param.in_[0] + '_' + sanitise_param_name(param.name)
+    param_name = param.in_[0] + '_' + maybe_mangle_name(param.lapidary_name or param.name, False)
 
     return AttributeModel(
         name=param_name,

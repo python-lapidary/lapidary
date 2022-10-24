@@ -55,8 +55,8 @@ def _get_one_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str,
             sub_name = name + str(idx)
             sub_module = module
 
-        if sub_schema.lapidary_type_name is not None:
-            sub_name = sub_schema.lapidary_type_name
+        if sub_schema.lapidary_name is not None:
+            sub_name = sub_schema.lapidary_name
 
         type_hint = get_type_hint(sub_schema, sub_module, sub_name, True, resolve)
         args.append(type_hint)

@@ -1,14 +1,13 @@
 from typing import Generator
 
-import inflection
-
 from .attribute import AttributeModel
 from .attribute_annotation import get_attr_annotation
 from .refs import ResolverFunc
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass, ModelType
-from ..module_path import ModulePath
 from .type_hint import TypeHint
+from ..module_path import ModulePath
+from ..names import get_subtype_name
 from ...openapi import model as openapi
 
 """
@@ -22,9 +21,12 @@ def get_param_attribute(
         module: ModulePath,
         resolver: ResolverFunc,
 ) -> AttributeModel:
+    param_name = param.lapidary_name or param.name
     return AttributeModel(
-        name=param.in_[0] + '_' + param.name.replace(':', '_'),
-        annotation=get_attr_annotation(param.schema_, param.name, parent_name, param.required, module, resolver, param.in_),
+        name=param.in_[0] + '_' + param_name,
+        annotation=get_attr_annotation(
+            param.schema_, param_name, parent_name, param.required, module, resolver, param.in_
+        ),
         deprecated=param.deprecated,
     )
 
@@ -40,7 +42,8 @@ def get_param_model_classes(
         schema = param.schema_
         if not isinstance(schema, openapi.Schema):
             continue
-        yield from get_schema_classes(schema, inflection.camelize(name) + inflection.camelize(param.name), module, resolver)
+        param_name = param.lapidary_name or param.name
+        yield from get_schema_classes(schema, get_subtype_name(name, param_name), module, resolver)
 
     schema_class = get_param_model_class(operation, name, module, resolver)
     if schema_class is not None:
@@ -58,7 +61,7 @@ def get_param_model_class(
     base_type = TypeHint.from_str('pydantic.BaseModel')
 
     return SchemaClass(
-        class_name=inflection.camelize(name),
+        class_name=name,
         base_type=base_type,
         attributes=attributes,
         docstr=operation.description or None,

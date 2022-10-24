@@ -30,13 +30,13 @@ model = openapi.OpenApiModel(
                 oneOf=[
                     openapi.Schema(
                         type=openapi.Type.object,
-                        lapidary_type_name='FirstSchemaClass',
+                        lapidary_name='FirstSchemaClass',
                         properties={
                             'a': openapi.Schema()
                         },
                     ),
                     openapi.Schema(
-                        lapidary_type_name='SecondSchemaClass',
+                        lapidary_name='SecondSchemaClass',
                         type=openapi.Type.object,
                         properties={
                             'a': openapi.Schema()
