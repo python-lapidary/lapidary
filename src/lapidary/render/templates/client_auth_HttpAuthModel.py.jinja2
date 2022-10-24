@@ -2,6 +2,6 @@
             scheme='{{ auth_model.scheme }}',
             token={{ auth_model.param_name }},
 {%- if auth_model.bearer_format %}
-            bearer_format={{ auth_model.bearer_format }},
+            bearer_format='{{ auth_model.bearer_format }}',
 {%- endif %}
         )
