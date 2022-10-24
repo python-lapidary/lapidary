@@ -1,5 +1,7 @@
 from typing import Generator
 
+import inflection
+
 from .attribute import AttributeModel
 from .attribute_annotation import get_attr_annotation
 from .refs import ResolverFunc
@@ -33,7 +35,6 @@ def get_param_attribute(
 
 def get_param_model_classes(
         operation: openapi.Operation,
-        name: str,
         module: ModulePath,
         resolver: ResolverFunc,
 ) -> Generator[SchemaClass, None, None]:
@@ -43,9 +44,9 @@ def get_param_model_classes(
         if not isinstance(schema, openapi.Schema):
             continue
         param_name = param.lapidary_name or param.name
-        yield from get_schema_classes(schema, get_subtype_name(name, param_name), module, resolver)
+        yield from get_schema_classes(schema, get_subtype_name(operation.operationId, param_name), module, resolver)
 
-    schema_class = get_param_model_class(operation, name, module, resolver)
+    schema_class = get_param_model_class(operation, inflection.camelize(operation.operationId), module, resolver)
     if schema_class is not None:
         yield schema_class
 

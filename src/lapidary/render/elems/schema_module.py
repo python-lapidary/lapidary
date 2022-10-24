@@ -71,5 +71,5 @@ def _get_schema_module(classes: list[SchemaClass], path: ModulePath) -> SchemaMo
 
 
 def get_param_model_classes_module(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> SchemaModule:
-    classes = [cls for cls in get_param_model_classes(op, op.operationId, module, resolve)]
+    classes = [cls for cls in get_param_model_classes(op, module, resolve)]
     return _get_schema_module(classes, module)
