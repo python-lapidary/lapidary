@@ -58,6 +58,7 @@ def get_attribute(
 
 def get_enum_attribute(value: Any, name: str) -> AttributeModel:
     name = maybe_mangle_name(name)
+    check_name(name)
     value = "'" + value.replace("'", r"\'") + "'" if value is not None else None
     return AttributeModel(
         name=name,

@@ -6,6 +6,7 @@ from lapidary.openapi import model as openapi
 from lapidary.render.elems.attribute import AttributeModel
 from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
 from lapidary.render.elems.refs import get_resolver
+from lapidary.render.elems.schema_class import get_schema_classes
 from lapidary.render.elems.schema_class_model import SchemaClass
 from lapidary.render.elems.schema_module import SchemaModule, get_schema_module
 from lapidary.render.elems.type_hint import TypeHint
@@ -55,24 +56,6 @@ components:
                     type: string
 """
 
-sub_schema_with_space = """
-openapi: '3.0.3'
-info:
-    title: Lapidary test schema
-    version: 1.0.0
-paths: {}
-components:
-    schemas:
-        Alice:
-            type: object
-            properties:
-                random name:
-                    type: object
-                    properties:
-                        key:
-                            type: string
-"""
-
 operation_param_with_space = """
 openapi: '3.0.3'
 info:
@@ -96,12 +79,13 @@ paths:
                       type: string
 """
 
+module_path = ModulePath('lapidary_test')
+
 
 class NamingTest(TestCase):
     def test_name_with_alias(self):
         model = openapi.OpenApiModel.parse_obj(yaml.safe_load(schema))
         resolve = get_resolver(model, 'lapidary_test')
-        module_path = ModulePath('lapidary_test')
 
         expected = SchemaModule(
             path=module_path,
@@ -146,16 +130,27 @@ class NamingTest(TestCase):
     def test_name_with_space(self):
         model = openapi.OpenApiModel.parse_obj(yaml.safe_load(schema_with_space))
         resolve = get_resolver(model, 'lapidary_test')
-        module_path = ModulePath('lapidary_test')
 
         with self.assertRaises(ValueError):
             from pprint import pp
             pp([mod for mod in get_schema_modules(model, module_path, resolve)])
 
-    def test_subschema_name_with_space(self):
-        model = openapi.OpenApiModel.parse_obj(yaml.safe_load(sub_schema_with_space))
-        resolve = get_resolver(model, 'lapidary_test')
-        module_path = ModulePath('lapidary_test')
-
+    def test_null_enum(self):
+        model = openapi.Schema(
+            enum=[None],
+            nullable=True,
+        )
         with self.assertRaises(ValueError):
-            _ = [mod for mod in get_schema_modules(model, module_path, resolve)]
+            from pprint import pp
+            pp([c for c in get_schema_classes(model, 'test', module_path, None)])
+
+    def test_null_enum_with_alias(self):
+        model = openapi.Schema(
+            enum=[None],
+            nullable=True,
+            lapidary_names={
+                None: 'null'
+            }
+        )
+        result = [c for c in get_schema_classes(model, 'test', module_path, None)]
+        self.assertEqual('null', result[0].attributes[0].name)
