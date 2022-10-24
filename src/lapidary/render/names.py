@@ -10,7 +10,7 @@ PARAM_MODEL = 'param_model'
 REQUEST_BODY = 'request_body'
 RESPONSE_BODY = 'response_body'
 
-VALID_IDENTIFIER_RE = re.compile(r'^[a-zA-Z_]\w+$', re.ASCII)
+VALID_IDENTIFIER_RE = re.compile(r'^[a-zA-Z]\w*$', re.ASCII)
 
 
 def get_subtype_name(parent_name: str, schema_name: str) -> str:
