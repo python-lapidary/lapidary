@@ -5,13 +5,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - version command
 - pytest for testing
+- errata as directory
+- support for HTTPAuth
 
 ### Changed
 - Use multiprocessing to speed-up code generation.
-- Made 
+- project root is now init argument instead of option
+- Upgraded dependencies.
 
 ### Fixed
 - Added Config.use_enum_values to all models.
+- handling json names that are reserved, special or invalid in Python
+- generating empty classes for non-object schemas with enum key.
 
 ## [0.5.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.5.0) - 2022-10-03
 ### Added
