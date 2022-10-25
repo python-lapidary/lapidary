@@ -34,6 +34,7 @@ class ClientInit(BaseModel):
     headers: list[tuple[str, str]] = Field(default_factory=list)
     init_auth_params: dict[str, TypeHint] = Field(default_factory=dict)
     response_map: dict[str, dict[str, TypeHint]] = Field(default_factory=dict)
+    default_auth: Optional[str]
 
 
 def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath, resolve: ResolverFunc) -> ClientInit:
@@ -51,12 +52,15 @@ def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath, res
         resolve
     ) if openapi_model.lapidary_responses_global else {}
 
+    default_auth = next(iter(openapi_model.security[0].__root__.keys())) if openapi_model.security else None
+
     return ClientInit(
         auth_models=auth_models,
         init_auth_params=auth_params,
         base_urls=[server.url for server in openapi_model.servers] if openapi_model.servers else [],
         headers=get_global_headers(openapi_model.lapidary_headers_global),
         response_map=response_map,
+        default_auth=default_auth,
     )
 
 
