@@ -20,16 +20,14 @@ def get_subtype_name(parent_name: str, schema_name: str) -> str:
     return subtype_name
 
 
-def check_name(name: str, check_reserved=True) -> None:
+def check_name(name: str, check_builtins=True) -> None:
     if (
             name is None
+            or keyword.iskeyword(name)
             or
             (
-                    check_reserved
-                    and (
-                            keyword.iskeyword(name)
-                            or name in builtins.__dict__
-                    )
+                    check_builtins
+                    and name in builtins.__dict__
             )
             or not VALID_IDENTIFIER_RE.match(name)
     ):
@@ -48,21 +46,21 @@ def _mangle_name(name: str) -> str:
     )
 
 
-def maybe_mangle_name(name: str, check_reserved=True) -> str:
+def maybe_mangle_name(name: str, check_builtins=True) -> str:
     """
     Names that are Python keywords or in builtins get suffixed with an underscore (_).
     Names that are not valid Python identifiers or start with underscore are mangled by replacing invalid characters
     with u_{code}.
     Since 'u_' is the escaping prefix, it also gets replaced
     """
-    if name is None:
-        return name
-    if check_reserved and (name in builtins.__dict__ or keyword.iskeyword(name)):
+    if name is None or name == '':
+        raise ValueError()
+
+    if (
+            check_builtins and (name in builtins.__dict__)
+            or keyword.iskeyword(name)
+    ):
         return name + '_'
-    # elif name is None:
-    #     return 'null'
-    # elif name == '':
-    #     return 'blank_'
     elif not VALID_IDENTIFIER_RE.match(name) or 'u_' in name:
         return _mangle_name(name)
     else:
