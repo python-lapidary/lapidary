@@ -2,9 +2,11 @@ import logging
 from unittest import TestCase
 
 import yaml
+
 from lapidary.openapi import model as openapi
 from lapidary.render.elems.attribute import AttributeModel
 from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
+from lapidary.render.elems.param_model_class import get_param_model_classes
 from lapidary.render.elems.refs import get_resolver
 from lapidary.render.elems.schema_class import get_schema_classes
 from lapidary.render.elems.schema_class_model import SchemaClass
@@ -54,29 +56,6 @@ components:
             properties:
                 key:
                     type: string
-"""
-
-operation_param_with_space = """
-openapi: '3.0.3'
-info:
-    title: Lapidary test schema
-    version: 1.0.0
-paths:
-    /:
-        get:
-            operationId: testOp
-            parameters:
-            - name: test param
-              in: query
-              schema:
-                type: string
-            responses: 
-              default:
-                description: ''
-                content:
-                  application/json:
-                    schema:
-                      type: string
 """
 
 module_path = ModulePath('lapidary_test')
@@ -150,3 +129,29 @@ class NamingTest(TestCase):
         )
         result = [c for c in get_schema_classes(model, 'test', module_path, None)]
         self.assertEqual('null', result[0].attributes[0].name)
+
+    def test_param_name_with_colon(self):
+        schema_text = """
+openapi: '3.0.3'
+info:
+    title: Lapidary test schema
+    version: 1.0.0
+paths:
+    /:
+        get:
+            operationId: testOp
+            parameters:
+            - name: test param
+              in: query
+              schema:
+                type: string
+            responses: {}
+        """
+
+        model = openapi.OpenApiModel.parse_obj(yaml.safe_load(schema_text))
+        param_model_class=next(get_param_model_classes(model.paths.__root__['/'].get, module_path, None))
+
+        attr = param_model_class.attributes[0]
+
+        self.assertEqual('q_testu_000020param', attr.name)
+        self.assertEqual("'test param'", attr.annotation.field_props['alias'])

@@ -1,4 +1,3 @@
-import re
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -48,8 +47,8 @@ def get_attribute(
         resolve: ResolverFunc
 ) -> AttributeModel:
     alias = alias or name
-    name = maybe_mangle_name(name)
-    check_name(name)
+    name = maybe_mangle_name(name, False)
+    check_name(name, False)
     alias = alias if alias != name else None
 
     return AttributeModel(
@@ -59,8 +58,8 @@ def get_attribute(
 
 
 def get_enum_attribute(value: Any, name: str) -> AttributeModel:
-    name = maybe_mangle_name(name)
-    check_name(name)
+    name = maybe_mangle_name(name, False)
+    check_name(name, False)
     value = "'" + value.replace("'", r"\'") + "'" if value is not None else None
     return AttributeModel(
         name=name,
@@ -69,15 +68,3 @@ def get_enum_attribute(value: Any, name: str) -> AttributeModel:
             field_props={'default': value},
         )
     )
-
-
-def _name_for_value(value: Any) -> str:
-    if value is None:
-        return 'none'
-    name = re.compile(r'\W+').sub('_', str(value))
-    if name == '' or not name[0].isalpha():
-        name = 'v_' + name
-    import keyword
-    if keyword.iskeyword(name):
-        name += '_'
-    return name

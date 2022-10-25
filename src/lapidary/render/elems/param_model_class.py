@@ -1,3 +1,8 @@
+"""
+Param model is a synthetic (from the perspective of OpenAPI specification) object that holds and validates all Operation
+parameters.
+"""
+
 from typing import Generator
 
 import inflection
@@ -9,12 +14,8 @@ from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass, ModelType
 from .type_hint import TypeHint
 from ..module_path import ModulePath
-from ..names import get_subtype_name
+from ..names import get_subtype_name, maybe_mangle_name, check_name
 from ...openapi import model as openapi
-
-"""
-Param model is a synthetic (from the perspective of OpenAPI specification) object that holds and validates all Operation parameters.
-"""
 
 
 def get_param_attribute(
@@ -23,11 +24,13 @@ def get_param_attribute(
         module: ModulePath,
         resolver: ResolverFunc,
 ) -> AttributeModel:
-    param_name = param.lapidary_name or param.name
+    attr_name = maybe_mangle_name(param.in_[0] + '_' + (param.lapidary_name or param.name))
+    check_name(attr_name)
+
     return AttributeModel(
-        name=param.in_[0] + '_' + param_name,
+        name=attr_name,
         annotation=get_attr_annotation(
-            param.schema_, param_name, parent_name, param.required, module, resolver, param.in_
+            param.schema_, param.name, parent_name, param.required, module, resolver, param.in_
         ),
         deprecated=param.deprecated,
     )
@@ -46,26 +49,29 @@ def get_param_model_classes(
         param_name = param.lapidary_name or param.name
         yield from get_schema_classes(schema, get_subtype_name(operation.operationId, param_name), module, resolver)
 
-    schema_class = get_param_model_class(operation, inflection.camelize(operation.operationId), module, resolver)
+    schema_class = get_param_model_class(operation, module, resolver)
     if schema_class is not None:
         yield schema_class
 
 
 def get_param_model_class(
         operation: openapi.Operation,
-        name: str,
         module: ModulePath,
         resolver: ResolverFunc,
 ) -> SchemaClass:
-    attributes = [get_param_attribute(param, name, module, resolver) for param in
+    attributes = [get_param_attribute(param, operation.operationId, module, resolver) for param in
                   operation.parameters] if operation.parameters else []
     base_type = TypeHint.from_str('pydantic.BaseModel')
 
     return SchemaClass(
-        class_name=name,
+        class_name=get_param_model_class_name(operation.operationId),
         base_type=base_type,
         attributes=attributes,
         docstr=operation.description or None,
         model_type=ModelType.param_model,
         has_aliases=True,
     )
+
+
+def get_param_model_class_name(operation_id: str) -> str:
+    return inflection.camelize(operation_id)
