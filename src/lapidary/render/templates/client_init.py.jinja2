@@ -25,8 +25,8 @@
                     ('{{ header[0] }}', '{{ header[1] }}'),
 {%- endfor %}
                 ],
-{%- if model.auth_models %}
-                auth=self.auth_{{ model.auth_models[0].auth_name }}
+{%- if model.default_auth %}
+                auth=self.auth_{{ model.default_auth }}
 {%- endif %}
             ),
 {%- if model.response_map %}
