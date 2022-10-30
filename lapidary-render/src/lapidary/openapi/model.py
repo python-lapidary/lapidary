@@ -378,31 +378,44 @@ class Schema(BaseModel):
         allow_population_by_field_name = True
 
     title: Optional[str]
+    type: Optional[Type]
+
+    # type == number or type == integer
     multipleOf: Annotated[Optional[float], Field(gt=0.0)]
     maximum: Optional[float]
     exclusiveMaximum: Optional[bool] = False
     minimum: Optional[float]
     exclusiveMinimum: Optional[bool] = False
+
+    # type == string
     maxLength: Annotated[Optional[int], Field(ge=0)]
-    minLength: Annotated[Optional[int], Field(ge=0)] = 0
+    minLength: Annotated[int, Field(ge=0)] = 0
     pattern: Optional[str]
+
+    # type == array
+    items: Optional[Union[Schema, Reference]]
     maxItems: Annotated[Optional[int], Field(ge=0)]
     minItems: Annotated[Optional[int], Field(ge=0)] = 0
     uniqueItems: Optional[bool] = False
+
+    # type == object
     maxProperties: Annotated[Optional[int], Field(ge=0)]
     minProperties: Annotated[Optional[int], Field(ge=0)] = 0
     required: Annotated[Optional[List[str]], Field(min_items=1, unique_items=True)]
+    properties: Optional[Dict[str, Union[Schema, Reference]]]
+    additionalProperties: Optional[Union[Schema, Reference, bool]] = True
+
+    # type == string or type = number or type == integer
+    format: Optional[str]
+
     enum: Annotated[Optional[List], Field(min_items=1, unique_items=False)]
-    type: Optional[Type]
+
     not_: Annotated[Optional[Union[Schema, Reference]], Field(alias='not')]
     allOf: Optional[List[Union[Schema, Reference]]]
     oneOf: Optional[List[Union[Schema, Reference]]]
     anyOf: Optional[List[Union[Schema, Reference]]]
-    items: Optional[Union[Schema, Reference]]
-    properties: Optional[Dict[str, Union[Schema, Reference]]]
-    additionalProperties: Optional[Union[Schema, Reference, bool]] = True
+
     description: Optional[str]
-    format: Optional[str]
     default: Optional[Any]
     nullable: Optional[bool] = False
     discriminator: Optional[Discriminator]
@@ -419,7 +432,7 @@ class Schema(BaseModel):
             alias='x-lapidary-names',
             default_factory=dict,
             description="Mapping of keys used in the JSON document and variable names in the generated Python code. "
-            "Applicable to enum values or object properties."
+                        "Applicable to enum values or object properties."
         )
     ]
     lapidary_name: Annotated[Optional[str], Field(alias='x-lapidary-type-name')] = None
