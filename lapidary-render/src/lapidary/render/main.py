@@ -6,14 +6,14 @@ from typing import Optional
 import typer
 
 from .config import load_config, Config
+from .elems.pyproject import render_pyproject, get_pyproject
 from .load import load_spec
-from .openapi.model import OpenApiModel
 from .render import render_client
-from .render.elems.pyproject import render_pyproject, get_pyproject
+from ..openapi.model import OpenApiModel
 
 logging.basicConfig()
-logger = logging.getLogger('lapidary')
-logger.setLevel(logging.INFO)
+logging.getLogger('lapidary').setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = typer.Typer()
 

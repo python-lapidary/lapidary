@@ -7,9 +7,9 @@ from typing import Annotated, Union
 from uuid import UUID
 
 import inflection
-from lapidary_base.absent import Absent
 from pydantic import BaseModel, Field, Extra
 
+from lapidary.runtime.absent import Absent
 from .refs import ResolverFunc
 from ..module_path import ModulePath
 from ...openapi import model as openapi

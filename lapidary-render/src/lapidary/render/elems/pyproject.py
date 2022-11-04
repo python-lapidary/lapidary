@@ -1,13 +1,13 @@
 import logging
 from importlib import resources
+from importlib.metadata import version
 from pathlib import Path
 
 import tomlkit
 from pydantic import BaseModel, Extra
 
-from ...config import Config
+from ..config import Config
 from ...openapi import model as openapi
-from importlib.metadata import version
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ def update_poetry_config(d: dict, model: PyProject):
     poetry = d.setdefault('tool', {}).setdefault('poetry', {})
     poetry.update(model.dict())
     deps = poetry.setdefault('dependencies', {})
-    deps['lapidary-base'] = '^' + version('lapidary-base')
+    deps['lapidary-runtime'] = '^' + version('lapidary-runtime')
 
 
 def update_lapidary_config(d: dict, model: Config) -> None:

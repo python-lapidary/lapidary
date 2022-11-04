@@ -17,7 +17,7 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
     client_class = get_client_class(model, root_module, resolver)
 
     default_imports = [
-        'lapidary_base',
+        'lapidary.runtime',
         'httpx',
     ]
 

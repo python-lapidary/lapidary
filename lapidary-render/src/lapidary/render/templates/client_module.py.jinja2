@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import typing
-import lapidary_base
+import lapidary.runtime
 import pydantic
 {%- for imp in model.imports %}
 import {{ imp }}
@@ -10,7 +10,7 @@ import {{ imp }}
 {% set path = model.path -%}
 {% set model = model.body %}
 
-class ApiClient(lapidary_base.ApiBase):
+class ApiClient(lapidary.runtime.ApiBase):
 {%- include 'client_init.py.jinja2' %}
     async def __aenter__(self) -> 'ApiClient':
         return await super().__aenter__()

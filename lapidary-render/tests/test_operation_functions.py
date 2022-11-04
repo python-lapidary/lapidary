@@ -1,7 +1,5 @@
 from unittest import TestCase
 
-from lapidary_base import ParamPlacement
-
 from lapidary.openapi import model as openapi
 from lapidary.render.elems.attribute import AttributeModel
 from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
@@ -13,6 +11,7 @@ from lapidary.render.elems.schema_class_model import SchemaClass
 from lapidary.render.elems.schema_module import SchemaModule
 from lapidary.render.elems.type_hint import GenericTypeHint, BuiltinTypeHint, TypeHint
 from lapidary.render.module_path import ModulePath
+from lapidary.runtime import ParamPlacement
 
 model = openapi.OpenApiModel(
     openapi='3.0.3',
@@ -90,7 +89,7 @@ union_str_absent = GenericTypeHint(
     name='Union',
     args=[
         BuiltinTypeHint(name='str'),
-        TypeHint.from_str('lapidary_base.absent.Absent')
+        TypeHint.from_str('lapidary.runtime.absent.Absent')
     ]
 )
 common_attributes = [
@@ -99,7 +98,7 @@ common_attributes = [
         annotation=AttributeAnnotationModel(
             type=union_str_absent,
             field_props={},
-            default='lapidary_base.absent.ABSENT',
+            default='lapidary.runtime.absent.ABSENT',
         ),
     ),
     AttributeModel(
@@ -107,7 +106,7 @@ common_attributes = [
         annotation=AttributeAnnotationModel(
             type=union_str_absent,
             field_props={},
-            default='lapidary_base.absent.ABSENT',
+            default='lapidary.runtime.absent.ABSENT',
         ),
     )
 ]
@@ -118,7 +117,7 @@ class OperationResponseTest(TestCase):
         expected = SchemaModule(
             path=module_path,
             imports=[
-                'lapidary_base.absent',
+                'lapidary.runtime.absent',
             ],
             body=[SchemaClass(
                 class_name='GetSchemaResponse200Response',
@@ -138,7 +137,7 @@ class OperationResponseTest(TestCase):
         expected = SchemaModule(
             path=module_path,
             imports=[
-                'lapidary_base.absent',
+                'lapidary.runtime.absent',
             ],
             body=[SchemaClass(
                 class_name='GetSchemaRequestRequest',

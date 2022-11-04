@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 
 import tomli
-from pydantic import BaseSettings, BaseModel
+from pydantic import BaseModel
 
 
 class Config(BaseModel):

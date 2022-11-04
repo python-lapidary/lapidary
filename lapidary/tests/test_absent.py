@@ -1,6 +1,6 @@
 import unittest
 
-from lapidary_base import Absent, ABSENT
+from lapidary.runtime.absent import Absent, ABSENT
 
 
 class MyTestCase(unittest.TestCase):

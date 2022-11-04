@@ -1,3 +1,3 @@
 if __name__ == '__main__':
-    from lapidary.main import app
+    from lapidary.render.main import app
     app()

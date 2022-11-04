@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from lapidary_base import Absent
+from lapidary.runtime import Absent
 
 from lapidary.openapi import model as openapi
 from lapidary.render.elems.attribute import AttributeModel
@@ -65,7 +65,7 @@ class Test(TestCase):
                     style=None,
                     explode=None,
                     allowReserved=False,
-                    default='lapidary_base.absent.ABSENT',
+                    default='lapidary.runtime.absent.ABSENT',
                 ),
                 deprecated=False
             )]

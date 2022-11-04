@@ -73,7 +73,7 @@ def _get_attr_annotation(
             field_props[k] = f"'{v}'"
 
     if in_ is not None:
-        field_props['in_'] = 'lapidary_base.ParamPlacement.' + in_
+        field_props['in_'] = 'lapidary.runtime.ParamPlacement.' + in_
         field_props['alias'] = f"'{alias or name}'"
 
     if alias is not None:
@@ -88,7 +88,7 @@ def _get_attr_annotation(
         # TODO better handle direction
         required = False
 
-    default = None if required else 'lapidary_base.absent.ABSENT'
+    default = None if required else 'lapidary.runtime.absent.ABSENT'
 
     return AttributeAnnotationModel(
         type=get_type_hint(schema, module, type_name, required, resolve),
@@ -102,9 +102,9 @@ def get_direction(read_only: Optional[bool], write_only: Optional[bool]) -> Opti
         if write_only:
             raise ValueError()
         else:
-            return 'lapidary_base.ParamDirection.read'
+            return 'lapidary.runtime.ParamDirection.read'
     else:
         if write_only:
-            return 'lapidary_base.ParamDirection.write'
+            return 'lapidary.runtime.ParamDirection.write'
         else:
             return None

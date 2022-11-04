@@ -1,15 +1,18 @@
 import concurrent.futures
+import functools
 import logging
 import os
+from concurrent.futures import Executor, Future
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from jinja2 import Environment, PackageLoader
 
 from .black import format_code
-from .client import render_client_module
-from .elems import get_resolver
-from .schema import render_schema_modules
+from .config import Config
+from .elems import get_resolver, ResolverFunc, get_client_class_module
+from .module_path import ModulePath
+from .schema import get_schema_modules
 from ..openapi import model as openapi
 
 logger = logging.getLogger(__name__)
@@ -67,3 +70,27 @@ def ensure_init_py(gen_root, package_name):
     for (dirpath, dirnames, filenames) in os.walk(gen_root / package_name):
         if '__init__.py' not in filenames:
             (Path(dirpath) / '__init__.py').touch()
+
+
+def render_client_module(
+        model: openapi.OpenApiModel, config: Config, gen_root: Path, resolver: ResolverFunc, env: Environment
+):
+    root_mod = ModulePath(config.package)
+    client_module_path = root_mod / 'client.py'
+    file_path = client_module_path.to_path(gen_root)
+    logger.info('Render client module to %s', file_path)
+
+    client_class_module = get_client_class_module(model, client_module_path, root_mod, resolver)
+    render(client_class_module, 'client_module.py.jinja2', file_path, env, config.format)
+
+
+def render_schema_modules(
+        model: openapi.OpenApiModel, config: Config, gen_root: Path, resolver: ResolverFunc, env: Environment,
+        executor: Executor
+) -> Iterable[Future]:
+    fn = functools.partial(render_, 'schema_module.py.jinja2', env, gen_root, config.format)
+    return [executor.submit(fn, x) for x in get_schema_modules(model, ModulePath(config.package), resolver)]
+
+
+def render_(source: str, env: Environment, gen_root: Path, format_: bool, render_model: Any):
+    render(render_model, source, render_model.path.to_path(gen_root), env, format_)

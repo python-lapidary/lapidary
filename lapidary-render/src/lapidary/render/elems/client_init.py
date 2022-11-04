@@ -2,7 +2,7 @@ from collections.abc import Collection, Mapping
 from functools import singledispatch
 from typing import Any, Optional, Union
 
-from lapidary_base import ParamPlacement
+from lapidary.runtime import ParamPlacement
 from pydantic import BaseModel, Field
 
 from .client_func_response_map import get_response_map

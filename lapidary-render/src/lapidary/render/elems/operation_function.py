@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Optional, Union
 
 import inflection
-from lapidary_base import ParamPlacement
+from lapidary.runtime import ParamPlacement
 
 from .attribute import AttributeModel
 from .attribute_annotation import AttributeAnnotationModel
