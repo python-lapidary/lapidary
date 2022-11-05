@@ -18,8 +18,8 @@ model = openapi.OpenApiModel(
                 openapi.Schema(type=openapi.Type.integer),
             ]),
             bob=openapi.Schema(oneOf=[
-                openapi.Reference(**{'$ref': '#/components/schemas/carol'}),
-                openapi.Reference(**{'$ref': '#/components/schemas/damian'}),
+                openapi.Reference(ref='#/components/schemas/carol'),
+                openapi.Reference(ref='#/components/schemas/damian'),
             ]),
             carol=openapi.Schema(type=openapi.Type.string),
             damian=openapi.Schema(type=openapi.Type.integer),
