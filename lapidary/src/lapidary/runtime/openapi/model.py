@@ -5,9 +5,81 @@ from __future__ import annotations
 
 import enum
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Optional, Union, Mapping
+from typing import Annotated, Any, Dict, List, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field
+
+__all__ = [
+    'APIKeySecurityScheme',
+    'AnyUrl',
+    'AuthorizationCodeOAuthFlow',
+    'BaseModel',
+    'Callback',
+    'ClientCredentialsFlow',
+    'Components',
+    'Contact',
+    'Discriminator',
+    'EmailStr',
+    'Encoding',
+    'Example',
+    'ExampleXORExamples',
+    'ExternalDocumentation',
+    'Extra',
+    'HTTPSecurityScheme',
+    'HTTPSecurityScheme1',
+    'HTTPSecuritySchemeItem',
+    'HTTPSecuritySchemeItem1',
+    'Header',
+    'ImplicitOAuthFlow',
+    'In',
+    'In1',
+    'In2',
+    'In3',
+    'In4',
+    'Info',
+    'LapidaryModelType',
+    'License',
+    'Link',
+    'MediaType',
+    'OAuth2SecurityScheme',
+    'OAuthFlows',
+    'OpenApiModel',
+    'OpenIdConnectSecurityScheme',
+    'Operation',
+    'Parameter',
+    'ParameterLocation',
+    'ParameterLocationItem',
+    'ParameterLocationItem1',
+    'ParameterLocationItem2',
+    'ParameterLocationItem3',
+    'PasswordOAuthFlow',
+    'PathItem',
+    'Paths',
+    'Reference',
+    'RequestBody',
+    'Required',
+    'Response',
+    'Responses',
+    'Schema',
+    'SchemaXORContent',
+    'SchemaXORContentItem',
+    'Scheme',
+    'SecurityRequirement',
+    'SecurityScheme',
+    'Server',
+    'ServerVariable',
+    'Style',
+    'Style1',
+    'Style2',
+    'Style4',
+    'Tag',
+    'Type',
+    'Type1',
+    'Type2',
+    'Type3',
+    'Type4',
+    'XML'
+]
 
 
 class LapidaryModelType(enum.Enum):
@@ -488,10 +560,6 @@ class SecurityScheme(BaseModel):
     ]
 
 
-def ref_to_path(ref: str) -> list[str]:
-    return ref.split('/')[1:]
-
-
 class OpenApiModel(BaseModel):
     """
     Validation schema for OpenAPI Specification 3.0.X.
@@ -525,39 +593,6 @@ class OpenApiModel(BaseModel):
         alias='x-lapidary-responses-global',
         description='Base Responses. Values in Responses declared in Operations override values in this one.',
     )
-
-    def resolve(self, ref: str, t: Optional[type]) -> Any:
-        result = self._schema_get(self.recursive_resolve(ref))
-        if t is not None and not isinstance(result, t):
-            raise TypeError(ref, t, type(result))
-        else:
-            return result
-
-    def recursive_resolve(self, ref: str) -> str:
-        """
-        Resolve recursive references
-        :return: The last reference, which points to a non-reference object
-        """
-
-        stack = []
-
-        while True:
-            model = self._schema_get(ref)
-            if isinstance(model, Reference):
-                ref = model.ref
-                if ref in stack:
-                    raise RecursionError(stack, ref)
-                else:
-                    stack.append(ref)
-            else:
-                return ref
-
-    def _schema_get(self, ref: str) -> Any:
-        model = self
-        path = ref_to_path(ref)
-        for part in path:
-            model = model[part] if isinstance(model, Mapping) else getattr(model, part)
-        return model
 
 
 class Components(BaseModel):
@@ -710,4 +745,3 @@ MediaType.update_forward_refs()
 PathItem.update_forward_refs()
 Operation.update_forward_refs()
 Paths.update_forward_refs()
-
