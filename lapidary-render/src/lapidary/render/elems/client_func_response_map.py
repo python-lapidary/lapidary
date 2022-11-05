@@ -1,9 +1,9 @@
+from lapidary.runtime import openapi
 from .refs import ResolverFunc
 from .response_body import response_type_name
 from .type_hint import resolve_type_hint
 from ..module_path import ModulePath
 from ..names import RESPONSE_BODY
-from ...openapi import model as openapi
 
 
 def get_response_map(responses: openapi.Responses, name: str, module: ModulePath, resolve: ResolverFunc) -> dict:

@@ -1,8 +1,8 @@
+from lapidary.runtime import openapi
 from .attribute import AttributeModel, get_enum_attribute
 from .attribute_annotation import AttributeAnnotationModel
 from .schema_class_model import SchemaClass, ModelType
 from .type_hint import BuiltinTypeHint, TypeHint
-from ...openapi import model as openapi
 
 
 def get_enum_value(value, schema: openapi.Schema) -> AttributeModel:

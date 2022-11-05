@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, Any
 
+from lapidary.runtime import openapi
 from .refs import SchemaOrRef, ResolverFunc
 from .type_hint import TypeHint, get_type_hint
 from ..module_path import ModulePath
 from ..names import get_subtype_name
-from ...openapi import model as openapi
 
 
 @dataclass(frozen=True)

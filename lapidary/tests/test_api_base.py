@@ -49,7 +49,7 @@ class ApiBaseTest(unittest.TestCase):
 
     def test_request_param_list_simple(self):
         class ParamModel(pydantic.BaseModel):
-            a: Annotated[list[str], pydantic.Field(in_=lapidary.runtime.ParamLocation.query, )]
+            a: Annotated[list[str], pydantic.Field(in_=ParamLocation.query)]
 
         query, _, _ = process_params(ParamModel(a=['hello', 'world']))
         self.assertEqual(['hello,world'], query.get_list('a'))

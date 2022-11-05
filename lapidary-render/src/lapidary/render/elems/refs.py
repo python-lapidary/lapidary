@@ -5,8 +5,8 @@ from typing import Callable, TypeVar, Union, Type, cast
 import inflection
 from typing_extensions import TypeAlias
 
+from lapidary.runtime import openapi
 from ..module_path import ModulePath
-from ...openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 

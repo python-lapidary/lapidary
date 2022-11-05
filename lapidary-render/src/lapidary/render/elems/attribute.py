@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import Any, Optional
 
+from lapidary.runtime import openapi
 from .attribute_annotation import AttributeAnnotationModel, get_attr_annotation
 from .refs import ResolverFunc, SchemaOrRef
 from .type_hint import BuiltinTypeHint
 from ..module_path import ModulePath
 from ..names import check_name, maybe_mangle_name
-from ...openapi import model as openapi
 
 
 @dataclass(frozen=True)

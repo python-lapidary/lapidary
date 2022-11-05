@@ -3,13 +3,13 @@ from typing import Generator, Optional
 import inflection
 from mimeparse import best_match
 
+from lapidary.runtime import openapi
 from .refs import ResolverFunc
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
 from .schema_module import _get_schema_module, SchemaModule
 from .type_hint import TypeHint, resolve_type_hint
 from ..module_path import ModulePath
-from ...openapi import model as openapi
 
 
 def get_request_body_classes(

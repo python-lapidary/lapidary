@@ -9,10 +9,9 @@ from uuid import UUID
 import inflection
 from pydantic import BaseModel, Field, Extra
 
-from lapidary.runtime.absent import Absent
+from lapidary.runtime import Absent, openapi
 from .refs import ResolverFunc
 from ..module_path import ModulePath
-from ...openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 

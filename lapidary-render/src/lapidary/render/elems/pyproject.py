@@ -6,8 +6,8 @@ from pathlib import Path
 import tomlkit
 from pydantic import BaseModel, Extra
 
+from lapidary.runtime import openapi
 from ..config import Config
-from ...openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 

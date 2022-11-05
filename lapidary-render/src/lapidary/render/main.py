@@ -5,11 +5,11 @@ from typing import Optional
 
 import typer
 
+from lapidary.runtime import openapi
 from .config import load_config, Config
 from .elems.pyproject import render_pyproject, get_pyproject
 from .load import load_spec
 from .render import render_client
-from ..openapi.model import OpenApiModel
 
 logging.basicConfig()
 logging.getLogger('lapidary').setLevel(logging.INFO)
@@ -69,9 +69,9 @@ def init(
     render_pyproject(project_root, get_pyproject(model.info), config)
 
 
-def update_project(project_root: Path, config: Config) -> OpenApiModel:
+def update_project(project_root: Path, config: Config) -> openapi.OpenApiModel:
     doc = load_spec(project_root, config)
     logger.info('Prepare client model')
-    model = OpenApiModel(**doc)
+    model = openapi.OpenApiModel(**doc)
     render_client(model, project_root, config)
     return model

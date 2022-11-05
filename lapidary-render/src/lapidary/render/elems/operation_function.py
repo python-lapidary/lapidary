@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from typing import Optional, Union
 
 import inflection
-from lapidary.runtime import ParamPlacement
 
+from lapidary.runtime import ParamPlacement, openapi
 from .attribute import AttributeModel
 from .attribute_annotation import AttributeAnnotationModel
 from .client_func_response_map import get_response_map
@@ -16,7 +16,6 @@ from .response_body import response_type_name
 from .type_hint import TypeHint, resolve_type_hint, get_type_hint, GenericTypeHint
 from ..module_path import ModulePath
 from ..names import PARAM_MODEL, get_subtype_name, maybe_mangle_name
-from ...openapi import model as openapi
 
 RESPONSE_BODY = 'response_body'
 

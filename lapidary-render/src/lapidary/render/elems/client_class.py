@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from typing import Union, Generator
 
+from lapidary.runtime import openapi
 from .client_init import ClientInit, get_client_init
 from .operation_function import OperationFunctionModel, get_operation_func
 from .refs import ResolverFunc
 from ..module_path import ModulePath
-from ...openapi import model as openapi
 
 
 @dataclass(frozen=True)

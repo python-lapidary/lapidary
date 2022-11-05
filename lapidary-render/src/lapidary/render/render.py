@@ -8,12 +8,12 @@ from typing import Any, Iterable
 
 from jinja2 import Environment, PackageLoader
 
+from lapidary.runtime import openapi
 from .black import format_code
 from .config import Config
 from .elems import get_resolver, ResolverFunc, get_client_class_module
 from .module_path import ModulePath
 from .schema import get_schema_modules
-from ..openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 

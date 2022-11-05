@@ -3,7 +3,6 @@ from unittest import TestCase
 
 import yaml
 
-from lapidary.openapi import model as openapi
 from lapidary.render.elems.attribute import AttributeModel
 from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
 from lapidary.render.elems.param_model_class import get_param_model_classes
@@ -14,6 +13,7 @@ from lapidary.render.elems.schema_module import SchemaModule, get_schema_module
 from lapidary.render.elems.type_hint import TypeHint
 from lapidary.render.module_path import ModulePath
 from lapidary.render.schema import get_schema_modules
+from lapidary.runtime import openapi
 
 logging.getLogger('lapidary').setLevel(logging.DEBUG)
 

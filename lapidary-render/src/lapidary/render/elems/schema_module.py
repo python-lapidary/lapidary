@@ -3,6 +3,7 @@ from typing import Union, Optional
 
 import inflection
 
+from lapidary.runtime import openapi
 from .module import AbstractModule, template_imports
 from .param_model_class import get_param_model_classes
 from .refs import ResolverFunc
@@ -10,7 +11,6 @@ from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
 from ..module_path import ModulePath
 from ..names import check_name
-from ...openapi import model as openapi
 
 
 @dataclass(frozen=True)

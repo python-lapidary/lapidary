@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 
+from lapidary.runtime import openapi
 from .client_class import ClientClass, get_client_class
 from .module import AbstractModule, template_imports
 from .refs import ResolverFunc
 from ..module_path import ModulePath
-from ...openapi import model as openapi
 
 
 @dataclass(frozen=True)

@@ -2,14 +2,13 @@ from collections.abc import Collection, Mapping
 from functools import singledispatch
 from typing import Any, Optional, Union
 
-from lapidary.runtime import ParamPlacement
 from pydantic import BaseModel, Field
 
+from lapidary.runtime import ParamPlacement, openapi
 from .client_func_response_map import get_response_map
 from .refs import ResolverFunc
 from .type_hint import TypeHint, BuiltinTypeHint
 from ..module_path import ModulePath
-from ...openapi import model as openapi
 
 
 class AuthModel(BaseModel):

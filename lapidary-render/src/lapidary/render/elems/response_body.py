@@ -2,12 +2,12 @@ from typing import Generator
 
 import inflection
 
+from lapidary.runtime import openapi
 from .refs import ResolverFunc
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
 from .schema_module import _get_schema_module, SchemaModule
 from ..module_path import ModulePath
-from ...openapi import model as openapi
 
 
 def get_response_body_classes(

@@ -1,6 +1,7 @@
 import logging
 from typing import Optional, Generator
 
+from lapidary.runtime import openapi
 from .attribute import get_attributes
 from .refs import ResolverFunc
 from .schema_class_enum import get_enum_class
@@ -8,7 +9,6 @@ from .schema_class_model import SchemaClass, ModelType
 from .type_hint import BuiltinTypeHint, TypeHint
 from ..module_path import ModulePath
 from ..names import get_subtype_name
-from ...openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 
