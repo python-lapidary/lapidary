@@ -4,10 +4,11 @@ from typing import Any, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from lapidary.runtime import ParamPlacement, openapi
 from .client_func_response_map import get_response_map
+from .params import ParamPlacement
 from .refs import ResolverFunc
 from .type_hint import TypeHint, BuiltinTypeHint
+from .. import openapi
 from ..module_path import ModulePath
 
 

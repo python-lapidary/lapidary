@@ -1,5 +1,4 @@
 import logging
-import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -29,7 +28,7 @@ def version():
 
 @app.command()
 def update(
-        project_root: Path = typer.Argument(Path('.')),
+        project_root: Path = typer.Argument(Path('')),
         format_: bool = typer.Option(True, '--format/--no-format'),
         cache: bool = True
 ):
@@ -54,12 +53,7 @@ def init(
         logger.error(f'Target "{project_root}" exists')
         raise typer.Exit(code=1)
 
-    target_schema_file_name = Path('openapi').with_suffix(schema_path.suffix)
-    target_schema = project_root / target_schema_file_name
     project_root.mkdir(parents=True, exist_ok=False)
-
-    logger.info('Copying %s to %s', schema_path, target_schema)
-    shutil.copy2(schema_path, target_schema)
 
     config = Config(
         package=package_name,
@@ -71,7 +65,15 @@ def init(
 
 def update_project(project_root: Path, config: Config) -> openapi.OpenApiModel:
     doc = load_spec(project_root, config)
+    save_spec(doc, project_root / 'gen' / config.package / config.specification)
+
     logger.info('Prepare client model')
     model = openapi.OpenApiModel(**doc)
     render_client(model, project_root, config)
     return model
+
+
+def save_spec(doc: dict, path: Path) -> None:
+    import yaml
+    with open(path, 'wt') as stream:
+        yaml.safe_dump(doc, stream, allow_unicode=True)

@@ -9,10 +9,12 @@ from typing import Any, Iterable
 from jinja2 import Environment, PackageLoader
 
 from lapidary.runtime import openapi
+from lapidary.runtime.model.refs import get_resolver, ResolverFunc
+from lapidary.runtime.module_path import ModulePath
 from .black import format_code
 from .config import Config
-from .elems import get_resolver, ResolverFunc, get_client_class_module
-from .module_path import ModulePath
+from .elems import get_client_class_module
+from .elems.module import AbstractModule
 from .schema import get_schema_modules
 
 logger = logging.getLogger(__name__)
@@ -92,5 +94,5 @@ def render_schema_modules(
     return [executor.submit(fn, x) for x in get_schema_modules(model, ModulePath(config.package), resolver)]
 
 
-def render_(source: str, env: Environment, gen_root: Path, format_: bool, render_model: Any):
+def render_(source: str, env: Environment, gen_root: Path, format_: bool, render_model: AbstractModule):
     render(render_model, source, render_model.path.to_path(gen_root), env, format_)

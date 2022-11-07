@@ -1,13 +1,13 @@
 from unittest import TestCase
 
-from lapidary.render.elems.attribute import AttributeModel
-from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
-from lapidary.render.elems.refs import get_resolver
 from lapidary.render.elems.schema_class import get_schema_class, get_schema_classes
 from lapidary.render.elems.schema_class_model import SchemaClass
-from lapidary.render.elems.type_hint import BuiltinTypeHint, TypeHint
-from lapidary.render.module_path import ModulePath
 from lapidary.runtime import Absent, openapi
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.model.attribute import AttributeModel
+from lapidary.runtime.model.attribute_annotation import AttributeAnnotationModel
+from lapidary.runtime.model.refs import get_resolver
+from lapidary.runtime.model.type_hint import BuiltinTypeHint, TypeHint
 
 model = openapi.OpenApiModel(
     openapi='3.0.3',

@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from lapidary.render.elems.refs import resolve
-from lapidary.render.elems.type_hint import TypeHint, get_type_hint
-from lapidary.render.module_path import ModulePath
 from lapidary.runtime import openapi
+from lapidary.runtime.model.refs import resolve
+from lapidary.runtime.model.type_hint import TypeHint, get_type_hint
+from lapidary.runtime.module_path import ModulePath
 
 schema_carol = openapi.Schema()
 schema_bob = openapi.Schema(properties={'carol': schema_carol})

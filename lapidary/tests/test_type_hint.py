@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from lapidary.render.elems.refs import get_resolver
-from lapidary.render.elems.type_hint import GenericTypeHint, BuiltinTypeHint, get_type_hint
-from lapidary.render.module_path import ModulePath
 from lapidary.runtime import openapi
+from lapidary.runtime.model.refs import get_resolver
+from lapidary.runtime.model.type_hint import GenericTypeHint, BuiltinTypeHint, get_type_hint, TypeHint
+from lapidary.runtime.module_path import ModulePath
 
 schema_carol = openapi.Schema()
 schema_bob = openapi.Schema(properties={'carol': schema_carol})
@@ -58,3 +58,6 @@ class OneOfTypeHintTest(TestCase):
                 get_resolver(model, 'mypackage')
             )
         )
+
+    def test_resolve(self):
+        print(TypeHint.from_str('lapidary.runtime.model.client_init.AuthModel').resolve())

@@ -7,7 +7,7 @@ import httpx
 import pydantic
 
 from .absent import ABSENT
-from .params import ParamLocation
+from .model.params import ParamLocation
 
 
 @unique

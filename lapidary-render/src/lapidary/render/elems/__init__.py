@@ -60,11 +60,7 @@ as attribute
 
 """
 
-from .attribute import get_attributes, AttributeModel
-from .attribute_annotation import get_attr_annotation, AttributeAnnotationModel
-from .client_class import ClientInit, get_client_init, get_client_class, ClientClass, get_operations
 from .client_module import get_client_class_module, ClientModule
-from .refs import ResolverFunc, get_resolver
-from .request_body import get_request_body_module
+from .module_request_body import get_request_body_module
 from .response_body import get_response_body_module
 from .schema_module import SchemaModule, get_modules_for_components_schemas, get_param_model_classes_module

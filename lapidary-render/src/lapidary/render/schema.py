@@ -1,9 +1,10 @@
 import logging
 from typing import Generator
 
-from . import names as mod_name
+from lapidary.runtime import names as mod_name
+from lapidary.runtime.model import get_operations
 from .elems import (
-    get_operations, get_request_body_module, get_response_body_module, SchemaModule,
+    get_request_body_module, get_response_body_module, SchemaModule,
     get_modules_for_components_schemas, get_param_model_classes_module,
 )
 
@@ -32,5 +33,3 @@ def get_schema_modules(model, root_module, resolver) -> Generator[SchemaModule, 
                 mod = get_response_body_module(op, op_root_module / mod_name.RESPONSE_BODY, resolver)
                 if len(mod.body) > 0:
                     yield mod
-
-

@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import datetime as dt
+import importlib
 import logging
 import typing
-from typing import Annotated, Union
+from typing import Annotated, Union, Type
 from uuid import UUID
 
 import inflection
 from pydantic import BaseModel, Field, Extra
 
-from lapidary.runtime import Absent, openapi
 from .refs import ResolverFunc
+from .. import openapi
+from ..absent import Absent
 from ..module_path import ModulePath
 
 logger = logging.getLogger(__name__)
@@ -172,6 +174,10 @@ class TypeHint(BaseModel):
 
     def __hash__(self) -> int:
         return self.module.__hash__() * 14159 + self.name.__hash__()
+
+    def resolve(self) -> Type:
+        mod = importlib.import_module(self.module)
+        return getattr(mod, self.name)
 
 
 class BuiltinTypeHint(TypeHint):

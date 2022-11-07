@@ -2,11 +2,11 @@ import unittest
 
 import yaml
 
-from lapidary.render.elems import get_client_class
 from lapidary.render.elems.param_model_class import get_param_model_classes
-from lapidary.render.elems.type_hint import TypeHint
-from lapidary.render.module_path import ModulePath
 from lapidary.runtime import openapi
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.model.client_class import get_client_class
+from lapidary.runtime.model.type_hint import TypeHint
 
 module_path = ModulePath('test')
 

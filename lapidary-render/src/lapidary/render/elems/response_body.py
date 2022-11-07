@@ -1,13 +1,12 @@
 from typing import Generator
 
-import inflection
-
 from lapidary.runtime import openapi
-from .refs import ResolverFunc
+from lapidary.runtime.model.refs import ResolverFunc
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.names import response_type_name
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
 from .schema_module import _get_schema_module, SchemaModule
-from ..module_path import ModulePath
 
 
 def get_response_body_classes(
@@ -31,7 +30,3 @@ def get_response_body_classes(
 def get_response_body_module(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> SchemaModule:
     classes = [cls for cls in get_response_body_classes(op, module, resolve)]
     return _get_schema_module(classes, module)
-
-
-def response_type_name(operation_id: str, status_code: str):
-    return inflection.camelize(operation_id) + status_code + 'Response'

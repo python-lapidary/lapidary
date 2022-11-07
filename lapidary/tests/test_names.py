@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from lapidary.render.names import _mangle_name
+from lapidary.runtime.names import _mangle_name
 
 
 class NamesTest(TestCase):

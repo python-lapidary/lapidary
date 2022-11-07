@@ -8,14 +8,14 @@ from typing import Generator
 import inflection
 
 from lapidary.runtime import openapi
-from .attribute import AttributeModel
-from .attribute_annotation import get_attr_annotation
-from .refs import ResolverFunc
+from lapidary.runtime.model.attribute import AttributeModel
+from lapidary.runtime.model.attribute_annotation import get_attr_annotation
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.names import get_subtype_name, maybe_mangle_name, check_name
+from lapidary.runtime.model.type_hint import TypeHint
+from lapidary.runtime.model.refs import ResolverFunc
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass, ModelType
-from .type_hint import TypeHint
-from ..module_path import ModulePath
-from ..names import get_subtype_name, maybe_mangle_name, check_name
 
 
 def get_param_attribute(

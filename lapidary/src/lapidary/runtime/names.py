@@ -65,3 +65,7 @@ def maybe_mangle_name(name: str, check_builtins=True) -> str:
         return _mangle_name(name)
     else:
         return name
+
+
+def response_type_name(operation_id: str, status_code: str):
+    return inflection.camelize(operation_id) + status_code + 'Response'
