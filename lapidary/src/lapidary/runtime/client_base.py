@@ -40,9 +40,8 @@ class ClientBase(ApiBase):
 
         self._ops = {op.name: op for op in client_model.methods}
 
-
-    def _handle_call(self, name: str, request_body=None, **kwargs) -> Coroutine:
-        async def op_handler(op: OperationFunctionModel):
+    def __getattr__(self, item: str):
+        async def op_handler(op: OperationFunctionModel, request_body=None, **kwargs):
             if op.params_model_name:
                 param_model = op.params_model_name.resolve().parse_obj(kwargs)
             else:
@@ -59,10 +58,7 @@ class ClientBase(ApiBase):
                 # auth=self.auth_tokenAuth,
             )
 
-        return op_handler(self._ops[name])
-
-    def __getattr__(self, item: str):
-        return functools.partial(self._handle_call, item)
+        return partial(op_handler, self._ops[item])
 
 
 def load_model(mod: str) -> tuple[OpenApiModel, ClientClass]:
