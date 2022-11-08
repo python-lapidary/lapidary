@@ -1,11 +1,22 @@
-from typing import Optional, Generator
+from typing import NamedTuple
 
 import httpx
 import pydantic
 
-from .model.params import ParamLocation
+from .common import PageFlowGenT
+from ..model.client_init import ApiKeyAuthModel
+from ..model.params import ParamLocation
 
-PageFlowGenT = Generator[httpx.Request, httpx.Response, None]
+
+class APIKey(NamedTuple):
+    api_key: str
+
+    def create(self, model: ApiKeyAuthModel) -> httpx.Auth:
+        return ApiKeyAuth(
+            api_key=self.api_key,
+            name=model.param_name,
+            placement=model.placement,
+        )
 
 
 class ApiKeyAuth(httpx.Auth, pydantic.BaseModel):
@@ -25,13 +36,3 @@ class ApiKeyAuth(httpx.Auth, pydantic.BaseModel):
         else:
             raise ValueError(self.placement)
         yield request
-
-
-class HTTPAuth(ApiKeyAuth):
-    def __init__(self, scheme: str, token: str, bearer_format: Optional[str] = None):
-        value_format = 'Bearer {token}' if scheme.lower() == 'bearer' else bearer_format
-        super().__init__(
-            api_key=value_format.format(token=token),
-            name='Authorization',
-            placement=ParamLocation.header,
-        )

@@ -1,9 +1,11 @@
-import functools
-from collections.abc import Coroutine
+import dataclasses
+from functools import partial
+from typing import Optional, Any
 
 import httpx
 
 from . import ApiBase
+from .auth.common import AuthParamModel
 from .load import load_yaml_cached_
 from .model.client_class import get_client_class, ClientClass
 from .model.operation_function import OperationFunctionModel
@@ -13,16 +15,28 @@ from .openapi import OpenApiModel
 
 
 class ClientBase(ApiBase):
-    def __init__(self, **kwargs):
+    def __init__(self, base_url: Optional[str] = None, auth: Any = None):
         root = ModulePath(self.__module__).parent()
 
         openapi, client_model = load_model(str(root))
 
-        base_url = kwargs.pop('base_url', None)
-        if base_url is None:
+        if base_url is None and openapi.servers and len(openapi.servers) > 0:
             base_url = openapi.servers[0].url
+        assert base_url is not None
 
-        super().__init__(httpx.AsyncClient(base_url=base_url))
+        if auth is not None:
+            # asdict returns deep-dict, here we need a shallow one
+            auth_dict = {field.name: getattr(auth, field.name) for field in dataclasses.fields(auth)}
+            auth_name, auth_factory = next(filter(lambda item: item[1] is not None, auth_dict.items()))
+            auth_model = next(filter(lambda model: model.auth_name == auth_name, client_model.init_method.auth_models))
+
+            auth_factory: AuthParamModel
+            auth_handler = auth_factory.create(auth_model)
+        else:
+            auth_handler = None
+
+        client = httpx.AsyncClient(auth=auth_handler, base_url=base_url)
+        super().__init__(client)
 
         self._ops = {op.name: op for op in client_model.methods}
 
