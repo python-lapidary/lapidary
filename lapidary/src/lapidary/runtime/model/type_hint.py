@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime as dt
 import importlib
 import logging
-import typing
 from typing import Annotated, Union, Type
 from uuid import UUID
 
@@ -138,7 +137,7 @@ class TypeHint(BaseModel):
         return TypeHint(module=module, name=name)
 
     @staticmethod
-    def from_type(typ: typing.Type) -> TypeHint:
+    def from_type(typ: Type) -> TypeHint:
         if hasattr(typ, '__origin__'):
             raise ValueError('Generic types unsupported', typ)
         module = typ.__module__
@@ -219,6 +218,9 @@ class EllipsisTypeHint(TypeHint):
     def __hash__(self) -> int:
         return (2 << 13) - 1
 
+    def resolve(self) -> Type:
+        raise TypeError(self)
+
 
 class GenericTypeHint(TypeHint):
     args: Annotated[list[TypeHint], Field(default_factory=list)]
@@ -255,6 +257,10 @@ class GenericTypeHint(TypeHint):
 
     def _types(self) -> list[TypeHint]:
         return [self, *[typ for arg in self.args for typ in arg._types()]]
+
+    def resolve(self) -> Type:
+        generic = super().resolve()
+        return generic.__class_getitem__(*(arg.resolve() for arg in self.args))
 
     def __repr__(self) -> str:
         return self.full_name()
