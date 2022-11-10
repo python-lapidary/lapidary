@@ -13,7 +13,7 @@ from lapidary.runtime.model.refs import get_resolver, ResolverFunc
 from lapidary.runtime.module_path import ModulePath
 from .black import format_code
 from .config import Config
-from .elems import get_client_class_module
+from .elems import get_client_class_module, ClientModule
 from .elems.module import AbstractModule
 from .schema import get_schema_modules
 
@@ -58,10 +58,14 @@ def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> 
     with (
         concurrent.futures.ProcessPoolExecutor() as executor
     ):
-        client_future = executor.submit(render_client_module, model, config, gen_root, resolver, env)
+        root_mod = ModulePath(config.package)
+        client_module = get_client_class_module(model, root_mod / 'client', root_mod, resolver)
+        client_future = executor.submit(render_client_module, client_module, root_mod, gen_root, config.format, env)
+        stub_future   = executor.submit(render_client_stub,   client_module, root_mod, gen_root, config.format, env)
+        auth_future   = executor.submit(render_auth_module,   client_module, root_mod, gen_root, config.format, env)
         schema_futures = render_schema_modules(model, config, gen_root, resolver, env, executor)
 
-        for f in [*schema_futures, client_future]:
+        for f in [*schema_futures, client_future, auth_future, stub_future]:
             f.result()
 
     ensure_init_py(gen_root, config.package)
@@ -75,15 +79,33 @@ def ensure_init_py(gen_root, package_name):
 
 
 def render_client_module(
-        model: openapi.OpenApiModel, config: Config, gen_root: Path, resolver: ResolverFunc, env: Environment
+        client_module: ClientModule, package_root: ModulePath,
+        gen_root: Path, format_: bool, env: Environment
 ):
-    root_mod = ModulePath(config.package)
-    client_module_path = root_mod / 'client.py'
-    file_path = client_module_path.to_path(gen_root)
+    file_path = (package_root / 'client.py').to_path(gen_root)
     logger.info('Render client module to %s', file_path)
 
-    client_class_module = get_client_class_module(model, client_module_path, root_mod, resolver)
-    render(client_class_module, 'client_module.py.jinja2', file_path, env, config.format)
+    render(client_module, 'client/client.py.jinja2', file_path, env, format_)
+
+
+def render_client_stub(
+        client_module: ClientModule, package_root: ModulePath,
+        gen_root: Path, format_: bool, env: Environment
+):
+    file_path = (package_root / 'client.pyi').to_path(gen_root)
+    logger.info('Render client stub to %s', file_path)
+
+    render(client_module, 'client/client.pyi.jinja2', file_path, env, format_)
+
+
+def render_auth_module(
+        client_module: ClientModule, package_root: ModulePath,
+        gen_root: Path, format_: bool, env: Environment
+):
+    file_path = (package_root / 'auth.py').to_path(gen_root)
+    logger.info('Render auth module to %s', file_path)
+
+    render(client_module, 'auth/auth.py.jinja2', file_path, env, format_)
 
 
 def render_schema_modules(

@@ -1,9 +1,10 @@
-{% from 'type_hint.py.jinja2' import type_hint -%}
-from __future__ import annotations
-
 import typing
+
 import lapidary.runtime
+import lapidary.runtime.auth
 import pydantic
+
+import {{ model.path.parent() }}.auth
 {%- for imp in model.imports %}
 import {{ imp }}
 {%- endfor %}
@@ -11,11 +12,10 @@ import {{ imp }}
 {% set model = model.body %}
 
 class ApiClient(lapidary.runtime.ApiBase):
-{%- include 'client_init.py.jinja2' %}
-    async def __aenter__(self) -> 'ApiClient':
-        return await super().__aenter__()
+{% include 'client/method_init.py.jinja2' %}
+
 {% for func in model.methods | sort(attribute='name') %}
-{%- include 'client_op_method.py.jinja2' %}
+{%- include 'client/method_operation.py.jinja2' %}
 {%- else %}
     pass
 {%- endfor %}

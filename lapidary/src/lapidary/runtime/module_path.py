@@ -27,7 +27,10 @@ class ModulePath:
         return ModulePath._SEP.join(self.parts)
 
     def to_path(self, root: pathlib.Path):
-        return root.joinpath(*self.parts).with_suffix('.py')
+        name = self.parts[-1]
+        dot_idx=name.rfind('.')
+        suffix = name[dot_idx:] if dot_idx != -1 else '.py'
+        return root.joinpath(*self.parts).with_suffix(suffix)
 
     def parent(self) -> ModulePath:
         return ModulePath(self.parts[:-1])

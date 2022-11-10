@@ -1,0 +1,11 @@
+import typing
+from dataclasses import dataclass
+
+from lapidary.runtime import auth
+
+@dataclass
+class Auth:
+    tokenAuth: typing.Optional[auth.HTTP]
+{%- for auth_model in model.auth_models %}
+{% include 'auth/client_auth_' + auth_model.__class__.__name__ + '.py.jinja2' %}
+{%- endfor %}
