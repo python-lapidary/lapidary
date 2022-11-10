@@ -11,6 +11,7 @@ version = "0.6.1"
 packages = [{ include = "lapidary", from = "src" }]
 readme = 'Readme.md'
 repository = 'https://github.com/python-lapidary/lapidary'
+include = [{ path = 'src/lapidary/render/templates' }]
 
 
 [tool.poetry.dependencies]
