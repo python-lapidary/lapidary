@@ -2,8 +2,7 @@
 Param model is a synthetic (from the perspective of OpenAPI specification) object that holds and validates all Operation
 parameters.
 """
-
-from typing import Generator
+from collections.abc import Iterator
 
 import inflection
 
@@ -40,7 +39,7 @@ def get_param_model_classes(
         operation: openapi.Operation,
         module: ModulePath,
         resolver: ResolverFunc,
-) -> Generator[SchemaClass, None, None]:
+) -> Iterator[SchemaClass]:
     # handle sub schemas
     for param in operation.parameters:
         schema = param.schema_

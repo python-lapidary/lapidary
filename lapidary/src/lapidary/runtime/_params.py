@@ -1,6 +1,6 @@
 import enum
 import uuid
-from collections.abc import Generator
+from collections.abc import Iterator
 from enum import Enum, unique
 
 import httpx
@@ -40,7 +40,7 @@ def get_style(param: pydantic.fields.ModelField) -> ParamStyle:
     return param.field_info.extra.get('style', default_style[location])
 
 
-def process_params(model: pydantic.BaseModel) -> (httpx.QueryParams, httpx.Headers, httpx.Cookies):
+def process_params(model: pydantic.BaseModel) -> tuple[httpx.QueryParams, httpx.Headers, httpx.Cookies]:
     containers = {
         ParamLocation.cookie: [],
         ParamLocation.header: [],
@@ -71,7 +71,7 @@ def process_params(model: pydantic.BaseModel) -> (httpx.QueryParams, httpx.Heade
     )
 
 
-def serialize_param(value, style: ParamStyle, explode_list: bool) -> Generator[str, None, None]:
+def serialize_param(value, style: ParamStyle, explode_list: bool) -> Iterator[str]:
     if value is None:
         return
     elif isinstance(value, str):

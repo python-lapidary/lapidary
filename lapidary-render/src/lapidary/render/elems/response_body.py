@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Iterable
 
 from lapidary.runtime import openapi
 from lapidary.runtime.model.refs import ResolverFunc
@@ -14,7 +14,7 @@ def get_response_body_classes(
         module: ModulePath,
         resolve: ResolverFunc,
 
-) -> Generator[SchemaClass, None, None]:
+) -> Iterable[SchemaClass]:
     for status_code, response in operation.responses.__root__.items():
         if isinstance(response, openapi.Reference):
             continue

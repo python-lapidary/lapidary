@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Iterator
 
 from mimeparse import best_match
 
@@ -15,8 +15,7 @@ def get_request_body_classes(
         operation: openapi.Operation,
         module: ModulePath,
         resolve: ResolverFunc,
-
-) -> Generator[SchemaClass, None, None]:
+) -> Iterator[SchemaClass]:
     rb = operation.requestBody
     if isinstance(rb, openapi.Reference):
         return

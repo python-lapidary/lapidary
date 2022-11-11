@@ -1,5 +1,6 @@
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Union, Generator
+from typing import Union
 
 from lapidary.runtime import openapi
 from .client_init import ClientInit, get_client_init
@@ -30,7 +31,7 @@ def get_client_class(openapi_model: openapi.OpenApiModel, module: ModulePath, re
 def get_operations(
         path_item: openapi.PathItem,
         skip_reference=False,
-) -> Generator[tuple[str, Union[openapi.Operation, openapi.Reference]], None, None]:
+) -> Iterator[tuple[str, Union[openapi.Operation, openapi.Reference]]]:
     for op_name in path_item.__fields_set__:
         v = getattr(path_item, op_name)
         if (
