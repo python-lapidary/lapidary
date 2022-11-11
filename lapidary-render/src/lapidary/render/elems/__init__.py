@@ -60,7 +60,7 @@ as attribute
 
 """
 
-from .client_module import get_client_class_module, ClientModule
-from .module_request_body import get_request_body_module
-from .response_body import get_response_body_module
-from .schema_module import SchemaModule, get_modules_for_components_schemas, get_param_model_classes_module
+from .auth_module import render_auth_module
+from .client_module import get_client_class_module, render_client_module, render_client_stub
+from .pyproject import render_pyproject, get_pyproject
+from .schema_modules import render_schema_modules

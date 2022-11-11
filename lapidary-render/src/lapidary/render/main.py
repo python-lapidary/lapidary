@@ -5,10 +5,10 @@ from typing import Optional
 import typer
 
 from lapidary.runtime import openapi
+from .client import render_client
 from .config import load_config, Config
-from .elems.pyproject import render_pyproject, get_pyproject
+from .elems import render_pyproject, get_pyproject
 from .load import load_spec
-from .render import render_client
 
 logging.basicConfig()
 logging.getLogger('lapidary').setLevel(logging.INFO)
@@ -40,7 +40,7 @@ def update(
     update_project(project_root, config)
 
 
-@app.command('init')
+@app.command()
 def init(
         schema_path: Path,
         project_root: Path,

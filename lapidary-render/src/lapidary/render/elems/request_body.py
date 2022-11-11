@@ -3,11 +3,12 @@ from typing import Generator
 from mimeparse import best_match
 
 from lapidary.runtime import openapi
-from lapidary.runtime.module_path import ModulePath
-from lapidary.runtime.model.request_body import request_type_name
 from lapidary.runtime.model.refs import ResolverFunc
+from lapidary.runtime.model.request_body import request_type_name
+from lapidary.runtime.module_path import ModulePath
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
+from .schema_module import _get_schema_module, SchemaModule
 
 
 def get_request_body_classes(
@@ -29,3 +30,6 @@ def get_request_body_classes(
     yield from get_schema_classes(schema, request_type_name(operation.operationId), module, resolve)
 
 
+def get_request_body_module(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> SchemaModule:
+    classes = [cls for cls in get_request_body_classes(op, module, resolve)]
+    return _get_schema_module(classes, module)

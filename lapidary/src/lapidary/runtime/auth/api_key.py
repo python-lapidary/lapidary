@@ -1,14 +1,14 @@
-from typing import NamedTuple
+from dataclasses import dataclass
 
 import httpx
-import pydantic
 
 from .common import PageFlowGenT
 from ..model.client_init import ApiKeyAuthModel
 from ..model.params import ParamLocation
 
 
-class APIKey(NamedTuple):
+@dataclass(eq=False, order=False, frozen=True)
+class APIKey:
     api_key: str
 
     def create(self, model: ApiKeyAuthModel) -> httpx.Auth:
@@ -19,7 +19,8 @@ class APIKey(NamedTuple):
         )
 
 
-class ApiKeyAuth(httpx.Auth, pydantic.BaseModel):
+@dataclass(eq=False, order=False, frozen=True)
+class ApiKeyAuth(httpx.Auth):
     api_key: str
     name: str
     placement: ParamLocation
