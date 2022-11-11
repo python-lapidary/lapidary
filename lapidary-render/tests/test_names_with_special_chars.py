@@ -149,7 +149,7 @@ paths:
         """
 
         model = openapi.OpenApiModel.parse_obj(yaml.safe_load(schema_text))
-        param_model_class=next(get_param_model_classes(model.paths.__root__['/'].get, module_path, None))
+        param_model_class = next(get_param_model_classes(model.paths.__root__['/'].get, module_path, None))
 
         attr = param_model_class.attributes[0]
 
