@@ -7,6 +7,7 @@ from lapidary.runtime.module_path import ModulePath
 from .client_module import ClientModule
 from ..render import render
 
+logger = logging.getLogger(__name__)
 
 
 def render_auth_module(
