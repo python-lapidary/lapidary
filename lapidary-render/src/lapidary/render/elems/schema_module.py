@@ -1,12 +1,10 @@
 from dataclasses import dataclass, field
 from typing import Union, Optional
 
-import inflection
-
 from lapidary.runtime import openapi
-from lapidary.runtime.module_path import ModulePath
-from lapidary.runtime.names import check_name
 from lapidary.runtime.model.refs import ResolverFunc
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.names import check_name, get_schema_module_name
 from .module import AbstractModule, template_imports
 from .param_model_class import get_param_model_classes
 from .schema_class import get_schema_classes
@@ -31,7 +29,7 @@ def get_modules_for_components_schemas(
         if isinstance(schema, openapi.Schema):
             name = schema.lapidary_name or name
             check_name(name)
-            module = get_schema_module(schema, name, root_package / inflection.underscore(name), resolver)
+            module = get_schema_module(schema, name, root_package / get_schema_module_name(name), resolver)
             if module is not None:
                 modules.append(module)
     return modules
