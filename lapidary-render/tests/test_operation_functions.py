@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from lapidary.render.elems.module_request_body import get_request_body_module
+from lapidary.render.elems.request_body import get_request_body_module
 from lapidary.render.elems.response_body import get_response_body_module
 from lapidary.render.elems.schema_class_model import SchemaClass
 from lapidary.render.elems.schema_module import SchemaModule

@@ -4,7 +4,7 @@ from typing import Optional, Any
 
 import httpx
 
-from . import ApiBase
+from .api_base import ApiBase
 from .auth.common import AuthParamModel
 from .load import load_yaml_cached_
 from .model.client_class import get_client_class, ClientClass
