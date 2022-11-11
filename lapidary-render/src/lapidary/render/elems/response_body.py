@@ -13,7 +13,6 @@ def get_response_body_classes(
         operation: openapi.Operation,
         module: ModulePath,
         resolve: ResolverFunc,
-
 ) -> Iterable[SchemaClass]:
     for status_code, response in operation.responses.__root__.items():
         if isinstance(response, openapi.Reference):
@@ -22,6 +21,8 @@ def get_response_body_classes(
             continue
         for media_type_name, media_type in response.content.items():
             schema = media_type.schema_
+            if schema is None:
+                continue
             if isinstance(schema, openapi.Reference):
                 continue
             yield from get_schema_classes(schema, response_type_name(operation.operationId, status_code), module, resolve)
