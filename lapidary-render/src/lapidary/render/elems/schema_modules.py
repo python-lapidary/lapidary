@@ -9,7 +9,6 @@ from lapidary.runtime import openapi, names as mod_name
 from lapidary.runtime.model.client_class import get_operations
 from lapidary.runtime.model.refs import ResolverFunc
 from lapidary.runtime.module_path import ModulePath
-from .module import AbstractModule
 from .request_body import get_request_body_module
 from .response_body import get_response_body_module
 from .schema_module import SchemaModule, get_modules_for_components_schemas, get_param_model_classes_module
@@ -20,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 def get_schema_modules(model: openapi.OpenApiModel, root_module: ModulePath, resolver: ResolverFunc) -> Iterable[SchemaModule]:
-
     if model.components.schemas:
         logger.info('Render schema modules')
         path = root_module / 'components' / 'schemas'
@@ -48,7 +46,7 @@ def render_schema_modules(
         model: openapi.OpenApiModel, config: Config, gen_root: Path, resolver: ResolverFunc, env: Environment,
         executor: Executor
 ) -> Iterable[Future]:
-    def fn(render_model: AbstractModule) -> None:
-        render(render_model, 'schema_module.py.jinja2', model.path.to_path(gen_root), env, config.format)
-
-    return [executor.submit(fn, x) for x in get_schema_modules(model, ModulePath(config.package), resolver)]
+    return [
+        executor.submit(render, mod, 'schema_module.py.jinja2', mod.path.to_path(gen_root), env, config.format)
+        for mod in get_schema_modules(model, ModulePath(config.package), resolver)
+    ]
