@@ -60,7 +60,5 @@ as attribute
 
 """
 
-from .auth_module import render_auth_module
-from .client_module import get_client_class_module, render_client_module, render_client_stub
-from .pyproject import render_pyproject, get_pyproject
+from .client_module import get_client_class_module
 from .schema_modules import render_schema_modules

@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Callable
+from typing_extensions import TypeAlias
 
 from jinja2 import Environment
 
@@ -8,10 +9,15 @@ from .black import format_code
 
 logger = logging.getLogger(__name__)
 
+EnvFactory: TypeAlias = Callable[[], Environment]
 
-def render(render_model: Any, source: str, destination: Path, env: Environment, format_: bool) -> None:
+
+def render(source: str, destination: Path, env: EnvFactory, format_: bool, **kwargs) -> None:
+    """Pass kwargs to jinja2 render"""
+
+    logger.info('Render %s to %s', source, destination)
     try:
-        code = env.get_template(source).render(model=render_model)
+        code = env().get_template(source).render(**kwargs)
     except Exception:
         logger.info('Failed to render %s', destination)
         raise

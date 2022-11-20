@@ -1,26 +1,34 @@
+import dataclasses
 from pathlib import Path
-from typing import Optional
 
 import tomli
-from pydantic import BaseModel
+
+PYPROJ_TOML = 'pyproject.toml'
 
 
-class Config(BaseModel):
-    specification = 'openapi.yaml'
+@dataclasses.dataclass
+class Config:
     package: str
-    errata: Optional[str] = None
-    format = True
-    cache = True
+    format: bool = True
+    cache: bool = True
+
+    src_root: str = 'src'
+    gen_root: str = 'gen'
+    patches: str = 'patches'
+
+    def get_patches(self, project_root: Path) -> Path:
+        return project_root / self.src_root / self.patches
+
+    def get_openapi(self, project_root: Path) -> Path:
+        return project_root / self.src_root / 'openapi.yaml'
 
 
-def load_config(config_path: Path) -> Config:
-    if not config_path.exists():
-        raise FileNotFoundError(config_path)
+def load_config(project_root: Path) -> Config:
+    pyproj_path = project_root / PYPROJ_TOML
+    if not pyproj_path.exists():
+        raise FileNotFoundError(pyproj_path)
 
-    with open(config_path, 'br') as fb:
-        pyproject = tomli.load(fb)
-        try:
-            config_dict = pyproject['tool']['lapidary']
-        except KeyError:
-            raise SystemExit('Lapidary not configured for the project')
-        return Config(**config_dict)
+    with open(pyproj_path, 'br') as fb:
+        pyproj = tomli.load(fb)
+        pyproj_dict = pyproj['tool']['lapidary']
+        return Config(**pyproj_dict)

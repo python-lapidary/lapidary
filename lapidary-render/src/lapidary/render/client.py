@@ -9,40 +9,45 @@ from lapidary.runtime import openapi
 from lapidary.runtime.model.refs import get_resolver
 from lapidary.runtime.module_path import ModulePath
 from .config import Config
-from .elems import get_client_class_module, render_auth_module, render_client_module, render_client_stub, render_schema_modules
+from .elems import get_client_class_module, render_schema_modules
+from .render import render, EnvFactory
 
 logger = logging.getLogger(__name__)
 
 
-def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> None:
-    env = Environment(
+def environment() -> EnvFactory:
+    return lambda: Environment(
         keep_trailing_newline=True,
         loader=PackageLoader("lapidary.render"),
     )
 
-    gen_root = target / 'gen'
-    gen_root.mkdir(parents=True, exist_ok=True)
 
+def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> None:
+    gen_root = target / config.gen_root
     resolver = get_resolver(model, config.package)
+    root_mod = ModulePath(config.package)
+    pkg_path = root_mod.to_path(gen_root, False)
+    client_module = get_client_class_module(model, root_mod / 'client', root_mod, resolver)
+    format_ = config.format
 
     with (
         concurrent.futures.ProcessPoolExecutor() as executor
     ):
-        root_mod = ModulePath(config.package)
-        client_module = get_client_class_module(model, root_mod / 'client', root_mod, resolver)
-        client_future = executor.submit(render_client_module, client_module, root_mod, gen_root, config.format, env)
-        stub_future = executor.submit(render_client_stub, client_module, root_mod, gen_root, config.format, env)
-        auth_future = executor.submit(render_auth_module, client_module, root_mod, gen_root, config.format, env)
-        schema_futures = render_schema_modules(model, config, gen_root, resolver, env, executor)
+        init_future = executor.submit(render, 'init/init.py.jinja2', pkg_path / '__init__.py', environment, format_)
+        client_future = executor.submit(render, 'client/client.py.jinja2', pkg_path / 'client.py', environment, format_, model=client_module)
+        stub_future = executor.submit(render, 'client/client.pyi.jinja2', pkg_path / 'client.pyi', environment, format_, model=client_module)
+        auth_future = executor.submit(render, 'auth/auth.py.jinja2', pkg_path / 'auth.py', environment, format_, model=client_module)
+        schema_futures = render_schema_modules(model, config, gen_root, resolver, environment, executor)
 
-        for f in [*schema_futures, client_future, auth_future, stub_future]:
+        for f in [*schema_futures, client_future, auth_future, stub_future, init_future]:
             f.result()
 
-    ensure_init_py(gen_root, config.package)
+    ensure_init_py(pkg_path)
+    (pkg_path / 'py.typed').touch()
     logger.info('Done.')
 
 
-def ensure_init_py(gen_root, package_name):
-    for (dirpath, dirnames, filenames) in os.walk(gen_root / package_name):
+def ensure_init_py(pkg_path: Path) -> None:
+    for (dirpath, dirnames, filenames) in os.walk(pkg_path):
         if '__init__.py' not in filenames:
             (Path(dirpath) / '__init__.py').touch()
