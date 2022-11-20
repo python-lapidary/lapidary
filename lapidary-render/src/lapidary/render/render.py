@@ -26,7 +26,8 @@ def render(source: str, destination: Path, env: EnvFactory, format_: bool, **kwa
         try:
             code = format_code(code)
         except Exception:
-            logger.info('Failed to format %s', destination)
+            logger.warning('Failed to format %s', destination)
+            raise
 
     try:
         destination.parent.mkdir(parents=True, exist_ok=True)
