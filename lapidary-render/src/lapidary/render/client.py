@@ -10,13 +10,14 @@ from lapidary.runtime.model.refs import get_resolver
 from lapidary.runtime.module_path import ModulePath
 from .config import Config
 from .elems import get_client_class_module, render_schema_modules
-from .render import render, EnvFactory
+from .render import render
 
 logger = logging.getLogger(__name__)
 
 
-def environment() -> EnvFactory:
-    return lambda: Environment(
+# Use factory because its cache isn't pickable.
+def environment() -> Environment:
+    return Environment(
         keep_trailing_newline=True,
         loader=PackageLoader("lapidary.render"),
     )
