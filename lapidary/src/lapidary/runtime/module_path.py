@@ -26,11 +26,14 @@ class ModulePath:
     def str(self):
         return ModulePath._SEP.join(self.parts)
 
-    def to_path(self, root: pathlib.Path):
-        name = self.parts[-1]
-        dot_idx=name.rfind('.')
-        suffix = name[dot_idx:] if dot_idx != -1 else '.py'
-        return root.joinpath(*self.parts).with_suffix(suffix)
+    def to_path(self, root: pathlib.Path, is_module=True):
+        path = root.joinpath(*self.parts)
+        if is_module:
+            name = self.parts[-1]
+            dot_idx = name.rfind('.')
+            suffix = name[dot_idx:] if dot_idx != -1 else '.py'
+            path = path.with_suffix(suffix)
+        return path
 
     def parent(self) -> ModulePath:
         return ModulePath(self.parts[:-1])
