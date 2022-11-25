@@ -1,6 +1,6 @@
 import dataclasses
 from functools import partial
-from typing import Optional, Any
+from typing import Optional, Any, cast
 
 import httpx
 
@@ -47,9 +47,11 @@ class ClientBase(ApiBase):
         self._ops = {op.name: op for op in client_model.methods}
 
     def __getattr__(self, item: str):
+        import pydantic
+
         async def op_handler(op: OperationFunctionModel, request_body=None, **kwargs):
             if op.params_model_name:
-                param_model = op.params_model_name.resolve().parse_obj(kwargs)
+                param_model = cast(pydantic.BaseModel, op.params_model_name.resolve()).parse_obj(kwargs)
             else:
                 param_model = None
 
