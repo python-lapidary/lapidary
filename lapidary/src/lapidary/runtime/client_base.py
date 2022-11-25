@@ -36,7 +36,13 @@ class ClientBase(ApiBase):
             auth_handler = None
 
         client = httpx.AsyncClient(auth=auth_handler, base_url=base_url)
-        super().__init__(client)
+        global_responses = {
+            status: {
+                media_type: type_hint.resolve() for media_type, type_hint in media_map.items()
+            }
+            for status, media_map in client_model.init_method.response_map.items()
+        }
+        super().__init__(client, global_responses)
 
         self._ops = {op.name: op for op in client_model.methods}
 
