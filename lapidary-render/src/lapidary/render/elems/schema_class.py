@@ -1,14 +1,15 @@
 import logging
-from typing import Optional, Generator
+from collections.abc import Iterator
+from typing import Optional
 
 from lapidary.runtime import openapi
-from .attribute import get_attributes
-from .refs import ResolverFunc
+from lapidary.runtime.model.attribute import get_attributes
+from lapidary.runtime.model.refs import ResolverFunc
+from lapidary.runtime.model.type_hint import BuiltinTypeHint, TypeHint
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.names import get_subtype_name
 from .schema_class_enum import get_enum_class
 from .schema_class_model import SchemaClass, ModelType
-from .type_hint import BuiltinTypeHint, TypeHint
-from ..module_path import ModulePath
-from ..names import get_subtype_name
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ def get_schema_classes(
         name: str,
         module: ModulePath,
         resolver: ResolverFunc,
-) -> Generator[SchemaClass, None, None]:
+) -> Iterator[SchemaClass]:
     # First handle the enum case, so that the model class has suffixed name, and all sub-schemas use it as their prefix
     if schema.enum is not None:
         enum_class = get_enum_class(schema, name)

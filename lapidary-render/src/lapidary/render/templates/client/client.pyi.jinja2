@@ -1,0 +1,22 @@
+{% include 'header.py.jinja2' %}
+import typing
+
+import lapidary.runtime
+import lapidary.runtime.auth
+import pydantic
+
+import {{ model.path.parent() }}.auth
+{%- for imp in model.imports %}
+import {{ imp }}
+{%- endfor %}
+{% set path = model.path -%}
+{% set model = model.body %}
+
+class ApiClient(lapidary.runtime.ApiBase):
+{% include 'client/method_init.py.jinja2' %}
+
+{% for func in model.methods | sort(attribute='name') %}
+{%- include 'client/method_operation.py.jinja2' %}
+{%- else %}
+    pass
+{%- endfor %}

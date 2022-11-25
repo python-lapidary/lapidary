@@ -1,9 +1,9 @@
 import unittest
 
 from lapidary.render.elems.client_module import get_client_class_module
-from lapidary.render.elems.refs import get_resolver
-from lapidary.render.module_path import ModulePath
 from lapidary.runtime import openapi
+from lapidary.runtime.model.refs import get_resolver
+from lapidary.runtime.module_path import ModulePath
 
 
 class GlobalHeadersTest(unittest.TestCase):

@@ -1,6 +1,6 @@
 import inspect
 import logging
-from collections.abc import Mapping, Generator
+from collections.abc import Mapping, Iterator
 from typing import Optional, Type, TypeVar, cast
 
 import httpx
@@ -83,7 +83,7 @@ def find_type_(code: str, mime: str, response_map: dict[str, dict[str, Type]]) -
     return mime_map[mime_match] if mime_match is not None else None
 
 
-def _status_code_matches(code: str) -> Generator[str, None, None]:
+def _status_code_matches(code: str) -> Iterator[str]:
     yield code
 
     code_as_list = list(code)

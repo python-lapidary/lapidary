@@ -1,23 +1,21 @@
-from typing import Generator, Optional
+from collections.abc import Iterator
 
-import inflection
 from mimeparse import best_match
 
 from lapidary.runtime import openapi
-from .refs import ResolverFunc
+from lapidary.runtime.model.refs import ResolverFunc
+from lapidary.runtime.model.request_body import request_type_name
+from lapidary.runtime.module_path import ModulePath
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
 from .schema_module import _get_schema_module, SchemaModule
-from .type_hint import TypeHint, resolve_type_hint
-from ..module_path import ModulePath
 
 
 def get_request_body_classes(
         operation: openapi.Operation,
         module: ModulePath,
         resolve: ResolverFunc,
-
-) -> Generator[SchemaClass, None, None]:
+) -> Iterator[SchemaClass]:
     rb = operation.requestBody
     if isinstance(rb, openapi.Reference):
         return
@@ -34,15 +32,3 @@ def get_request_body_classes(
 def get_request_body_module(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> SchemaModule:
     classes = [cls for cls in get_request_body_classes(op, module, resolve)]
     return _get_schema_module(classes, module)
-
-
-def get_request_body_type(op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Optional[TypeHint]:
-    mime_json = best_match(op.requestBody.content.keys(), 'application/json')
-    if mime_json == '':
-        return None
-    schema = op.requestBody.content[mime_json].schema_
-    return resolve_type_hint(schema, module, request_type_name(op.operationId), resolve)
-
-
-def request_type_name(name):
-    return inflection.camelize(name) + 'Request'

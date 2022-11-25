@@ -2,20 +2,19 @@
 Param model is a synthetic (from the perspective of OpenAPI specification) object that holds and validates all Operation
 parameters.
 """
-
-from typing import Generator
+from collections.abc import Iterator
 
 import inflection
 
 from lapidary.runtime import openapi
-from .attribute import AttributeModel
-from .attribute_annotation import get_attr_annotation
-from .refs import ResolverFunc
+from lapidary.runtime.model.attribute import AttributeModel
+from lapidary.runtime.model.attribute_annotation import get_attr_annotation
+from lapidary.runtime.model.refs import ResolverFunc
+from lapidary.runtime.model.type_hint import TypeHint
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.names import get_subtype_name, maybe_mangle_name, check_name
 from .schema_class import get_schema_classes
-from .schema_class_model import SchemaClass, ModelType
-from .type_hint import TypeHint
-from ..module_path import ModulePath
-from ..names import get_subtype_name, maybe_mangle_name, check_name
+from .schema_class_model import ModelType, SchemaClass
 
 
 def get_param_attribute(
@@ -40,7 +39,7 @@ def get_param_model_classes(
         operation: openapi.Operation,
         module: ModulePath,
         resolver: ResolverFunc,
-) -> Generator[SchemaClass, None, None]:
+) -> Iterator[SchemaClass]:
     # handle sub schemas
     for param in operation.parameters:
         schema = param.schema_

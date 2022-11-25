@@ -1,0 +1,14 @@
+{% include 'header.py.jinja2' %}
+
+import dataclasses
+import typing
+
+import lapidary.runtime.auth
+
+@dataclasses.dataclass
+class Auth:
+{%- for auth_model in model.body.init_method.auth_models %}
+{% include 'auth/client_auth_' + auth_model.__class__.__name__ + '.py.jinja2' %}
+{%- else %}
+    pass
+{%- endfor %}

@@ -1,7 +1,0 @@
-        self.auth_{{ auth_model.auth_name }} = lapidary.runtime.HTTPAuth(
-            scheme='{{ auth_model.scheme }}',
-            token={{ auth_model.param_name }},
-{%- if auth_model.bearer_format %}
-            bearer_format='{{ auth_model.bearer_format }}',
-{%- endif %}
-        )

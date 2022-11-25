@@ -1,77 +1,68 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Optional
 
-import typer
+import yaml
 
 from lapidary.runtime import openapi
-from .config import load_config, Config
-from .elems.pyproject import render_pyproject, get_pyproject
-from .load import load_spec
-from .render import render_client
+from .client import render_client, environment
+from .config import Config
+from .pyproj import create_pyproj
+from .spec import load_spec, save_spec
 
-logging.basicConfig()
-logging.getLogger('lapidary').setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = typer.Typer()
 
-
-@app.command()
-def version():
-    """Print version and exit."""
-
-    from importlib.metadata import version
-    package = 'lapidary'
-    print(f'{package}, {version(package)}')
-
-
-@app.command()
-def update(
-        project_root: Path = typer.Argument(Path('.')),
-        format_: bool = typer.Option(True, '--format/--no-format'),
-        cache: bool = True
-):
-    """Update existing project. Read configuration from pyproject.yaml ."""
-
-    config = load_config(project_root / 'pyproject.toml')
-    config.format = format_
-    config.cache = cache
-    update_project(project_root, config)
-
-
-@app.command('init')
-def init(
+def init_project(
         schema_path: Path,
         project_root: Path,
         package_name: str,
-        errata: Optional[Path] = None,
+        format_: bool,
+        render: bool,
 ):
-    """Create a new project from scratch."""
+    # Create a new project from scratch
+    # - Init directories
+    # - Create pyproject.toml
+    # - Copy openapi file to root/src
+    # - Call update_project
 
-    if project_root.exists():
-        logger.error(f'Target "{project_root}" exists')
-        raise typer.Exit(code=1)
-
-    target_schema_file_name = Path('openapi').with_suffix(schema_path.suffix)
-    target_schema = project_root / target_schema_file_name
-    project_root.mkdir(parents=True, exist_ok=False)
-
-    logger.info('Copying %s to %s', schema_path, target_schema)
-    shutil.copy2(schema_path, target_schema)
+    assert not project_root.exists()
 
     config = Config(
         package=package_name,
-        errata=errata,
+        format=format_,
     )
-    model = update_project(project_root, config)
-    render_pyproject(project_root, get_pyproject(model.info), config)
+
+    project_root.mkdir()
+    create_pyproj(project_root, config, environment())
+    (project_root / config.src_root).mkdir()
+    (project_root / config.gen_root).mkdir()
+    shutil.copyfile(schema_path, config.get_openapi(project_root))
+
+    if render:
+        with open(config.get_openapi(project_root), 'rt') as buf:
+            oa_doc = yaml.safe_load(buf)
+        render_client_(project_root, config, oa_doc)
 
 
-def update_project(project_root: Path, config: Config) -> openapi.OpenApiModel:
+def update_project(project_root: Path, config: Config) -> None:
+    # update_pyproj(project_root, config)
+
+    shutil.rmtree(project_root / config.gen_root)
+    (project_root / config.gen_root).mkdir()
+    oa_doc = update_openapi(project_root, config)
+    render_client_(project_root, config, oa_doc)
+
+
+def update_openapi(project_root: Path, config: Config) -> dict:
     doc = load_spec(project_root, config)
-    logger.info('Prepare client model')
-    model = openapi.OpenApiModel(**doc)
+    package_path = project_root / config.gen_root / config.package
+    package_path.mkdir()
+    save_spec(doc, package_path / 'openapi.yaml')
+    return doc
+
+
+def render_client_(project_root: Path, config: Config, oa_doc: dict) -> None:
+    logger.info('Prepare elems model')
+    model = openapi.OpenApiModel.parse_obj(oa_doc)
     render_client(model, project_root, config)
-    return model

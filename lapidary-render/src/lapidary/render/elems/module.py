@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from ..module_path import ModulePath
+from lapidary.runtime.module_path import ModulePath
 
 template_imports = [
     'builtins',

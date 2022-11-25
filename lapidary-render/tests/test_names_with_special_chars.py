@@ -3,17 +3,17 @@ from unittest import TestCase
 
 import yaml
 
-from lapidary.render.elems.attribute import AttributeModel
-from lapidary.render.elems.attribute_annotation import AttributeAnnotationModel
 from lapidary.render.elems.param_model_class import get_param_model_classes
-from lapidary.render.elems.refs import get_resolver
 from lapidary.render.elems.schema_class import get_schema_classes
 from lapidary.render.elems.schema_class_model import SchemaClass
 from lapidary.render.elems.schema_module import SchemaModule, get_schema_module
-from lapidary.render.elems.type_hint import TypeHint
-from lapidary.render.module_path import ModulePath
-from lapidary.render.schema import get_schema_modules
+from lapidary.render.elems.schema_modules import get_schema_modules
 from lapidary.runtime import openapi
+from lapidary.runtime.model.attribute import AttributeModel
+from lapidary.runtime.model.attribute_annotation import AttributeAnnotationModel
+from lapidary.runtime.model.refs import get_resolver
+from lapidary.runtime.model.type_hint import TypeHint
+from lapidary.runtime.module_path import ModulePath
 
 logging.getLogger('lapidary').setLevel(logging.DEBUG)
 
@@ -149,7 +149,7 @@ paths:
         """
 
         model = openapi.OpenApiModel.parse_obj(yaml.safe_load(schema_text))
-        param_model_class=next(get_param_model_classes(model.paths.__root__['/'].get, module_path, None))
+        param_model_class = next(get_param_model_classes(model.paths.__root__['/'].get, module_path, None))
 
         attr = param_model_class.attributes[0]
 
