@@ -17,7 +17,7 @@ ResponseMap = dict[str, MimeMap]
 logger = logging.getLogger(__name__)
 
 
-def _handle_response(
+def handle_response(
         response: httpx.Response,
         response_map: Optional[ResponseMap],
         global_response_map: Optional[ResponseMap],

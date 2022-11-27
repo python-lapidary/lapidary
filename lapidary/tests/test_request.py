@@ -1,51 +1,43 @@
 import unittest
 from typing import Annotated
-from unittest.mock import MagicMock
 
 import httpx
 import pydantic
 
-from lapidary.runtime import ApiBase, ParamLocation
+from lapidary.runtime import ParamLocation
 from lapidary.runtime._params import process_params
 from lapidary.runtime.http_consts import CONTENT_TYPE, MIME_JSON
-from lapidary.runtime.response import _status_code_matches
+from lapidary.runtime.request import build_request
 
 
-class ApiBaseTest(unittest.TestCase):
-    def test__status_code_matches(self):
-        matches = [m for m in _status_code_matches('400')]
-        self.assertEqual(['400', '40X', '4XX', 'default'], matches)
-
+class BuildRequestTestCase(unittest.TestCase):
     def test_build_request_from_list(self):
         class RequestBodyModel(pydantic.BaseModel):
             a: str
 
-        httpx_client = MagicMock(spec=httpx.AsyncClient)
-        ApiBase(httpx_client)._build_request(
-            'GET',
-            '/path/',
+        request_parts = build_request(
             param_model=None,
             request_body=[RequestBodyModel(a='a')],
-            response_map={},
+            response_map=None,
+            global_response_map=None,
         )
-        httpx_client.build_request.assert_called_with(
-            'GET',
-            '/path/',
-            content='[{"a": "a"}]',
-            params=None,
-            headers={CONTENT_TYPE: MIME_JSON},
-            cookies=None,
+
+        self.assertEqual(
+            dict(
+                content='[{"a": "a"}]',
+                params=None,
+                headers=httpx.Headers({CONTENT_TYPE: MIME_JSON}),
+                cookies=None,
+            ),
+            request_parts
         )
 
     def test_build_request_none(self):
-        class ApiClient(ApiBase): pass
-
-        client = ApiClient(httpx.AsyncClient())
-        request = client._build_request(
-            'GET', 'http://example.com/', param_model=None, request_body=None, response_map=None
+        request = build_request(
+            param_model=None, request_body=None, response_map=None, global_response_map=None
         )
 
-        self.assertEqual(b'', request.content)
+        self.assertEqual(None, request['content'])
 
     def test_request_param_list_simple(self):
         class ParamModel(pydantic.BaseModel):
