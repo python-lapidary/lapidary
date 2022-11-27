@@ -60,7 +60,7 @@ class ClientBase(ABC):
             else:
                 param_model = None
 
-            response_map = {status: {mime: type.resolve() for mime, type in mime_map.items()} for status, mime_map in op.response_map.items()}
+            response_map = {status: {mime: type_.resolve() for mime, type_ in mime_map.items()} for status, mime_map in op.response_map.items()}
 
             return await self._request(
                 op.method,
