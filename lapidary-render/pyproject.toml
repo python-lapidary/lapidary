@@ -4,9 +4,9 @@ requires = ["poetry-core>=1.0.0"]
 
 [tool.poetry]
 authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
-description = "Python async OpenAPI client generator"
+description = "Python async OpenAPI client library generator"
 license = "AGPL-3.0"
-name = "lapidary"
+name = "lapidary-render"
 version = "0.6.1"
 packages = [{ include = "lapidary", from = "src" }]
 readme = 'Readme.md'
@@ -20,7 +20,7 @@ black = "^22.8.0"
 inflection = "^0.5.1"
 Jinja2 = "^3.1.2"
 jsonpatch = "^1.32"
-lapidary-runtime = { path = '../lapidary-runtime', develop = true }
+lapidary = { path = '../lapidary', develop = true }
 pydantic = { extras = ["email"], version = "^1.9.2" }
 python-mimeparse = "^1.6.0"
 PyYAML = "^6.0"

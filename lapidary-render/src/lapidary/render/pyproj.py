@@ -15,6 +15,7 @@ def create_pyproj(project_root: Path, config: Config, env: Environment) -> None:
         versions=dict(
             pydantic=version('pydantic'),
             lapidary=version('lapidary'),
+            lapidary_render=version('lapidary-render'),
         )
     )
     with open(project_root / PYPROJ_TOML, 'wt') as stream:
