@@ -34,14 +34,16 @@ def init_project(
     )
 
     project_root.mkdir()
-    create_pyproj(project_root, config, environment())
     (project_root / config.src_root).mkdir()
     (project_root / config.gen_root).mkdir()
+
     shutil.copyfile(schema_path, config.get_openapi(project_root))
+    with open(config.get_openapi(project_root), 'rt') as buf:
+        oa_doc = yaml.safe_load(buf)
+
+    create_pyproj(project_root, config,oa_doc['info']['title'], environment())
 
     if render:
-        with open(config.get_openapi(project_root), 'rt') as buf:
-            oa_doc = yaml.safe_load(buf)
         render_client_(project_root, config, oa_doc)
 
 
