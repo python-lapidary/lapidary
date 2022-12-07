@@ -1,23 +1,18 @@
 import logging
-import re
 import warnings
 from dataclasses import dataclass
 from typing import Optional, Union
 
-import inflection
+from lapidary.runtime import openapi
+from lapidary.runtime.model.params import ParamPlacement
+from lapidary.runtime.model.refs import ResolverFunc
+from lapidary.runtime.model.type_hint import TypeHint, resolve_type_hint, get_type_hint, GenericTypeHint
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.names import PARAM_MODEL, RESPONSE_BODY, get_subtype_name, maybe_mangle_name, response_type_name
 
 from .attribute import AttributeModel
 from .attribute_annotation import AttributeAnnotationModel
-from .client_func_response_map import get_response_map
-from .params import ParamPlacement
-from .refs import ResolverFunc
 from .request_body import get_request_body_type
-from .type_hint import TypeHint, resolve_type_hint, get_type_hint, GenericTypeHint
-from .. import openapi
-from ..module_path import ModulePath
-from ..names import PARAM_MODEL, get_subtype_name, maybe_mangle_name, response_type_name
-
-RESPONSE_BODY = 'response_body'
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +20,8 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True)
 class OperationFunctionModel:
     name: str
-    method: str
-    path: str
     request_type: Optional[TypeHint]
     params: list[AttributeModel]
-    params_model_name: Optional[TypeHint]
-    response_map: dict[str, dict[str, TypeHint]]
     response_type: Optional[TypeHint]
     auth_name: Optional[str]
     docstr: Optional[str] = None
@@ -89,13 +80,6 @@ def get_operation_func(
 
     request_type = get_request_body_type(op, module, resolver) if op.requestBody else None
 
-    response_map = get_response_map(
-        op.responses,
-        op.operationId,
-        module,
-        resolver
-    )
-
     response_types = get_response_types(op, module, resolver)
     if len(response_types) == 0:
         response_type = None
@@ -112,15 +96,8 @@ def get_operation_func(
 
     return OperationFunctionModel(
         name=op.operationId,
-        method=method,
-        path=re.compile(r'\{([^}]+)\}').sub(r'{p_\1}', url_path),
         request_type=request_type,
         params=params,
-        params_model_name=TypeHint(
-            module=(module / PARAM_MODEL).str(),
-            name=inflection.camelize(op.operationId)
-        ) if op.parameters else None,
-        response_map=response_map,
         response_type=response_type,
         auth_name=auth_name,
     )
@@ -130,8 +107,14 @@ def get_response_types(op: openapi.Operation, module: ModulePath, resolve: Resol
     """
     Generate unique collection of types that may be returned by the operation. Skip types that are marked as exceptions as those are raised instead.
     """
+    return get_response_types_(op.operationId, op.responses, module, resolve)
+
+
+def get_response_types_(op_name: Optional[str], responses: openapi.Responses, module: ModulePath, resolve: ResolverFunc) -> set[TypeHint]:
     response_types = set()
-    for resp_code, response in op.responses.__root__.items():
+    for resp_code, response in responses.__root__.items():
+        if isinstance(response, openapi.Reference):
+            response, module, name = resolve(response, openapi.Response)
         if response.content is None:
             continue
         for media_type in response.content.values():
@@ -139,7 +122,7 @@ def get_response_types(op: openapi.Operation, module: ModulePath, resolve: Resol
             if isinstance(schema, openapi.Reference):
                 schema, resp_module, name = resolve(schema, openapi.Schema)
             else:
-                name = response_type_name(op.operationId, resp_code)
+                name = response_type_name(op_name, resp_code)
                 resp_module = module / RESPONSE_BODY
             if schema.lapidary_model_type is openapi.LapidaryModelType.exception:
                 continue

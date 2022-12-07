@@ -1,8 +1,7 @@
 import unittest
 
-from lapidary.render.elems.client_module import get_client_class_module
 from lapidary.runtime import openapi
-from lapidary.runtime.model.refs import get_resolver
+from lapidary.runtime.model import get_resolver, get_client_model
 from lapidary.runtime.module_path import ModulePath
 
 
@@ -21,6 +20,6 @@ class GlobalHeadersTest(unittest.TestCase):
         )
 
         module_path = ModulePath('test')
-        module = get_client_class_module(model, module_path / 'client.py', module_path, get_resolver(model, 'test'))
+        client_model = get_client_model(model, module_path, get_resolver(model, 'test'))
 
-        self.assertEqual(module.body.init_method.headers, [('user-agent', 'james-bond',)])
+        self.assertEqual(client_model.init_method.headers, [('user-agent', 'james-bond',)])

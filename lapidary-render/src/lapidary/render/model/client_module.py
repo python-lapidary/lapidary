@@ -2,9 +2,10 @@ import logging
 from dataclasses import dataclass, field
 
 from lapidary.runtime import openapi
-from lapidary.runtime.model.client_class import ClientClass, get_client_class
-from lapidary.runtime.model.refs import ResolverFunc
+from lapidary.runtime.model import ResolverFunc
 from lapidary.runtime.module_path import ModulePath
+
+from .client_class import ClientClass, get_client_class
 from .module import AbstractModule, template_imports
 
 logger = logging.getLogger(__name__)

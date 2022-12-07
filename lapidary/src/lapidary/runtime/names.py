@@ -67,10 +67,14 @@ def maybe_mangle_name(name: str, check_builtins=True) -> str:
         return name
 
 
-def response_type_name(operation_id: str, status_code: str):
+def response_type_name(operation_id: str, status_code: str) -> str:
     return inflection.camelize(operation_id) + status_code + 'Response'
 
 
 def get_schema_module_name(name):
     from inflection import underscore
     return underscore(name)
+
+
+def request_type_name(name):
+    return inflection.camelize(name) + 'Request'

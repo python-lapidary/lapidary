@@ -2,18 +2,18 @@ import logging
 from unittest import TestCase
 
 import yaml
-
-from lapidary.render.elems.param_model_class import get_param_model_classes
-from lapidary.render.elems.schema_class import get_schema_classes
-from lapidary.render.elems.schema_class_model import SchemaClass
-from lapidary.render.elems.schema_module import SchemaModule, get_schema_module
-from lapidary.render.elems.schema_modules import get_schema_modules
 from lapidary.runtime import openapi
-from lapidary.runtime.model.attribute import AttributeModel
-from lapidary.runtime.model.attribute_annotation import AttributeAnnotationModel
 from lapidary.runtime.model.refs import get_resolver
 from lapidary.runtime.model.type_hint import TypeHint
 from lapidary.runtime.module_path import ModulePath
+
+from lapidary.render.model.attribute import AttributeModel
+from lapidary.render.model.attribute_annotation import AttributeAnnotationModel
+from lapidary.render.model.param_model_class import get_param_model_classes
+from lapidary.render.model.schema_class import get_schema_classes
+from lapidary.render.model.schema_class_model import SchemaClass
+from lapidary.render.model.schema_module import SchemaModule, get_schema_module
+from lapidary.render.model.schema_modules import get_schema_modules
 
 logging.getLogger('lapidary').setLevel(logging.DEBUG)
 

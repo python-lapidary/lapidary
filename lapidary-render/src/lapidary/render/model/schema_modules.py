@@ -4,9 +4,10 @@ from concurrent.futures import Executor, Future
 from pathlib import Path
 
 from lapidary.runtime import openapi, names as mod_name
-from lapidary.runtime.model.client_class import get_operations
 from lapidary.runtime.model.refs import ResolverFunc
 from lapidary.runtime.module_path import ModulePath
+
+from .client_class import get_operations
 from .request_body import get_request_body_module
 from .response_body import get_response_body_module
 from .schema_module import SchemaModule, get_modules_for_components_schemas, get_param_model_classes_module
@@ -24,7 +25,7 @@ def get_schema_modules(model: openapi.OpenApiModel, root_module: ModulePath, res
 
     for path, path_item in model.paths.__root__.items():
         for tpl in get_operations(path_item, True):
-            method, op = tpl
+            _, op = tpl
             op_root_module = root_module / 'paths' / op.operationId
             if op.parameters:
                 mod = get_param_model_classes_module(op, op_root_module / mod_name.PARAM_MODEL, resolver)

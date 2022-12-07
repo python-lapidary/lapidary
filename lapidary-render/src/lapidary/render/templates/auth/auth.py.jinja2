@@ -1,14 +1,15 @@
 {% include 'header.py.jinja2' %}
+{% from 'type_hint.py.jinja2' import type_hint -%}
 
 import dataclasses
-import typing
-
-import lapidary.runtime.auth
+{%- for imp in model.imports %}
+import {{ imp }}
+{%- endfor %}
 
 @dataclasses.dataclass
 class Auth:
-{%- for auth_model in model.body.init_method.auth_models %}
-{% include 'auth/client_auth_' + auth_model.__class__.__name__ + '.py.jinja2' %}
+{%- for name, auth_model in model.schemes.items() %}
+    {{ name }}: {{ type_hint(auth_model, model.path) }}
 {%- else %}
     pass
 {%- endfor %}

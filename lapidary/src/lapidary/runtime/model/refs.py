@@ -7,12 +7,12 @@ from typing import Callable, TypeVar, Union, Type, cast, Optional, Any, Mapping
 import inflection
 from typing_extensions import TypeAlias
 
-from .. import openapi
 from ..module_path import ModulePath
+from ..openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T', openapi.Schema, openapi.Parameter, openapi.SecurityScheme)
+T = TypeVar('T', openapi.Schema, openapi.Parameter, openapi.SecurityScheme, openapi.Response)
 ResolverFunc = Callable[[openapi.Reference, Type[T]], tuple[T, ModulePath, str]]
 
 SchemaOrRef: TypeAlias = Union[openapi.Schema, openapi.Reference]

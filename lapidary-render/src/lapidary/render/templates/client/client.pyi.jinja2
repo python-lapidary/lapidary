@@ -12,7 +12,7 @@ import {{ imp }}
 {% set path = model.path -%}
 {% set model = model.body %}
 
-class ApiClient(lapidary.runtime.ApiBase):
+class ApiClient(lapidary.runtime.ClientBase):
 {% include 'client/method_init.py.jinja2' %}
 
 {% for func in model.methods | sort(attribute='name') %}

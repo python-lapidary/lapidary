@@ -4,7 +4,7 @@ from pathlib import Path
 
 from jinja2 import Environment
 
-from lapidary.render.config import Config, PYPROJ_TOML
+from .config import Config, PYPROJ_TOML
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,9 @@
 from unittest import TestCase
 
-from lapidary.render.elems.schema_class import get_schema_classes
 from lapidary.runtime import openapi
 from lapidary.runtime.module_path import ModulePath
+
+from lapidary.render.model.schema_class import get_schema_classes
 
 
 class ReeservedNamesTest(TestCase):

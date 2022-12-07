@@ -4,7 +4,7 @@ from typing import Optional
 import httpx
 
 from .api_key import ApiKeyAuth
-from ..model.client_init import HttpAuthModel
+from ..model.auth import HttpAuthModel
 from ..model.params import ParamLocation
 
 
@@ -13,7 +13,7 @@ class HTTP:
     token: str
 
     def create(self, model: HttpAuthModel) -> httpx.Auth:
-        return HTTPAuth(model.auth_name, self.token, model.bearer_format)
+        return HTTPAuth(model.scheme, self.token, model.bearer_format)
 
 
 class HTTPAuth(ApiKeyAuth):

@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Optional, Union
+
+from lapidary.runtime import openapi
+from lapidary.runtime.model import ResolverFunc
+from lapidary.runtime.model.type_hint import BuiltinTypeHint
+from lapidary.runtime.module_path import ModulePath
+from lapidary.runtime.names import check_name, maybe_mangle_name
 
 from .attribute_annotation import AttributeAnnotationModel, get_attr_annotation
-from .refs import ResolverFunc, SchemaOrRef
-from .type_hint import BuiltinTypeHint
-from .. import openapi
-from ..module_path import ModulePath
-from ..names import check_name, maybe_mangle_name
 
 
 @dataclass(frozen=True)
@@ -43,7 +44,7 @@ def get_attributes(
 
 
 def get_attribute(
-        typ: SchemaOrRef, name: str, alias: str, parent_name: str, required: bool, module: ModulePath,
+        typ: Union[openapi.Schema, openapi.Reference], name: str, alias: str, parent_name: str, required: bool, module: ModulePath,
         resolve: ResolverFunc
 ) -> AttributeModel:
     alias = alias or name

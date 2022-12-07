@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import httpx
 
 from .common import PageFlowGenT
-from ..model.client_init import ApiKeyAuthModel
+from ..model.auth import ApiKeyAuthModel
 from ..model.params import ParamLocation
 
 

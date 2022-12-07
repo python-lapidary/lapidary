@@ -7,8 +7,8 @@ import pydantic
 from ._params import process_params
 from .http_consts import MIME_JSON, CONTENT_TYPE, ACCEPT
 from .mime import find_mime
+from .model import ResponseMap
 from .pydantic_utils import to_model
-from .response import ResponseMap
 
 
 def get_accept_header(response_map: Optional[ResponseMap], global_response_map: Optional[ResponseMap]) -> Optional[str]:

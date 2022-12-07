@@ -6,7 +6,6 @@ import logging
 from typing import Annotated, Union, Type
 from uuid import UUID
 
-import inflection
 from pydantic import BaseModel, Field, Extra
 
 from .refs import ResolverFunc
@@ -28,10 +27,6 @@ PRIMITIVE_TYPES = {
     openapi.Type.number: float,
     openapi.Type.boolean: bool,
 }
-
-
-def module_name(path: list[str]) -> str:
-    return '.'.join([*path[:-1], inflection.underscore(path[-1])])
 
 
 def get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, required: bool,

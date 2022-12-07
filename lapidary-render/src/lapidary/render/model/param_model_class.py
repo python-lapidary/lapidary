@@ -5,14 +5,14 @@ parameters.
 from collections.abc import Iterator
 
 import inflection
-
 from lapidary.runtime import openapi
-from lapidary.runtime.model.attribute import AttributeModel
-from lapidary.runtime.model.attribute_annotation import get_attr_annotation
 from lapidary.runtime.model.refs import ResolverFunc
 from lapidary.runtime.model.type_hint import TypeHint
 from lapidary.runtime.module_path import ModulePath
 from lapidary.runtime.names import get_subtype_name, maybe_mangle_name, check_name
+
+from .attribute import AttributeModel
+from .attribute_annotation import get_attr_annotation
 from .schema_class import get_schema_classes
 from .schema_class_model import ModelType, SchemaClass
 

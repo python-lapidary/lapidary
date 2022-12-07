@@ -3,11 +3,12 @@ from collections.abc import Iterator
 from typing import Optional
 
 from lapidary.runtime import openapi
-from lapidary.runtime.model.attribute import get_attributes
 from lapidary.runtime.model.refs import ResolverFunc
 from lapidary.runtime.model.type_hint import BuiltinTypeHint, TypeHint
 from lapidary.runtime.module_path import ModulePath
 from lapidary.runtime.names import get_subtype_name
+
+from .attribute import get_attributes
 from .schema_class_enum import get_enum_class
 from .schema_class_model import SchemaClass, ModelType
 

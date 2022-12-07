@@ -9,7 +9,7 @@ from lapidary.runtime import openapi
 from lapidary.runtime.model.refs import get_resolver
 from lapidary.runtime.module_path import ModulePath
 from .config import Config
-from .elems import get_client_class_module, render_schema_modules
+from .model import get_auth_module, get_client_class_module, render_schema_modules
 from .render import render
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> 
     root_mod = ModulePath(config.package)
     pkg_path = root_mod.to_path(gen_root, False)
     client_module = get_client_class_module(model, root_mod / 'client', root_mod, resolver)
+    auth_module = get_auth_module(model, root_mod)
     format_ = config.format
 
     with (
@@ -37,7 +38,7 @@ def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> 
         init_future = executor.submit(render, 'init/init.py.jinja2', pkg_path / '__init__.py', environment, format_)
         client_future = executor.submit(render, 'client/client.py.jinja2', pkg_path / 'client.py', environment, format_, model=client_module)
         stub_future = executor.submit(render, 'client/client.pyi.jinja2', pkg_path / 'client.pyi', environment, format_, model=client_module)
-        auth_future = executor.submit(render, 'auth/auth.py.jinja2', pkg_path / 'auth.py', environment, format_, model=client_module)
+        auth_future = executor.submit(render, 'auth/auth.py.jinja2', pkg_path / 'auth.py', environment, format_, model=auth_module, module=root_mod)
         schema_futures = render_schema_modules(model, config, gen_root, resolver, environment, executor)
 
         for f in [*schema_futures, client_future, auth_future, stub_future, init_future]:
@@ -49,6 +50,6 @@ def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> 
 
 
 def ensure_init_py(pkg_path: Path) -> None:
-    for (dirpath, dirnames, filenames) in os.walk(pkg_path):
+    for (dirpath, _, filenames) in os.walk(pkg_path):
         if '__init__.py' not in filenames:
             (Path(dirpath) / '__init__.py').touch()

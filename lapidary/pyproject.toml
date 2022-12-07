@@ -15,6 +15,7 @@ httpx = { extras = ["http2"], version = "^0.23.0" }
 pydantic = "^1.10.2"
 python-mimeparse = "^1.6.0"
 inflection = "^0.5.1"
+boltons = "^21.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"

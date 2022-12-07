@@ -4,6 +4,8 @@ from pathlib import Path
 
 import yaml
 
+from .openapi import model as openapi
+
 
 def load_yaml_cached(path: Path, cache_root: Path, use_cache: bool) -> dict:
     with open(path, 'rt') as fb:
@@ -27,3 +29,15 @@ def load_yaml_cached_(text: str, cache_root: Path, use_cache: bool) -> dict:
             pickle.dump(d, fb, pickle.HIGHEST_PROTOCOL)
 
     return d
+
+
+def load_model(mod: str) -> openapi.OpenApiModel:
+    from importlib.resources import open_text
+    import sys
+    module = sys.modules[mod]
+    with open_text(module, 'openapi.yaml') as stream:
+        text = stream.read()
+
+    import platformdirs
+    d = load_yaml_cached_(text, platformdirs.user_cache_path(), True)
+    return openapi.OpenApiModel.parse_obj(d)

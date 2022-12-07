@@ -1,10 +1,11 @@
 import unittest
 
-from lapidary.render.elems.client_module import get_client_class_module
 from lapidary.runtime import openapi
 from lapidary.runtime.model.refs import get_resolver
 from lapidary.runtime.model.type_hint import TypeHint
 from lapidary.runtime.module_path import ModulePath
+
+from lapidary.render.model.client_module import get_client_class_module
 
 
 class GlobalResponsesTest(unittest.TestCase):
@@ -50,11 +51,10 @@ class GlobalResponsesTest(unittest.TestCase):
         # pp(dataclasses.asdict(module))
 
         expected = {
-            '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
-            '5XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError'),
         }
 
-        self.assertEqual(expected, module.body.init_method.response_map)
+        self.assertEqual(expected, module.body.init_method.response_types)
 
     def test_inline_global_responses_in_output_model(self):
         model = openapi.OpenApiModel(
@@ -102,11 +102,10 @@ class GlobalResponsesTest(unittest.TestCase):
         # pp(dataclasses.asdict(module))
 
         expected = {
-            '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
-            '5XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError'),
         }
 
-        self.assertEqual(expected, module.body.init_method.response_map)
+        self.assertEqual(expected, module.body.init_method.response_types)
 
     def test_global_responses_as_dict(self):
         model = openapi.OpenApiModel(**{
@@ -151,11 +150,9 @@ class GlobalResponsesTest(unittest.TestCase):
 
         module_path = ModulePath('test')
         module = get_client_class_module(model, module_path / 'client.py', module_path, get_resolver(model, 'test'))
-        # pp(dataclasses.asdict(module))
 
         expected = {
-            '4XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
-            '5XX': {'application/json; version=2.3.5': TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError')},
+            TypeHint(module='test.components.schemas.gsm_tasks_error', name='GSMTasksError'),
         }
 
-        self.assertEqual(expected, module.body.init_method.response_map)
+        self.assertEqual(expected, module.body.init_method.response_types)

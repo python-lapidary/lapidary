@@ -1,20 +1,18 @@
 import inspect
 import logging
-from collections.abc import Mapping, Iterator
-from typing import Optional, Type, TypeVar, cast
+from collections.abc import Iterator
+from typing import Optional, Type, cast, TypeVar
 
 import httpx
 import pydantic
 
 from .http_consts import CONTENT_TYPE
 from .mime import find_mime
-
-T = TypeVar('T')
-
-MimeMap = Mapping[str, Type[T]]
-ResponseMap = dict[str, MimeMap]
+from .model import ResponseMap
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar('T')
 
 
 def handle_response(
