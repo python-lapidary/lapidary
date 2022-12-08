@@ -30,7 +30,7 @@ def load_spec(project_root: Path, config: Config) -> dict:
 def load_patches(project_root: Path, cache_path, config: Config) -> Optional[JsonPatch]:
     if config.patches is None:
         return None
-    patches_path = project_root / config.src_root / config.patches
+    patches_path = config.get_patches(project_root)
     if not patches_path.exists():
         return None
     if not patches_path.is_dir():
@@ -44,6 +44,6 @@ def load_patches(project_root: Path, cache_path, config: Config) -> Optional[Jso
 
 
 def save_spec(doc: dict, path: Path) -> None:
-    with open(path, 'wb') as stream:
+    with open(path, 'wt') as stream:
         yaml.safe_dump(doc, stream, allow_unicode=True)
 
