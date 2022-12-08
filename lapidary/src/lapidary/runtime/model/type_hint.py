@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import importlib
 import logging
-from typing import Annotated, Union, Type
+from typing import Annotated, Union, Type, cast, Generic
 from uuid import UUID
 
 from pydantic import BaseModel, Field, Extra
@@ -63,11 +63,13 @@ def _get_one_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str,
     )
 
 
-def _get_all_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeHint:
-    if len(schema.allOf) != 1:
-        raise NotImplementedError(name, 'len(allOf) != 1')
+def _get_composite_type_hint(
+        component_schemas: list[Union[openapi.Schema, openapi.Reference]], module: ModulePath, name: str, resolve: ResolverFunc
+) -> TypeHint:
+    if len(component_schemas) != 1:
+        raise NotImplementedError(name, 'Multiple component schemas (allOf, anyOf, oneOf) are currently unsupported.')
 
-    return resolve_type_hint(schema.allOf[0], module, name, resolve)
+    return resolve_type_hint(component_schemas[0], module, name, resolve)
 
 
 def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeHint:
@@ -83,15 +85,15 @@ def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolv
     elif schema.type == openapi.Type.array:
         return _get_type_hint_array(schema, module, class_name, resolver)
     elif schema.anyOf:
-        return BuiltinTypeHint.from_str('Unsupported')
+        return _get_composite_type_hint(schema.anyOf, module, class_name, resolver)
     elif schema.oneOf:
         return _get_one_of_type_hint(schema, module, class_name, resolver)
     elif schema.allOf:
-        return _get_all_of_type_hint(schema, module, class_name, resolver)
+        return _get_composite_type_hint(schema.allOf, module, class_name, resolver)
     elif schema.type is None:
         return TypeHint.from_str('typing.Any')
     else:
-        return EllipsisTypeHint()
+        raise NotImplementedError
 
 
 def _get_type_hint_object(schema: openapi.Schema, module: ModulePath, name: str) -> TypeHint:
@@ -192,29 +194,6 @@ class BuiltinTypeHint(TypeHint):
 
     def full_name(self):
         return self.name
-
-
-class EllipsisTypeHint(TypeHint):
-    def full_name(self):
-        return '...'
-
-    def type_checking_imports(self) -> list[tuple[str, str]]:
-        return []
-
-    def imports(self) -> list[str]:
-        return []
-
-    def _types(self) -> list[TypeHint]:
-        return []
-
-    def __eq__(self, other) -> bool:
-        return isinstance(other, EllipsisTypeHint)
-
-    def __hash__(self) -> int:
-        return (2 << 13) - 1
-
-    def resolve(self) -> Type:
-        raise TypeError(self)
 
 
 class GenericTypeHint(TypeHint):
