@@ -22,14 +22,3 @@ def create_pyproj(project_root: Path, config: Config, title, env: Environment) -
     )
     with open(project_root / PYPROJ_TOML, 'wt') as stream:
         stream.write(text)
-
-
-def update_pyproj(_1: Path, _2: Config):
-    """
-    Check dependency versions.
-    If it's different from required, issue a warning;
-    if it's missing, add one.
-    """
-
-    import warnings
-    warnings.warn('Updating pyproject.toml is currently not supported.')

@@ -144,9 +144,6 @@ class TypeHint(BaseModel):
         else:
             return TypeHint(module=module, name=name)
 
-    def type_checking_imports(self) -> list[tuple[str, str]]:
-        return []
-
     def imports(self) -> list[str]:
         return [self.module]
 
@@ -217,9 +214,6 @@ class GenericTypeHint(TypeHint):
             else:
                 args.add(typ)
         return GenericTypeHint(module='typing', name='Union', args=args)
-
-    def type_checking_imports(self) -> list[tuple[str, str]]:
-        return []
 
     def imports(self) -> list[str]:
         return [
