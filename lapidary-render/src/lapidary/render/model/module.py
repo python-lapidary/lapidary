@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from lapidary.runtime.module_path import ModulePath
 
@@ -9,6 +9,7 @@ template_imports = [
 ]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AbstractModule:
     path: ModulePath
+    imports: list[str] = field(default_factory=list)

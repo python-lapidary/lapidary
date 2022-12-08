@@ -11,10 +11,9 @@ from .module import AbstractModule, template_imports
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ClientModule(AbstractModule):
-    body: ClientClass
-    imports: list[str] = field(default_factory=list)
+    body: ClientClass = field()
 
 
 def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePath, root_module: ModulePath, resolver: ResolverFunc) -> ClientModule:
@@ -26,18 +25,16 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
     ]
 
     global_response_type_imports = {
-        imp
-        for media_type in client_class.init_method.response_map.values()
-        for typ in media_type.values()
-        for imp in typ.imports()
+        import_
+        for type_hint in client_class.init_method.response_types
+        for import_ in type_hint.imports()
     }
 
     response_type_imports = {
-        imp
+        import_
         for func in client_class.methods
-        for media_type in func.response_map.values()
-        for typ in media_type.values()
-        for imp in typ.imports()
+        if func.response_type is not None
+        for import_ in func.response_type.imports()
     }
 
     type_hint_imports = {

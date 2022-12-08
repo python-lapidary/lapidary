@@ -5,20 +5,20 @@ from lapidary.runtime import openapi
 from lapidary.runtime.model.refs import ResolverFunc
 from lapidary.runtime.module_path import ModulePath
 from lapidary.runtime.names import check_name, get_schema_module_name
+
 from .module import AbstractModule, template_imports
 from .param_model_class import get_param_model_classes
 from .schema_class import get_schema_classes
 from .schema_class_model import SchemaClass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SchemaModule(AbstractModule):
     """
     One schema module per schema element directly under #/components/schemas, containing that schema and all non-reference schemas.
     One schema module for inline request and for response body for each operation
     """
     body: list[SchemaClass] = field(default_factory=list)
-    imports: list[str] = field(default_factory=list)
 
 
 def get_modules_for_components_schemas(
