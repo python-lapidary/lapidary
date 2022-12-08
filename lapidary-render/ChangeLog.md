@@ -3,24 +3,43 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
 ### Added
-- version command
-- pytest for testing
-- errata as directory
-- support for HTTPAuth
+- Support for (global) api responses.
+- Warning header to templates.
+- Generate auth model to hold all parameters
+- import ApiClient and Auth in __init__.py
 
 ### Changed
-- Use multiprocessing to speed-up code generation.
-- project root is now init argument instead of option
+- Generate stubs instead of full operation methods.
+- Migrated project to monorepo
+- Changed some models to better suite a dynamic library.
+
+### Fixed
+- Fail on unsupported types
+- Added templates to distribution package.
+
+## [0.6.1](https://github.com/python-lapidary/lapidary/releases/tag/v0.6.1) - 2022-10-24
+### Fixed
+- handling default auth and invalid names.
+
+## [0.6.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.6.0) - 2022-10-24
+### Changed
 - Upgraded dependencies.
 
 ### Fixed
-- Added Config.use_enum_values to all models.
-- handling json names that are reserved, special or invalid in Python
-- generating empty classes for non-object schemas with enum key.
+- Allow naming null enum values.
+- missing quotes for bearer_format in the template.
+- names and aliases of attributes.
+- removed pprint calls from tests.
+- name validation regex.
+- generating nested schema classes.
+- make param model class names camel case.
+
+## [0.5.1](https://github.com/python-lapidary/lapidary/releases/tag/v0.5.1) - 2022-10-24
+### Fixed
+- issubclass for some typing.* types
 
 ## [0.5.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.5.0) - 2022-10-03
 ### Added
-- Exception types
 - limited support for allOf schemas
 - optional explicit names for enum values
 
@@ -43,6 +62,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added support for naming schema classes
 - Generate classes for schemas declared in-line under allOf, onyOf and oneOf.
 - global responses
+- Exception types
 
 ### Changed
 - Rename project to Lapidary
