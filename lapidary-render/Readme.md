@@ -1,51 +1,63 @@
-# Lapidary - Python async OpenAPI client generator
+# Code generator
+## Installation
 
-Generate OpenAPI 3.0.3 client code that is easy to understand and debug.
+lapidary-render requires python 3.9 or higher to run.
 
-Leverages [Pydantic](https://github.com/pydantic/pydantic) as the base classes
-and [httpx](https://github.com/encode/httpx) as the HTTP client.
+I recommend installing via `pipx`
+
+`pipx install lapidary-render`
+
+You can set python version for lapidary with `pipx install --python [path-to-python] lapidary-render`. See `pipx install --help` for details.
 
 ## Usage
 
-lapidary [--errata path] spec_file target_dir root_package
+`lapidary` command offers inline help and shell command completion. See `lapidary --help` for details.
 
-Lapidary will create target_dir, all necessary directories and pyproject.toml if they don't exist.
+### lapidary init
 
-Generated files will be placed in <target_dir>/gen/<root_package>
+`lapidary init [--[no-]format] [--[no-]render] SCHEMA_PATH PROJECT_ROOT PACKAGE_NAME`
 
-Errata is a JSON Patch file in JSON or YAML format; it's applied to the spec before any other processing.
+Lapidary will create 
+- PROJECT_ROOT and all necessary directories,
+- \_\_init\_\_.py files,
+- pyproject.toml with [poetry](https://python-poetry.org/) configured,
+- py.typed
+- client.pyi with function stubs for all operations and a client.py with an empty client class.
+- [Pydantic](https://docs.pydantic.dev/) model classes for each schema.
 
-## Supported OpenAPI features
+All python files are generated in PROJECT_ROOT/gen directory.
 
-- Parameter names: operation parameters are uniquely identified by their name the value of an `in` attribute. It is possible to have parameter named `param` in all of path, query, cookies and headers.
-  
-  Lapidary uses Hungarian notation for method parameter names.
-- Enums: [TODO] there's no limitation that enum schema cannot be an object or an array.
+If a directory PROJECT_ROOT/src/patches exists, Lapidary will read all yaml files and apply them as JSONPatch against the original openapi file.
 
-  Enums might need two python classes - a subclass of `enum.Enum` and the schema class.
-- oneOf: maps to typing.Union
-- AllOf: [TODO] maps to a separate class that uses all the schemas as superclasses.
-- AnyOf: [TODO] maps to similar class as in case of AllOf, all fields should be non-required and the object should validate against at least one of superclasses.
-- Recursive references between schemas: supported.
-- References to other schemas: unsupported.
-- Read- and write-only attributes: [TODO] Read-only attributes are considered non-existent when the object is validated before being sent to the server.
+If the original openapi file is not compatible with Lapidary, running `lapidary init --no-render ...` will generate only the project structure without any
+models or stubs. Once you've prepared the patch, run `lapidary update`.
 
-## Broken and incomplete API specifications
+### lapidary update
 
-- errata: use errata to update the specification document in cases where actual data doesn't match it, and the service provider is reluctant or slow to update it.
+`lapidary update [--[no-]format] [--[no-]cache] [PROJECT_ROOT]`
 
-TODO: pre- and postprocessing of API specification (dict- and pydantic-based models) with python code, errata (jsonpatch), etc
+Default PROJECT_ROOT is the current directory.
 
-## Backwards compatibility
+The command
+- deletes PROJECT_ROOT/gen directory,
+- re-applies patches to openapi file
+- and generates python files
 
-Once stable, Lapidary should generate code that is backwards compatible as long as the API specification is too. The following rules are used to ensure that.
+### lapidary version
 
-Names of interface elements (public functions, classes and methods) are fully deterministic and are derived only from their source elements and, in some cases, their parents.
-For example, schemas of the same name are either placed in separate modules, or their names have the parent element name prepended. 
+`lapidary version`
 
-Each operation must have operationId which is used to create a unique package for its models.
+Prints the programs version and exits.
 
-The structure of the API specification is roughly reflected in the generated code.
-Each schema under #/components/schemas together with all inline parameter schemas will become a single module in `<your_package>.components.schemas`.
-Each operation must define `operationId` which will be used as a sub-package name for the module containing its all inline schemas. Operation packages will be placed under `<your_package>.paths`
+## Configuration
 
+Lapidary can be configured with a pyproject.yaml file, under [tool.lapidary] path.
+
+Only `package` value is required, and it's set by `lapidary init`.
+
+- package [str] - root package name 
+- format [bool] - whether to format the generated code with black [default = True].
+- cache [bool] - whether to cache openapi and patches as pickle files. Only files larger than 50kB are cached [default = True].
+- src_root [str] - sources root, in PROJECT_ROOT [default = 'src'].
+- gen_root [str] = generated sources root, in PROJECT_ROOT [default = 'gen'].
+- patches [str] = patches directory, under sources root [default = 'patches'].
