@@ -2,6 +2,8 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
+
+## [0.7.1](https://github.com/python-lapidary/lapidary/releases/tag/v0.7.1) - 2022-12-15
 ### Fixed
 - Error while constructing a type.
 

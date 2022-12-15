@@ -7,7 +7,7 @@ authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
 description = "Python async OpenAPI client library generator"
 license = "AGPL-3.0"
 name = "lapidary-render"
-version = "0.6.1"
+version = "0.7.1"
 packages = [{ include = "lapidary", from = "src" }]
 readme = 'Readme.md'
 repository = 'https://github.com/python-lapidary/lapidary'
@@ -20,7 +20,7 @@ black = "^22.8.0"
 inflection = "^0.5.1"
 Jinja2 = "^3.1.2"
 jsonpatch = "^1.32"
-lapidary = { path = '../lapidary', develop = true }
+lapidary = "0.7.1"
 pydantic = "^1.10.2"
 python-mimeparse = "^1.6.0"
 PyYAML = "^6.0"

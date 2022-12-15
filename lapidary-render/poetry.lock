@@ -347,22 +347,22 @@ files = [
 
 [[package]]
 name = "lapidary"
-version = "0.5.1"
+version = "0.7.1"
 description = "Python async OpenAPI client library"
 category = "main"
 optional = false
-python-versions = "^3.9"
-develop = true
+python-versions = ">=3.9,<4.0"
+files = [
+    {file = "lapidary-0.7.1-py3-none-any.whl", hash = "sha256:c86b3b78c2b2ce1a198a8b73e038cab10bb0878a6879b97d151636dbccd254fd"},
+    {file = "lapidary-0.7.1.tar.gz", hash = "sha256:a814da064a0249210ae75ead10c384f2bc2c151ef2024821412e082739122682"},
+]
 
 [package.dependencies]
-httpx = {version = "^0.23.0", extras = ["http2"]}
-inflection = "^0.5.1"
-pydantic = "^1.10.2"
-python-mimeparse = "^1.6.0"
-
-[package.source]
-type = "directory"
-url = "../lapidary"
+httpx = {version = ">=0.23.0,<0.24.0", extras = ["http2"]}
+inflection = ">=0.5.1,<0.6.0"
+pydantic = {version = ">=1.10.2,<2.0.0", extras = ["email"]}
+python-mimeparse = ">=1.6.0,<2.0.0"
+pyyaml = ">=6.0,<7.0"
 
 [[package]]
 name = "markupsafe"
