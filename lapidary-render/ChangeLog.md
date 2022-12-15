@@ -2,6 +2,8 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
+### Fixed
+- Missing imports for request body types.
 
 ## [0.7.1](https://github.com/python-lapidary/lapidary/releases/tag/v0.7.1) - 2022-12-15
 ### Added
