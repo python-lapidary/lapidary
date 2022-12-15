@@ -1,3 +1,4 @@
+import itertools
 import logging
 from dataclasses import dataclass, field
 
@@ -30,14 +31,22 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
         for import_ in type_hint.imports()
     }
 
-    response_type_imports = {
+    request_response_type_imports = {
         import_
         for func in client_class.methods
-        if func.response_type is not None
-        for import_ in func.response_type.imports()
+        for imports in itertools.chain(
+            map(
+                lambda elem: elem.imports(),
+                filter(
+                    lambda elem: elem is not None,
+                    (func.response_type, func.request_type)
+                )
+            )
+        )
+        for import_ in imports
     }
 
-    type_hint_imports = {
+    param_type_imports = {
         imp
         for attr in client_class.methods
         for t in attr.params
@@ -48,8 +57,8 @@ def get_client_class_module(model: openapi.OpenApiModel, client_module: ModulePa
     imports = list({
         *default_imports,
         *global_response_type_imports,
-        *response_type_imports,
-        *type_hint_imports,
+        *request_response_type_imports,
+        *param_type_imports,
     })
 
     imports.sort()
