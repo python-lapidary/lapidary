@@ -13,6 +13,7 @@ repository = "https://github.com/python-lapidary/lapidary"
 python = "^3.9"
 httpx = { extras = ["http2"], version = "^0.23.0" }
 inflection = "^0.5.1"
+platformdirs = "^2.6.0"
 pydantic = {extras = ["email"], version = "^1.10.2"}
 python-mimeparse = "^1.6.0"
 pyyaml = "^6.0"
