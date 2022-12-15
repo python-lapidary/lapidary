@@ -2,6 +2,7 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
+## [0.7.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.7.0) - 2022-12-15
 ### Added
 - Support for api responses.
 - py.typed for mypy

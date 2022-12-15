@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lapidary"
-version = "0.5.1"
+version = "0.7.0"
 description = "Python async OpenAPI client library"
 authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
 license = "MIT"
@@ -12,10 +12,10 @@ repository = "https://github.com/python-lapidary/lapidary"
 [tool.poetry.dependencies]
 python = "^3.9"
 httpx = { extras = ["http2"], version = "^0.23.0" }
-pydantic = "^1.10.2"
-python-mimeparse = "^1.6.0"
 inflection = "^0.5.1"
-boltons = "^21.0.0"
+pydantic = {extras = ["email"], version = "^1.10.2"}
+python-mimeparse = "^1.6.0"
+pyyaml = "^6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"
