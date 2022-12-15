@@ -13,7 +13,7 @@ import pydantic
 from .load import load_model
 from .model import OperationModel, get_resolver, ResponseMap, get_client_model, get_api_responses
 from .module_path import ModulePath
-from .request import build_request
+from .request import build_request, get_path
 from .response import handle_response
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class ClientBase(ABC):
 
             return await self._request(
                 op.method,
-                op.path.format(**kwargs),
+                get_path(op.path, param_model),
                 param_model=param_model,
                 request_body=request_body,
                 response_map=op.response_map,

@@ -1,3 +1,4 @@
+import enum
 import typing
 from typing import Optional, Any, Union
 
@@ -7,7 +8,7 @@ import pydantic
 from ._params import process_params
 from .http_consts import MIME_JSON, CONTENT_TYPE, ACCEPT
 from .mime import find_mime
-from .model import ResponseMap
+from .model import ResponseMap, ParamLocation
 from .pydantic_utils import to_model
 
 
@@ -62,3 +63,18 @@ def build_request(
         headers=headers,
         cookies=cookies
     )
+
+
+def get_path(path_format: str, param_model: pydantic.BaseModel) -> str:
+    path_params = {
+        param_name: param_to_str(param_model.__dict__[param_name])
+        for param_name in param_model.__fields_set__
+        if param_model.__fields__[param_name].field_info.extra['in_'] is ParamLocation.path
+    }
+    return path_format.format(**path_params)
+
+
+def param_to_str(value: Any) -> str:
+    if isinstance(value, enum.Enum):
+        return value.value
+    return str(value)
