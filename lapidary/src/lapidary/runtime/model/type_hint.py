@@ -227,7 +227,7 @@ class GenericTypeHint(TypeHint):
         return [self, *[typ for arg in self.args for typ in arg._types()]]
 
     def resolve(self) -> Type:
-        generic = cast(Type[Generic], super().resolve())
+        generic = super().resolve()
         return generic[tuple(arg.resolve() for arg in self.args)]
 
     def __repr__(self) -> str:
