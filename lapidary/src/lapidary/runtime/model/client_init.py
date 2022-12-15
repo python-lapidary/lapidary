@@ -33,7 +33,7 @@ def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath, res
         default_auth=default_auth,
         response_map=(
             get_response_map(openapi_model.lapidary_responses_global, None, module, resolve_ref)
-            if openapi_model.lapidary_responses_global is not None else None
+            if openapi_model.lapidary_responses_global else {}
         ),
         auth_models=auth_models,
     )
