@@ -347,19 +347,20 @@ files = [
 
 [[package]]
 name = "lapidary"
-version = "0.7.1"
+version = "0.7.3"
 description = "Python async OpenAPI client library"
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "lapidary-0.7.1-py3-none-any.whl", hash = "sha256:c86b3b78c2b2ce1a198a8b73e038cab10bb0878a6879b97d151636dbccd254fd"},
-    {file = "lapidary-0.7.1.tar.gz", hash = "sha256:a814da064a0249210ae75ead10c384f2bc2c151ef2024821412e082739122682"},
+    {file = "lapidary-0.7.3-py3-none-any.whl", hash = "sha256:7e5eac159b7bac60397551803b633b1c1f8126617666f3f962daacf1854ebb88"},
+    {file = "lapidary-0.7.3.tar.gz", hash = "sha256:1be9c96375f53d532a4498b6795098c8cd1f6923fed8fc828720419230d2771e"},
 ]
 
 [package.dependencies]
 httpx = {version = ">=0.23.0,<0.24.0", extras = ["http2"]}
 inflection = ">=0.5.1,<0.6.0"
+platformdirs = ">=2.6.0,<3.0.0"
 pydantic = {version = ">=1.10.2,<2.0.0", extras = ["email"]}
 python-mimeparse = ">=1.6.0,<2.0.0"
 pyyaml = ">=6.0,<7.0"
@@ -712,4 +713,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "581a4a91d248eb9eb4842d3c8771d689918cc6e1c1ac5619f7d2bf90ddad7fc0"
+content-hash = "df7e5c2e2edf5988a3a76dbc18b8baf900352abde84396cec49aa8cdd417b840"
