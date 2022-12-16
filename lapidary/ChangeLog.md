@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.7.3](https://github.com/python-lapidary/lapidary/releases/tag/v0.7.3) - 2022-12-15
 ### Fixed
 - None error on missing x-lapidary-responses-global
-- Enum params are rendered as their string representation instead of calue.
+- Enum params are rendered as their string representation instead of value.
 
 ## [0.7.2](https://github.com/python-lapidary/lapidary/releases/tag/v0.7.2) - 2022-12-15
 ### Fixed
