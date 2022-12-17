@@ -30,8 +30,7 @@ def render(source: str, destination: Path, env: EnvFactory, strict: bool, **jinj
 
     try:
         destination.parent.mkdir(parents=True, exist_ok=True)
-        with open(destination, 'wt') as fb:
-            fb.write(code)
+        destination.write_text(code)
     except Exception:
         logger.info('Failed to save %s', destination)
         raise

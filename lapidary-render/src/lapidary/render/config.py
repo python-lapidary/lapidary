@@ -30,5 +30,5 @@ def load_config(project_root: Path) -> Config:
 
     with open(pyproj_path, 'br') as fb:
         pyproj = tomli.load(fb)
-        pyproj_dict = pyproj['tool']['lapidary']
-        return Config(**pyproj_dict)
+    pyproj_dict = pyproj['tool']['lapidary']
+    return Config(**pyproj_dict)

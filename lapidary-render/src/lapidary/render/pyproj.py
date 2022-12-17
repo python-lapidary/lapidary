@@ -22,5 +22,4 @@ def create_pyproj(project_root: Path, config: Config, title, env: Environment) -
             lapidary_render=version('lapidary-render'),
         )
     )
-    with open(project_root / PYPROJ_TOML, 'wt') as stream:
-        stream.write(text)
+    target.write_text(text)
