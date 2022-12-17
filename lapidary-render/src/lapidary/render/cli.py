@@ -8,7 +8,7 @@ from .config import Config, load_config
 HELP_FORMAT_STRICT = 'Use black in slow (strict checking) mode'
 
 logging.basicConfig()
-logging.getLogger('lapidary').setLevel(logging.INFO)
+logging.getLogger('lapidary').setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = typer.Typer()

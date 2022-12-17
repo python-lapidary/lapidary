@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 def create_pyproj(project_root: Path, config: Config, title, env: Environment) -> None:
+    target = project_root / PYPROJ_TOML
+    logger.info('Render %s', target)
     text = env.get_template('pyproject.toml.jinja2').render(
         package=config.package,
         project_name=project_root.name,
