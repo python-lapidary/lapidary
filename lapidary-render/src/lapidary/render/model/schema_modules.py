@@ -46,6 +46,6 @@ def render_schema_modules(
         executor: Executor
 ) -> Iterable[Future]:
     return (
-        executor.submit(render, 'schema_module.py.jinja2', mod.path.to_path(gen_root), env, config.format, model=mod)
+        executor.submit(render, 'schema_module.py.jinja2', mod.path.to_path(gen_root), env, config.format_strict, model=mod)
         for mod in get_schema_modules(model, ModulePath(config.package), resolver)
     )

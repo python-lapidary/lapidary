@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 def init_project(
         schema_path: Path,
         project_root: Path,
-        package_name: str,
-        format_: bool,
+        config: Config,
         render: bool,
 ):
     # Create a new project from scratch
@@ -27,11 +26,6 @@ def init_project(
     # - Call update_project
 
     assert not project_root.exists()
-
-    config = Config(
-        package=package_name,
-        format=format_,
-    )
 
     project_root.mkdir()
     (project_root / config.src_root).mkdir()

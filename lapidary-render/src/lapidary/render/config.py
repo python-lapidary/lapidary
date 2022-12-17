@@ -9,7 +9,7 @@ PYPROJ_TOML = 'pyproject.toml'
 @dataclasses.dataclass
 class Config:
     package: str
-    format: bool = True
+    format_strict: bool = False
     cache: bool = True
 
     src_root: str = 'src'

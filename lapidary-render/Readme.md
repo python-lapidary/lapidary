@@ -15,7 +15,7 @@ You can set python version for lapidary with `pipx install --python [path-to-pyt
 
 ### lapidary init
 
-`lapidary init [--[no-]format] [--[no-]render] SCHEMA_PATH PROJECT_ROOT PACKAGE_NAME`
+`lapidary init [--[no-]format-strict] [--[no-]render] SCHEMA_PATH PROJECT_ROOT PACKAGE_NAME`
 
 Lapidary will create 
 - PROJECT_ROOT and all necessary directories,
@@ -34,7 +34,7 @@ models or stubs. Once you've prepared the patch, run `lapidary update`.
 
 ### lapidary update
 
-`lapidary update [--[no-]format] [--[no-]cache] [PROJECT_ROOT]`
+`lapidary update [--[no-]format-strict] [--[no-]cache] [PROJECT_ROOT]`
 
 Default PROJECT_ROOT is the current directory.
 

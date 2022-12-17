@@ -3,6 +3,10 @@ from pathlib import Path
 
 import typer
 
+from .config import Config, load_config
+
+HELP_FORMAT_STRICT = 'Use black in slow (strict checking) mode'
+
 logging.basicConfig()
 logging.getLogger('lapidary').setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,7 +26,7 @@ def version():
 @app.command()
 def update(
         project_root: Path = typer.Argument(Path('.')),
-        format_: bool = typer.Option(True, '--format/--no-format'),
+        format_strict: bool = typer.Option(False, help=HELP_FORMAT_STRICT),
         cache: bool = True
 ):
     """Update existing project. Read configuration from pyproject.yaml ."""
@@ -32,14 +36,13 @@ def update(
         raise typer.Exit(code=1)
 
     from .main import update_project
-    from .config import load_config
 
     try:
         config = load_config(project_root)
     except (KeyError, FileNotFoundError):
         raise SystemExit('Missing Lapidary configuration')
 
-    config.format = format_
+    config.format_strict = format_strict
     config.cache = cache
     update_project(project_root, config)
 
@@ -49,8 +52,9 @@ def init(
         schema_path: Path,
         project_root: Path,
         package_name: str,
-        format_: bool = typer.Option(True, '--format/--no-format'),
+        format_strict: bool = typer.Option(False, help=HELP_FORMAT_STRICT),
         render: bool = True,
+        cache: bool = True
 ):
     """Create a new project from scratch."""
 
@@ -60,4 +64,10 @@ def init(
 
     from .main import init_project
 
-    init_project(schema_path, project_root, package_name, format_, render)
+    config = Config(
+        package=package_name,
+        format_strict=format_strict,
+        cache=cache,
+    )
+
+    init_project(schema_path, project_root, config, render)

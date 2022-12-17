@@ -30,15 +30,15 @@ def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> 
     pkg_path = root_mod.to_path(gen_root, False)
     client_module = get_client_class_module(model, root_mod / 'client', root_mod, resolver)
     auth_module = get_auth_module(model, root_mod)
-    format_ = config.format
+    strict = config.format_strict
 
     with (
         concurrent.futures.ProcessPoolExecutor() as executor
     ):
-        init_future = executor.submit(render, 'init/init.py.jinja2', pkg_path / '__init__.py', environment, format_)
-        client_future = executor.submit(render, 'client/client.py.jinja2', pkg_path / 'client.py', environment, format_, model=client_module)
-        stub_future = executor.submit(render, 'client/client.pyi.jinja2', pkg_path / 'client.pyi', environment, format_, model=client_module)
-        auth_future = executor.submit(render, 'auth/auth.py.jinja2', pkg_path / 'auth.py', environment, format_, model=auth_module, module=root_mod)
+        init_future = executor.submit(render, 'init/init.py.jinja2', pkg_path / '__init__.py', environment, strict)
+        client_future = executor.submit(render, 'client/client.py.jinja2', pkg_path / 'client.py', environment, strict, model=client_module)
+        stub_future = executor.submit(render, 'client/client.pyi.jinja2', pkg_path / 'client.pyi', environment, strict, model=client_module)
+        auth_future = executor.submit(render, 'auth/auth.py.jinja2', pkg_path / 'auth.py', environment, strict, model=auth_module, module=root_mod)
         schema_futures = render_schema_modules(model, config, gen_root, resolver, environment, executor)
 
         for f in [*schema_futures, client_future, auth_future, stub_future, init_future]:
