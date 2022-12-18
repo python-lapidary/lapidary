@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Next]
 ### Changed
 - Replaced --format flag with --format-strict. The code is always formatted with black, --format-strict disables the fast mode.
+- Changed the default openapi directory to src/openapi.
 
 ## [0.7.3](https://github.com/python-lapidary/lapidary/releases/tag/v0.7.3) - 2022-12-15
 ### Fixed

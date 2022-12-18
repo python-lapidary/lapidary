@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def load_spec(project_root: Path, config: Config) -> dict:
-    spec_path = project_root / config.src_root / 'openapi.yaml'
+    spec_path = project_root / config.openapi_root / 'openapi.yaml'
     cache_path = platformdirs.user_cache_path('lapidary', version=version('lapidary'))
     cache_path.mkdir(parents=True, exist_ok=True)
 
