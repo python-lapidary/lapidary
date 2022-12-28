@@ -66,7 +66,7 @@ def get_operation_param(
 
 
 def get_operation_func(
-        op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc
+        op: openapi.Operation, module: ModulePath, resolver: ResolverFunc
 ) -> OperationFunctionModel:
     params = []
     if op.parameters:
