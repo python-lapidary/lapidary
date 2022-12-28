@@ -35,21 +35,20 @@ def render_client(model: openapi.OpenApiModel, target: Path, config: Config) -> 
     with (
         concurrent.futures.ProcessPoolExecutor() as executor
     ):
-        init_future = executor.submit(render, 'init/init.py.jinja2', pkg_path / '__init__.py', environment, strict)
         client_future = executor.submit(render, 'client/client.py.jinja2', pkg_path / 'client.py', environment, strict, model=client_module)
         stub_future = executor.submit(render, 'client/client.pyi.jinja2', pkg_path / 'client.pyi', environment, strict, model=client_module)
         auth_future = executor.submit(render, 'auth/auth.py.jinja2', pkg_path / 'auth.py', environment, strict, model=auth_module, module=root_mod)
         schema_futures = render_schema_modules(model, config, gen_root, resolver, environment, executor)
 
-        for f in [*schema_futures, client_future, auth_future, stub_future, init_future]:
+        for f in [*schema_futures, client_future, auth_future, stub_future]:
             f.result()
 
-    ensure_init_py(pkg_path)
+    ensure_init_py(pkg_path / config.package)
     (pkg_path / 'py.typed').touch()
     logger.info('Done.')
 
 
 def ensure_init_py(pkg_path: Path) -> None:
     for (dirpath, _, filenames) in os.walk(pkg_path):
-        if '__init__.py' not in filenames:
+        if dirpath != str(pkg_path) and '__init__.py' not in filenames:
             (Path(dirpath) / '__init__.py').touch()
