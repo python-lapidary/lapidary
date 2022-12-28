@@ -86,7 +86,7 @@ def get_operation_func(
     elif len(response_types) == 1:
         response_type = response_types.pop()
     else:
-        response_type = GenericTypeHint.union_of(list(response_types))
+        response_type = GenericTypeHint.union_of(tuple(response_types))
 
     auth_name = None
     if op.security is not None and len(op.security) > 0:

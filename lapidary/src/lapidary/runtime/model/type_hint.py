@@ -3,10 +3,10 @@ from __future__ import annotations
 import datetime as dt
 import importlib
 import logging
-from typing import Annotated, Union, Type, cast, Generic
+from typing import Union, Type
 from uuid import UUID
 
-from pydantic import BaseModel, Field, Extra
+from pydantic import BaseModel, Extra
 
 from .refs import ResolverFunc
 from .. import openapi
@@ -59,7 +59,7 @@ def _get_one_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str,
     return GenericTypeHint(
         module='typing',
         name='Union',
-        args=args,
+        args=tuple(args),
     )
 
 
@@ -194,7 +194,7 @@ class BuiltinTypeHint(TypeHint):
 
 
 class GenericTypeHint(TypeHint):
-    args: Annotated[list[TypeHint], Field(default_factory=list)]
+    args: tuple[TypeHint, ...]
 
     class Config:
         extra = Extra.forbid
@@ -206,7 +206,7 @@ class GenericTypeHint(TypeHint):
             return super().union_with(other)
 
     @staticmethod
-    def union_of(types: list[TypeHint]) -> GenericTypeHint:
+    def union_of(types: tuple[TypeHint, ...]) -> GenericTypeHint:
         args = set()
         for typ in types:
             if isinstance(typ, GenericTypeHint) and typ.module == 'typing' and typ.name == 'Union':
@@ -235,6 +235,10 @@ class GenericTypeHint(TypeHint):
 
     def full_name(self) -> str:
         return f'{super().full_name()}[{", ".join(arg.full_name() for arg in self.args)}]'
+
+    @property
+    def origin(self) -> TypeHint:
+        return TypeHint(module=self.module, name=self.name)
 
     def __eq__(self, other) -> bool:
         return (
