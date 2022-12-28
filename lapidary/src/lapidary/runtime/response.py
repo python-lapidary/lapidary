@@ -1,14 +1,14 @@
 import inspect
 import logging
-from collections.abc import Iterator
-from typing import Optional, Type, cast, TypeVar
+from collections.abc import Iterator, AsyncIterator, Iterable, AsyncGenerator
+from typing import Optional, Type, TypeVar, Callable, get_args, get_origin
 
 import httpx
 import pydantic
 
 from .http_consts import CONTENT_TYPE
 from .mime import find_mime
-from .model import ResponseMap
+from .model import ResponseMap, PagingPlugin
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +16,9 @@ T = TypeVar('T')
 
 
 def handle_response(
-        response: httpx.Response,
         response_map: Optional[ResponseMap],
         global_response_map: Optional[ResponseMap],
+        response: httpx.Response,
 ) -> T:
     response.read()
 
@@ -28,15 +28,26 @@ def handle_response(
         response.raise_for_status()
         return response.content
 
+    iterator = get_origin(typ) is Iterator
+    parse_type = typ if not iterator else list[get_args(typ)]
+
     try:
-        obj = parse_model(response, cast(Type[T], typ))
+        obj = parse_model(response, parse_type)
     except pydantic.ValidationError:
         raise ValueError(response.content)
 
     if isinstance(obj, Exception):
         raise obj
+    elif iterator:
+        return aiter2(obj)
     else:
         return obj
+
+
+async def aiter2(values: Iterable[T]) -> AsyncIterator[T]:
+    """Turn Iterable to AsyncIterator (AsyncGenerator really)."""
+    for value in values:
+        yield value
 
 
 def parse_model(response: httpx.Response, typ: Type[T]) -> T:
@@ -90,3 +101,37 @@ def _status_code_matches(code: str) -> Iterator[str]:
         yield ''.join(code_as_list)
 
     yield 'default'
+
+
+P = TypeVar('P')
+
+
+async def mk_generator(
+        paging: PagingPlugin[T, P], request: httpx.Request, auth: Optional[httpx.Auth], client: httpx.AsyncClient,
+        response_handler: Callable[[httpx.Response], T]
+) -> AsyncIterator[P]:
+    async for response in get_pages(paging, request, auth, client):
+        response_model = response_handler(response)
+        processed = paging.map_response(response_model)
+        if isinstance(processed, Iterable):
+            for elem in processed:
+                yield elem
+        elif isinstance(processed, AsyncIterator):
+            async for elem in processed:
+                yield elem
+        else:
+            yield processed
+
+
+async def get_pages(
+        paging: PagingPlugin, request: httpx.Request, auth: Optional[httpx.Auth], client: httpx.AsyncClient
+) -> AsyncGenerator[httpx.Response, None]:
+    flow = paging.page_flow(request)
+    request = next(flow)
+    while True:
+        response = await client.send(request, auth=auth)
+        yield response
+        try:
+            request = flow.send(response)
+        except StopIteration:
+            break

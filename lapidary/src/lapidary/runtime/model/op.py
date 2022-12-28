@@ -1,3 +1,4 @@
+import pkgutil
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -5,11 +6,12 @@ from typing import Optional, Type
 
 import inflection
 
+from .plugins import PagingPlugin
 from .refs import ResolverFunc
 from .response_map import get_response_map, ResponseMap
 from ..module_path import ModulePath
 from ..names import PARAM_MODEL
-from ..openapi import model as openapi
+from ..openapi import model as openapi, PluginModel
 from ..openapi.utils import get_operations
 from ..types import resolve
 
@@ -20,12 +22,12 @@ class OperationModel:
     path: str
     params_model: Optional[Type]
     response_map: Optional[ResponseMap]
+    paging: Optional[PagingPlugin]
 
 
 def get_operation(
         op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc
 ) -> OperationModel:
-
     response_map = get_response_map(op.responses, op.operationId, module, resolver)
 
     return OperationModel(
@@ -33,6 +35,7 @@ def get_operation(
         path=re.compile(r'\{([^}]+)\}').sub(r'{p_\1}', url_path),
         params_model=resolve((module / PARAM_MODEL).str(), inflection.camelize(op.operationId)) if op.parameters else None,
         response_map=response_map,
+        paging=instantiate_plugin(op.paging),
     )
 
 
@@ -42,3 +45,11 @@ def get_operation_functions(openapi_model: openapi.OpenApiModel, module: ModuleP
         for url_path, path_item in openapi_model.paths.__root__.items()
         for method, op in get_operations(path_item, True)
     }
+
+
+def instantiate_plugin(model: Optional[PluginModel]) -> Optional[PagingPlugin]:
+    if not model:
+        return None
+
+    type_ = pkgutil.resolve_name(model.factory)
+    return type_()

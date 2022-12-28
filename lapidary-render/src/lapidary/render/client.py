@@ -4,10 +4,10 @@ import os
 from pathlib import Path
 
 from jinja2 import Environment, PackageLoader
-
 from lapidary.runtime import openapi
 from lapidary.runtime.model.refs import get_resolver
 from lapidary.runtime.module_path import ModulePath
+
 from .config import Config
 from .model import get_auth_module, get_client_class_module, render_schema_modules
 from .render import render

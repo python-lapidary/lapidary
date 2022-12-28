@@ -16,6 +16,9 @@ class ClientModel:
 
 def get_client_model(openapi_model: openapi.OpenApiModel, module: ModulePath, resolve: ResolverFunc) -> ClientModel:
     return ClientModel(
-        init_method=get_client_init(openapi_model, module, resolve),
+        init_method=get_client_init(
+            openapi_model,
+            module,
+        ),
         methods=get_operation_functions(openapi_model, module, resolve),
     )
