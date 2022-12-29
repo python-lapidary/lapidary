@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import importlib
 import logging
-from typing import Union, Type
+from typing import Union
 from uuid import UUID
 
 from pydantic import BaseModel, Extra
@@ -134,7 +134,7 @@ class TypeHint(BaseModel):
         return TypeHint(module=module, name=name)
 
     @staticmethod
-    def from_type(typ: Type) -> TypeHint:
+    def from_type(typ: type) -> TypeHint:
         if hasattr(typ, '__origin__'):
             raise ValueError('Generic types unsupported', typ)
         module = typ.__module__
@@ -168,7 +168,7 @@ class TypeHint(BaseModel):
     def __hash__(self) -> int:
         return self.module.__hash__() * 14159 + self.name.__hash__()
 
-    def resolve(self) -> Type:
+    def resolve(self) -> type:
         mod = importlib.import_module(self.module)
         return getattr(mod, self.name)
 
@@ -226,7 +226,7 @@ class GenericTypeHint(TypeHint):
     def _types(self) -> list[TypeHint]:
         return [self, *[typ for arg in self.args for typ in arg._types()]]
 
-    def resolve(self) -> Type:
+    def resolve(self) -> type:
         generic = super().resolve()
         return generic[tuple(arg.resolve() for arg in self.args)]
 

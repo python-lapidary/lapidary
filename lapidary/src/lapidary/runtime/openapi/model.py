@@ -614,6 +614,7 @@ class Response(BaseModel):
 class MediaType(BaseModel):
     class Config:
         extra = Extra.forbid
+        allow_population_by_field_name = True
 
     schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
     example: Optional[Any]

@@ -14,7 +14,7 @@ class ClientInit:
     auth_models: Mapping[str, AuthModel] = field(default_factory=dict)
     base_url: Optional[str] = None
     headers: list[tuple[str, str]] = field(default_factory=list)
-    response_map: Optional[ResponseMap] = None
+    response_map: Optional[ResponseMap] = field(default_factory=dict)
 
 
 def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath) -> ClientInit:

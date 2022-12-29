@@ -16,7 +16,7 @@ def get_accept_header(response_map: Optional[ResponseMap], global_response_map: 
     all_mime_types = {
         mime
         for rmap in [response_map, global_response_map]
-        if rmap is not None
+        if rmap
         for mime_map in rmap.values()
         for mime in mime_map.keys()
     }

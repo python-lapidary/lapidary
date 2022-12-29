@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Route
 
 from lapidary.runtime import ClientBase
-from lapidary.runtime.model import ClientModel, OperationModel, ClientInit
+from lapidary.runtime.model import ClientModel, OperationModel, ClientInit, ReturnTypeInfo
 
 
 class TestClient(unittest.IsolatedAsyncioTestCase):
@@ -30,7 +30,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
                     None,
                     {
                         '200': {
-                            'application/json': list[str]
+                            'application/json': ReturnTypeInfo(list[str], False)
                         }
                     },
                     None,
