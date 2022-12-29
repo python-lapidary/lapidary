@@ -146,13 +146,4 @@ def to_iterator(type_: TypeHint) -> TypeHint:
     if type_.origin == TypeHint.from_type(list):
         return GenericTypeHint(module='collections.abc', name='Iterator', args=type_.args)
 
-    if type_.origin == TypeHint.from_type(dict):
-        return GenericTypeHint(
-            module='collections.abc',
-            name='Iterator',
-            args=(
-                GenericTypeHint(module='builtins', name='tuple', args=type_.args)
-            )
-        )
-
     return type_
