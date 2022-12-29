@@ -3,11 +3,12 @@
 
 from __future__ import annotations
 
-import enum
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field
+
+from .ext import PluginModel, LapidaryModelType
 
 __all__ = [
     'APIKeySecurityScheme',
@@ -33,7 +34,6 @@ __all__ = [
     'In3',
     'In4',
     'Info',
-    'LapidaryModelType',
     'License',
     'Link',
     'MediaType',
@@ -76,11 +76,6 @@ __all__ = [
     'Type4',
     'XML'
 ]
-
-
-class LapidaryModelType(enum.Enum):
-    model = 'model'
-    exception = 'exception'
 
 
 class Reference(BaseModel):
@@ -504,7 +499,7 @@ class Schema(BaseModel):
         )
     ]
     lapidary_name: Annotated[Optional[str], Field(alias='x-lapidary-type-name')] = None
-    lapidary_model_type: Annotated[Optional[LapidaryModelType], Field(alias='x-lapidary-model-type')] = None
+    lapidary_model_type: Annotated[Optional[LapidaryModelType], Field(alias='x-lapidary-modelType')] = None
 
 
 class Tag(BaseModel):
@@ -619,6 +614,7 @@ class Response(BaseModel):
 class MediaType(BaseModel):
     class Config:
         extra = Extra.forbid
+        allow_population_by_field_name = True
 
     schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
     example: Optional[Any]
@@ -683,6 +679,8 @@ class Operation(BaseModel):
     deprecated: Optional[bool] = False
     security: Optional[List[SecurityRequirement]]
     servers: Optional[List[Server]]
+
+    paging: Annotated[Optional[PluginModel], Field(alias='x-lapidary-pagingPlugin')]
 
 
 class Responses(BaseModel):

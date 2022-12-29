@@ -1,4 +1,10 @@
 {% include 'header.py.jinja2' %}
+
+__all__ = [
+    'ApiClient',
+    'Auth',
+]
+
 import typing
 
 import lapidary.runtime
@@ -6,6 +12,8 @@ import lapidary.runtime.auth
 import pydantic
 
 import {{ model.path.parent() }}.auth
+from {{ model.path.parent() }}.auth import Auth
+
 {%- for imp in model.imports %}
 import {{ imp }}
 {%- endfor %}

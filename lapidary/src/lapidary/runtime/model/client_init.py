@@ -3,10 +3,9 @@ from dataclasses import dataclass, field
 from typing import Optional, Union
 
 from .auth import AuthModel, get_auth_models
-from .refs import ResolverFunc
-from .response_map import ResponseMap, get_response_map
-from ..openapi import model as openapi
+from .response_map import get_api_responses, ResponseMap
 from ..module_path import ModulePath
+from ..openapi import model as openapi
 
 
 @dataclass(frozen=True)
@@ -15,26 +14,30 @@ class ClientInit:
     auth_models: Mapping[str, AuthModel] = field(default_factory=dict)
     base_url: Optional[str] = None
     headers: list[tuple[str, str]] = field(default_factory=list)
-    response_map: Optional[ResponseMap] = None
+    response_map: Optional[ResponseMap] = field(default_factory=dict)
 
 
-def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath, resolve_ref: ResolverFunc) -> ClientInit:
+def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath) -> ClientInit:
     default_auth = next(iter(openapi_model.security[0].__root__.keys())) if openapi_model.security else None
-    base_url = next(iter(openapi_model.servers)).url if openapi_model.servers and len(openapi_model.servers) > 0 else None
+
+    base_url = (
+        openapi_model.servers[0].url if openapi_model.servers and openapi_model.servers
+        else None
+    )
 
     auth_models = (
         get_auth_models(openapi_model.components.securitySchemes)
         if openapi_model.components and openapi_model.components.securitySchemes
         else {}
     )
+
+    api_responses = get_api_responses(openapi_model, module) if openapi_model.lapidary_responses_global else {}
+
     return ClientInit(
         base_url=base_url,
         headers=get_global_headers(openapi_model.lapidary_headers_global),
         default_auth=default_auth,
-        response_map=(
-            get_response_map(openapi_model.lapidary_responses_global, None, module, resolve_ref)
-            if openapi_model.lapidary_responses_global else {}
-        ),
+        response_map=api_responses,
         auth_models=auth_models,
     )
 

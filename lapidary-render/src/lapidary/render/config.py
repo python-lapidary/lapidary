@@ -12,15 +12,15 @@ class Config:
     format_strict: bool = False
     cache: bool = True
 
-    src_root: str = 'src'
+    openapi_root: str = 'src/openapi'
     gen_root: str = 'gen'
     patches: str = 'patches'
 
     def get_patches(self, project_root: Path) -> Path:
-        return project_root / self.src_root / self.patches
+        return project_root / self.openapi_root / self.patches
 
     def get_openapi(self, project_root: Path) -> Path:
-        return project_root / self.src_root / 'openapi.yaml'
+        return project_root / self.openapi_root / 'openapi.yaml'
 
 
 def load_config(project_root: Path) -> Config:

@@ -66,7 +66,7 @@ def get_operation_param(
 
 
 def get_operation_func(
-        op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc
+        op: openapi.Operation, module: ModulePath, resolver: ResolverFunc
 ) -> OperationFunctionModel:
     params = []
     if op.parameters:
@@ -86,7 +86,7 @@ def get_operation_func(
     elif len(response_types) == 1:
         response_type = response_types.pop()
     else:
-        response_type = GenericTypeHint.union_of(list(response_types))
+        response_type = GenericTypeHint.union_of(tuple(response_types))
 
     auth_name = None
     if op.security is not None and len(op.security) > 0:
@@ -107,6 +107,7 @@ def get_response_types(op: openapi.Operation, module: ModulePath, resolve: Resol
     """
     Generate unique collection of types that may be returned by the operation. Skip types that are marked as exceptions as those are raised instead.
     """
+
     return get_response_types_(op.operationId, op.responses, module, resolve)
 
 
@@ -127,5 +128,22 @@ def get_response_types_(op_name: Optional[str], responses: openapi.Responses, mo
             if schema.lapidary_model_type is openapi.LapidaryModelType.exception:
                 continue
             typ = resolve_type_hint(schema, resp_module, name, resolve)
+
+            if schema.lapidary_model_type is openapi.LapidaryModelType.iterator:
+                typ = to_iterator(typ)
+
             response_types.add(typ)
     return response_types
+
+
+def to_iterator(type_: TypeHint) -> TypeHint:
+    if not isinstance(type_, GenericTypeHint):
+        return type_
+
+    if type_.origin == TypeHint.from_type(Union):
+        return GenericTypeHint.union_of(tuple(to_iterator(targ) for targ in type_.args))
+
+    if type_.origin == TypeHint.from_type(list):
+        return GenericTypeHint(module='collections.abc', name='Iterator', args=type_.args)
+
+    return type_

@@ -4,6 +4,8 @@ from pathlib import Path
 
 import yaml
 
+from .model import ClientModel, get_client_model, get_resolver
+from .module_path import ModulePath
 from .openapi import model as openapi
 
 
@@ -41,3 +43,10 @@ def load_model(mod: str) -> openapi.OpenApiModel:
     import platformdirs
     d = load_yaml_cached_(text, platformdirs.user_cache_path(), True)
     return openapi.OpenApiModel.parse_obj(d)
+
+
+def get_model(module: str) -> ClientModel:
+    root = ModulePath(module).parent()
+
+    openapi_model = load_model(str(root))
+    return get_client_model(openapi_model, root, get_resolver(openapi_model, str(root)))

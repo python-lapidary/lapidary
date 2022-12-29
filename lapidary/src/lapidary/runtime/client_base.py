@@ -5,38 +5,42 @@ __all__ = [
 import logging
 from abc import ABC
 from functools import partial
-from typing import Optional, Any, cast
+from typing import Optional, Any, cast, Callable
 
 import httpx
 import pydantic
 
-from .load import load_model
-from .model import OperationModel, get_resolver, ResponseMap, get_client_model, get_api_responses
-from .module_path import ModulePath
+from .load import get_model
+from .model import OperationModel, ClientModel
 from .request import build_request, get_path
-from .response import handle_response
+from .response import handle_response, mk_generator
 
 logger = logging.getLogger(__name__)
 
 
 class ClientBase(ABC):
-    def __init__(self, base_url: Optional[str] = None, auth: Any = None):
-        root = ModulePath(self.__module__).parent()
+    def __init__(
+            self,
+            base_url: Optional[str] = None,
+            auth: Any = None,
+            *,
+            _model: Optional[ClientModel] = None,
+            _app: Optional[Callable[..., Any]] = None,
+    ):
+        if _model:
+            self._model = _model
+        else:
+            self._model = get_model(self.__module__)
 
-        openapi_model = load_model(str(root))
-        model = get_client_model(openapi_model, root, get_resolver(openapi_model, str(root)))
-        self._ops = model.methods
-
-        if base_url is None and openapi_model.servers and len(openapi_model.servers) > 0:
-            base_url = openapi_model.servers[0].url
+        if base_url is None:
+            base_url = self._model.init_method.base_url
         if base_url is None:
             raise ValueError('Missing base_url.')
 
-        scheme_name, scheme = next(iter(auth.__dict__.items()))
-        auth_handler = scheme.create(model.init_method.auth_models[scheme_name])
+        scheme_name, scheme = next(iter(auth.__dict__.items())) if auth else (None, None)
+        auth_handler = scheme.create(self._model.init_method.auth_models[scheme_name]) if scheme else None
 
-        self._client = httpx.AsyncClient(auth=auth_handler, base_url=base_url)
-        self._api_responses = get_api_responses(openapi_model, root)
+        self._client = httpx.AsyncClient(auth=auth_handler, base_url=base_url, app=_app)
 
     def __getattr__(self, item: str):
         async def op_handler(op: OperationModel, request_body=None, **kwargs):
@@ -46,17 +50,15 @@ class ClientBase(ABC):
                 param_model = None
 
             return await self._request(
-                op.method,
+                op,
                 get_path(op.path, param_model),
                 param_model=param_model,
                 request_body=request_body,
-                response_map=op.response_map,
-                # auth=self.auth_tokenAuth,
             )
 
-        return partial(op_handler, self._ops[item])
+        return partial(op_handler, self._model.methods[item])
 
-    async def __aenter__(self) -> 'ClientBase':
+    async def __aenter__(self):
         await self._client.__aenter__()
         return self
 
@@ -65,19 +67,22 @@ class ClientBase(ABC):
 
     async def _request(
             self,
-            method: str,
+            operation: OperationModel,
             url: str,
-            param_model: Optional[pydantic.BaseModel] = None,
-            request_body: Any = None,
-            response_map: Optional[ResponseMap] = None,
+            param_model: Optional[pydantic.BaseModel],
+            request_body: Any,
             auth: Optional[httpx.Auth] = httpx.USE_CLIENT_DEFAULT,
     ):
-        request_ = build_request(param_model, request_body, response_map, self._api_responses)
-        request = self._client.build_request(method, url, **request_)
+        request_ = build_request(param_model, request_body, operation.response_map, self._model.init_method.response_map)
+        request = self._client.build_request(operation.method, url, **request_)
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s", f'{request.method} {request.url} {request.headers}')
 
-        response = await self._client.send(request, auth=auth)
+        response_handler = partial(handle_response, operation.response_map, self._model.init_method.response_map)
 
-        return handle_response(response, response_map, self._api_responses)
+        if operation.paging:
+            return mk_generator(operation.paging, request, auth, self._client, response_handler)
+
+        response = await self._client.send(request, auth=auth)
+        return response_handler(response)

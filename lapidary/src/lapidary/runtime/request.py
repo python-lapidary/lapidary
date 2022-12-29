@@ -16,7 +16,7 @@ def get_accept_header(response_map: Optional[ResponseMap], global_response_map: 
     all_mime_types = {
         mime
         for rmap in [response_map, global_response_map]
-        if rmap is not None
+        if rmap
         for mime_map in rmap.values()
         for mime in mime_map.keys()
     }
@@ -70,7 +70,7 @@ def get_path(path_format: str, param_model: pydantic.BaseModel) -> str:
         param_name: param_to_str(param_model.__dict__[param_name])
         for param_name in param_model.__fields_set__
         if param_model.__fields__[param_name].field_info.extra['in_'] is ParamLocation.path
-    }
+    } if param_model else {}
     return path_format.format(**path_params)
 
 

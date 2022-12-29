@@ -1,3 +1,4 @@
+import typing
 from unittest import TestCase
 
 from lapidary.runtime import openapi
@@ -62,3 +63,12 @@ class OneOfTypeHintTest(TestCase):
     def test_resolve(self):
         from lapidary.runtime.model.auth import AuthModel
         self.assertEqual(AuthModel, TypeHint.from_str('lapidary.runtime.model.auth.AuthModel').resolve())
+
+
+def test_from_type_union():
+    assert TypeHint.from_type(typing.Union) == TypeHint(module='typing', name='Union')
+
+
+def test_origin():
+    type_ = GenericTypeHint(module='typing', name='Union', args=(TypeHint.from_type(str), TypeHint.from_type(int)))
+    assert TypeHint.from_type(typing.Union) == type_.origin

@@ -1,8 +1,11 @@
+import builtins
 import keyword
 import logging
 import re
-import builtins
+
 import inflection
+
+from lapidary.runtime.module_path import ModulePath
 
 logger = logging.getLogger(__name__)
 
@@ -78,3 +81,7 @@ def get_schema_module_name(name):
 
 def request_type_name(name):
     return inflection.camelize(name) + 'Request'
+
+
+def param_model_name(module: ModulePath, op_id: str) -> str:
+    return (module / PARAM_MODEL).str() + ':' + inflection.camelize(op_id)

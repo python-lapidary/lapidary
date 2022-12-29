@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Callable, TypeVar, Union, Type, cast, Optional, Any, Mapping
+from typing import Callable, TypeVar, Union, cast, Optional, Any, Mapping
 
 import inflection
 from typing_extensions import TypeAlias
@@ -13,12 +13,12 @@ from ..openapi import model as openapi
 logger = logging.getLogger(__name__)
 
 T = TypeVar('T', openapi.Schema, openapi.Parameter, openapi.SecurityScheme, openapi.Response)
-ResolverFunc = Callable[[openapi.Reference, Type[T]], tuple[T, ModulePath, str]]
+ResolverFunc = Callable[[openapi.Reference, type[T]], tuple[T, ModulePath, str]]
 
 SchemaOrRef: TypeAlias = Union[openapi.Schema, openapi.Reference]
 
 
-def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, typ: Type[T]) -> tuple[T, ModulePath, str]:
+def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, typ: type[T]) -> tuple[T, ModulePath, str]:
     """
     module = {root_package}.{path[0:4]}
     name = path[4:]
