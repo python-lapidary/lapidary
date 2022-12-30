@@ -50,8 +50,12 @@ model = openapi.OpenApiModel(
 
 class Test(TestCase):
     def test_resolve_ref(self):
-        a = get_schema_class(model.components.schemas['alice'], 'alice', ModulePath('alice'),
-                             get_resolver(model, 'bob'))
+        a = get_schema_class(
+            model.components.schemas['alice'],
+            'alice',
+            ModulePath('alice'),
+            get_resolver(model, 'bob'),
+        )
         schema = SchemaClass(
             class_name='alice',
             base_type=TypeHint.from_str('pydantic.BaseModel'),
@@ -73,7 +77,11 @@ class Test(TestCase):
         self.assertEqual(schema, a)
 
     def test_schema_type_name(self):
-        classes = [cls for cls in get_schema_classes(model.components.schemas['charlie'], 'alice', ModulePath('test'),
-                                                     get_resolver(model, 'test'))]
+        classes = [cls for cls in get_schema_classes(
+            model.components.schemas['charlie'],
+            'alice',
+            ModulePath('test'),
+            get_resolver(model, 'test'),
+        )]
         class_names = [cls.class_name for cls in classes]
         self.assertEqual(class_names, ['FirstSchemaClass', 'SecondSchemaClass'])

@@ -130,7 +130,7 @@ class NamingTest(TestCase):
         result = [c for c in get_schema_classes(model, 'test', module_path, None)]
         self.assertEqual('null', result[0].attributes[0].name)
 
-    def test_param_name_with_colon(self):
+    def test_param_name_with_space(self):
         schema_text = """
 openapi: '3.0.3'
 info:

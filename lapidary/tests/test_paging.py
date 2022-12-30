@@ -25,7 +25,6 @@ class TestPagingPlugin(PagingPlugin):
 
 
 async def handler(request: starlette.requests.Request) -> starlette.responses.Response:
-    print(request)
     headers = {}
     if not request.query_params:
         headers['Link'] = '<https://example.com/strings?page=next>; rel="next'
