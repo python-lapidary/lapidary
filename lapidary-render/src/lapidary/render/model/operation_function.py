@@ -66,8 +66,13 @@ def get_operation_param(
 
 
 def get_operation_func(
-        op: openapi.Operation, module: ModulePath, resolver: ResolverFunc
+        op: openapi.Operation, root: ModulePath, operation_id: Optional[str], resolver: ResolverFunc
 ) -> OperationFunctionModel:
+    if not operation_id:
+        raise ValueError('operationId is required')
+
+    module = root / 'paths' / op.operationId
+
     params = []
     if op.parameters:
         for oapi_param in op.parameters:

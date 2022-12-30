@@ -17,7 +17,7 @@ class ClientClass:
 
 def get_client_class(openapi_model: openapi.OpenApiModel, module: ModulePath, resolver: ResolverFunc) -> ClientClass:
     functions = [
-        get_operation_func(op, module / 'paths' / op.operationId, resolver)
+        get_operation_func(op, module, op.operationId, resolver)
         for url_path, path_item in openapi_model.paths.items()
         for method, op in get_operations(path_item, True)
     ]
