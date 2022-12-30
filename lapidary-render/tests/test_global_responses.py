@@ -16,7 +16,7 @@ class GlobalResponsesTest(unittest.TestCase):
                 title='',
                 version=''
             ),
-            paths=openapi.Paths(__root__={}),
+            paths=openapi.Paths(),
             components=openapi.Components(
                 schemas={
                     'GSMTasksError': openapi.Schema(
@@ -40,7 +40,7 @@ class GlobalResponsesTest(unittest.TestCase):
                     )
                 },
             ),
-            lapidary_responses_global=openapi.Responses(__root__={
+            lapidary_responses_global=openapi.Responses(**{
                 '4XX': openapi.Reference(ref='#/components/responses/error-response'),
                 '5XX': openapi.Reference(ref='#/components/responses/error-response'),
             })
@@ -63,7 +63,7 @@ class GlobalResponsesTest(unittest.TestCase):
                 title='',
                 version=''
             ),
-            paths=openapi.Paths(__root__={}),
+            paths=openapi.Paths(),
             components=openapi.Components(
                 schemas={
                     'GSMTasksError': openapi.Schema(
@@ -77,7 +77,7 @@ class GlobalResponsesTest(unittest.TestCase):
                     )
                 }
             ),
-            lapidary_responses_global=openapi.Responses(__root__={
+            lapidary_responses_global=openapi.Responses(**{
                 '4XX': openapi.Response(
                     description='Client error',
                     content={
@@ -114,7 +114,7 @@ class GlobalResponsesTest(unittest.TestCase):
                 title='',
                 version=''
             ),
-            'paths': openapi.Paths(__root__={}),
+            'paths': openapi.Paths(),
             'components': openapi.Components(
                 schemas={
                     'GSMTasksError': openapi.Schema(
@@ -128,7 +128,7 @@ class GlobalResponsesTest(unittest.TestCase):
                     )
                 }
             ),
-            'x-lapidary-responses-global': openapi.Responses(__root__={
+            'x-lapidary-responses-global': openapi.Responses(**{
                 '4XX': openapi.Response(
                     description='Client error',
                     content={

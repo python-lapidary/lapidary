@@ -37,6 +37,5 @@ paths:
         """
 
         model = openapi.OpenApiModel.parse_obj(yaml.safe_load(text))
-        classes = list(get_param_model_classes(model.paths.__root__['/'].get, module_path, None))
-        print(classes)
+        classes = list(get_param_model_classes(model.paths['/'].get, module_path, None))
         self.assertEqual(TypeHint.from_str('test.TestOpParam'), classes[1].attributes[0].annotation.type)

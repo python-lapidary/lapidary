@@ -16,11 +16,11 @@ from lapidary.render.model.schema_module import SchemaModule
 model = openapi.OpenApiModel(
     openapi='3.0.3',
     info=openapi.Info(title='Lapidary test schema', version='1.0.0'),
-    paths=openapi.Paths(__root__={
+    paths=openapi.Paths(**{
         '/simple-response/': openapi.PathItem(
             get=openapi.Operation(
                 operationId='get_simple_response',
-                responses=openapi.Responses(__root__={
+                responses=openapi.Responses(**{
                     '200': openapi.Response(
                         description='test response',
                         content={'application/json': openapi.MediaType(
@@ -33,7 +33,7 @@ model = openapi.OpenApiModel(
         '/schema-response/': openapi.PathItem(
             get=openapi.Operation(
                 operationId='get_schema_response',
-                responses=openapi.Responses(__root__={
+                responses=openapi.Responses(**{
                     '200': openapi.Response(
                         description='test response',
                         content={'application/json': openapi.MediaType(
@@ -53,7 +53,7 @@ model = openapi.OpenApiModel(
         '/schema-request/': openapi.PathItem(
             get=openapi.Operation(
                 operationId='get_schema_request',
-                responses=openapi.Responses(__root__={}),
+                responses=openapi.Responses(),
                 requestBody=openapi.RequestBody(
                     content={'application/json': openapi.MediaType(
                         schema=openapi.Schema(
@@ -71,7 +71,7 @@ model = openapi.OpenApiModel(
         '/ignored-header/': openapi.PathItem(
             get=openapi.Operation(
                 operationId='ignored_header',
-                responses=openapi.Responses(__root__={}),
+                responses=openapi.Responses(),
                 parameters=[
                     openapi.Parameter(
                         name='accept',
@@ -126,13 +126,13 @@ class OperationResponseTest(TestCase):
             )]
         )
 
-        mod = get_response_body_module(model.paths.__root__['/schema-response/'].get, module_path, resolve)
+        mod = get_response_body_module(model.paths['/schema-response/'].get, module_path, resolve)
         # pp(mod)
 
         self.assertEqual(expected, mod)
 
     def test_request_body_schema_class(self):
-        mod = get_request_body_module(model.paths.__root__['/schema-request/'].get, module_path, resolve)
+        mod = get_request_body_module(model.paths['/schema-request/'].get, module_path, resolve)
 
         expected = SchemaModule(
             path=module_path,
@@ -149,6 +149,6 @@ class OperationResponseTest(TestCase):
         self.assertEqual(expected, mod)
 
     def test_ignored_header(self):
-        op_def = model.paths.__root__['/ignored-header/'].get
-        op_model = get_operation_func(op_def, module_path, resolve)
+        op_def = model.paths['/ignored-header/'].get
+        op_model = get_operation_func(op_def, module_path, 'op', resolve)
         self.assertEqual([], op_model.params)

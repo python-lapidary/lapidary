@@ -26,7 +26,7 @@ def get_response_map(
         responses: openapi.Responses, op_name: str, module: ModulePath, resolve_ref: ResolverFunc
 ) -> ResponseMap:
     result = {}
-    for resp_code, response in responses.__root__.items():
+    for resp_code, response in responses.items():
         response, sub_module, sub_name = resolve_response(resp_code, response, op_name, module, resolve_ref)
         if not response.content:
             continue

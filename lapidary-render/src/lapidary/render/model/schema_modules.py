@@ -23,7 +23,7 @@ def get_schema_modules(model: openapi.OpenApiModel, root_module: ModulePath, res
         path = root_module / 'components' / 'schemas'
         yield from get_modules_for_components_schemas(model.components.schemas, path, resolver)
 
-    for path, path_item in model.paths.__root__.items():
+    for path, path_item in model.paths.items():
         for tpl in get_operations(path_item, True):
             _, op = tpl
             op_root_module = root_module / 'paths' / op.operationId
@@ -35,7 +35,7 @@ def get_schema_modules(model: openapi.OpenApiModel, root_module: ModulePath, res
                 mod = get_request_body_module(op, op_root_module / mod_name.REQUEST_BODY, resolver)
                 if len(mod.body) > 0:
                     yield mod
-            if len(op.responses.__root__):
+            if len(op.responses.items()):
                 mod = get_response_body_module(op, op_root_module / mod_name.RESPONSE_BODY, resolver)
                 if len(mod.body) > 0:
                     yield mod

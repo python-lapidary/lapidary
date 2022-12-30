@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import re
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field
 
+from .base import ExtendableModel, DynamicExtendableModel
 from .ext import PluginModel, LapidaryModelType
 
 __all__ = [
@@ -86,27 +88,18 @@ class Reference(BaseModel):
     ref: Annotated[str, Field(alias='$ref')]
 
 
-class Contact(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Contact(ExtendableModel):
     name: Optional[str]
     url: Optional[str]
     email: Optional[EmailStr]
 
 
-class License(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class License(ExtendableModel):
     name: str
     url: Optional[str]
 
 
-class ServerVariable(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class ServerVariable(ExtendableModel):
     enum: Optional[List[str]]
     default: str
     description: Optional[str]
@@ -121,15 +114,12 @@ class Type(Enum):
     string = 'string'
 
 
-class Discriminator(BaseModel):
+class Discriminator(ExtendableModel):
     propertyName: str
     mapping: Optional[Dict[str, str]]
 
 
-class XML(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class XML(ExtendableModel):
     name: Optional[str]
     namespace: Optional[AnyUrl]
     prefix: Optional[str]
@@ -137,10 +127,7 @@ class XML(BaseModel):
     wrapped: Optional[bool] = False
 
 
-class Example(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Example(ExtendableModel):
     summary: Optional[str]
     description: Optional[str]
     value: Optional[Any]
@@ -151,17 +138,13 @@ class Style(Enum):
     simple = 'simple'
 
 
-class Paths(BaseModel):
-    __root__: Annotated[dict[str, Union[PathItem, Reference]], Field(default_factory=dict)]
-
-
 class SecurityRequirement(BaseModel):
     __root__: Annotated[dict[str, list[str]], Field(default_factory=dict)]
 
 
-class ExternalDocumentation(BaseModel):
+class ExternalDocumentation(ExtendableModel):
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
 
     description: Optional[str]
     url: str
@@ -410,14 +393,7 @@ class AuthorizationCodeOAuthFlow(BaseModel):
     scopes: Optional[Dict[str, str]]
 
 
-class Callback(BaseModel):
-    __root__: Annotated[dict[str, Union[PathItem, Reference]], Field(default_factory=dict)]
-
-
-class Info(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Info(ExtendableModel):
     title: str
     description: Optional[str]
     termsOfService: Optional[str]
@@ -426,18 +402,14 @@ class Info(BaseModel):
     version: str
 
 
-class Server(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Server(ExtendableModel):
     url: str
     description: Optional[str]
     variables: Optional[Dict[str, ServerVariable]]
 
 
-class Schema(BaseModel):
+class Schema(ExtendableModel):
     class Config:
-        extra = Extra.forbid
         allow_population_by_field_name = True
 
     title: Optional[str]
@@ -502,10 +474,7 @@ class Schema(BaseModel):
     lapidary_model_type: Annotated[Optional[LapidaryModelType], Field(alias='x-lapidary-modelType')] = None
 
 
-class Tag(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Tag(ExtendableModel):
     name: str
     description: Optional[str]
     externalDocs: Optional[ExternalDocumentation]
@@ -521,10 +490,7 @@ class OAuthFlows(BaseModel):
     authorizationCode: Optional[AuthorizationCodeOAuthFlow]
 
 
-class Link(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Link(ExtendableModel):
     operationId: Optional[str]
     operationRef: Optional[str]
     parameters: Optional[Dict[str, Any]]
@@ -551,13 +517,12 @@ class SecurityScheme(BaseModel):
     ]
 
 
-class OpenApiModel(BaseModel):
+class OpenApiModel(ExtendableModel):
     """
     Validation schema for OpenAPI Specification 3.0.X.
     """
 
     class Config:
-        extra = Extra.forbid
         allow_population_by_field_name = True
 
     openapi: Annotated[str, Field(regex='^3\\.0\\.\\d(-.+)?$')]
@@ -586,10 +551,7 @@ class OpenApiModel(BaseModel):
     )
 
 
-class Components(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Components(ExtendableModel):
     schemas: Optional[Dict[str, Union[Schema, Reference]]]
     responses: Optional[Dict[str, Union[Reference, Response]]]
     parameters: Optional[Dict[str, Union[Reference, Parameter]]]
@@ -601,19 +563,15 @@ class Components(BaseModel):
     callbacks: Optional[Dict[str, Union[Reference, Callback]]]
 
 
-class Response(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Response(ExtendableModel):
     description: str
     headers: Optional[Dict[str, Union[Header, Reference]]]
     content: Optional[Dict[str, MediaType]]
     links: Optional[Dict[str, Union[Link, Reference]]]
 
 
-class MediaType(BaseModel):
+class MediaType(ExtendableModel, ):
     class Config:
-        extra = Extra.forbid
         allow_population_by_field_name = True
 
     schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
@@ -641,10 +599,7 @@ class Header(BaseModel):
     examples: Optional[Dict[str, Union[Example, Reference]]]
 
 
-class PathItem(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class PathItem(ExtendableModel):
     summary: Optional[str]
     description: Optional[str]
     servers: Optional[List[Server]]
@@ -661,10 +616,19 @@ class PathItem(BaseModel):
     trace: Optional[Operation]
 
 
-class Operation(BaseModel):
-    class Config:
-        extra = Extra.forbid
+class Paths(DynamicExtendableModel[Union[PathItem, Reference]]):
+    @classmethod
+    def _validate_key(cls, key: str) -> bool:
+        return key.startswith('/')
 
+
+class Callback(DynamicExtendableModel[Union[PathItem, Reference]]):
+    @classmethod
+    def _validate_key(cls, key: str) -> bool:
+        return True
+
+
+class Operation(ExtendableModel):
     tags: Optional[List[str]]
     summary: Optional[str]
     description: Optional[str]
@@ -683,13 +647,14 @@ class Operation(BaseModel):
     paging: Annotated[Optional[PluginModel], Field(alias='x-lapidary-pagingPlugin')]
 
 
-class Responses(BaseModel):
-    __root__: Annotated[Optional[dict[str, Union[Response, Reference]]], Field(default_factory=dict)]
+class Responses(DynamicExtendableModel[Union[Response, Reference]]):
+    @classmethod
+    def _validate_key(cls, key: str) -> bool:
+        return key == 'default' or re.match(r'^[1-5][0-9X]{2}$', key)
 
 
-class Parameter(BaseModel):
+class Parameter(ExtendableModel):
     class Config:
-        extra = Extra.forbid
         allow_population_by_field_name = True
 
     name: str
@@ -711,19 +676,13 @@ class Parameter(BaseModel):
     lapidary_name: Annotated[Union[str, None], Field(alias='x-lapidary-name')] = None
 
 
-class RequestBody(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class RequestBody(ExtendableModel):
     description: Optional[str]
     content: Dict[str, MediaType]
     required: Optional[bool] = False
 
 
-class Encoding(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class Encoding(ExtendableModel):
     contentType: Optional[str]
     headers: Optional[Dict[str, Header]]
     style: Optional[Style2]
@@ -733,9 +692,12 @@ class Encoding(BaseModel):
 
 Schema.update_forward_refs()
 OpenApiModel.update_forward_refs()
+# Callback.update_forward_refs()
 Components.update_forward_refs()
 Response.update_forward_refs()
+# Responses.update_forward_refs()
 MediaType.update_forward_refs()
 PathItem.update_forward_refs()
+# Paths.update_forward_refs()
 Operation.update_forward_refs()
 Paths.update_forward_refs()

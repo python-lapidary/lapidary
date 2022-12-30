@@ -10,14 +10,14 @@ class TestResponseBody(TestCase):
     def test_get_response_body_classes(self):
         op = openapi.Operation(
             operationId='op',
-            responses=openapi.Responses(
-                __root__=dict(default=openapi.Response(
+            responses=openapi.Responses(**dict(
+                default=openapi.Response(
                     description='',
                     content={
                         'image/png': dict(),
                     }
-                ))
-            )
+                )
+            ))
         )
         self.assertEqual(
             [],

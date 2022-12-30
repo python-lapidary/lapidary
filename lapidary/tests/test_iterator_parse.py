@@ -13,11 +13,11 @@ def test_parse_iterator():
             title='test',
             version='1',
         ),
-        paths=openapi.Paths(__root__={
+        paths=openapi.Paths(**{
             '/': openapi.PathItem(
                 get=openapi.Operation(
                     operationId='test_op',
-                    responses=openapi.Responses(__root__={
+                    responses=openapi.Responses(**{
                         '200': openapi.Response(
                             description='',
                             content={MIME_JSON: openapi.MediaType(schema_=openapi.Schema(
@@ -26,8 +26,7 @@ def test_parse_iterator():
                                     type=openapi.Type.string
                                 ),
                                 lapidary_model_type=LapidaryModelType.iterator,
-                            ))
-                            },
+                            ))},
                         )
                     })
                 )
@@ -52,5 +51,4 @@ def test_parse_iterator():
         }
     )
 
-    print(model)
     assert model == expected

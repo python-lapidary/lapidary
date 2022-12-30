@@ -39,7 +39,7 @@ def get_operation(
 def get_operation_functions(openapi_model: openapi.OpenApiModel, module: ModulePath, resolver: ResolverFunc) -> Mapping[str, OperationModel]:
     return {
         op.operationId: get_operation(op, method, url_path, module / 'paths' / op.operationId, resolver)
-        for url_path, path_item in openapi_model.paths.__root__.items()
+        for url_path, path_item in openapi_model.paths.items()
         for method, op in get_operations(path_item, True)
     }
 

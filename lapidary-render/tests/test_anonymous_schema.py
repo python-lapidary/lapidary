@@ -13,7 +13,7 @@ from lapidary.render.model.schema_class_model import SchemaClass
 model = openapi.OpenApiModel(
     openapi='3.0.3',
     info=openapi.Info(title='', version=''),
-    paths=openapi.Paths(__root__={}),
+    paths=openapi.Paths(),
     components=openapi.Components(
         schemas={
             'alice': openapi.Schema(

@@ -10,7 +10,7 @@ schema_bob = openapi.Schema(properties={'carol': schema_carol})
 model = openapi.OpenApiModel(
     openapi='3.0.3',
     info=openapi.Info(title='', version=''),
-    paths=openapi.Paths(__root__={}),
+    paths=openapi.Paths(),
     components=openapi.Components(
         schemas={
             'alice': openapi.Reference(ref='#/components/schemas/bob'),

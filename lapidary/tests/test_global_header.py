@@ -13,7 +13,7 @@ class GlobalHeadersTest(unittest.TestCase):
                 title='',
                 version=''
             ),
-            paths=openapi.Paths(__root__={}),
+            paths=openapi.Paths(),
             lapidary_headers_global={
                 'user-agent': 'james-bond',
             }
