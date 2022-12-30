@@ -28,7 +28,7 @@ def init_project(
     assert not project_root.exists()
 
     project_root.mkdir()
-    (project_root / config.openapi_root).mkdir()
+    (project_root / config.openapi_root).mkdir(parents=True)
     (project_root / config.gen_root).mkdir()
 
     logger.info('Copy OpenAPI schema to %s', config.get_openapi(project_root))
