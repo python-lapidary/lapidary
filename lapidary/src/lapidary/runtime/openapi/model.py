@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Optional, Union
 
-from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field
+from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field, validator, root_validator, parse_obj_as, fields
 
 from .base import ExtendableModel, DynamicExtendableModel
 from .ext import PluginModel, LapidaryModelType
@@ -22,12 +23,8 @@ __all__ = [
     'Discriminator',
     'Encoding',
     'Example',
-    'ExampleXORExamples',
     'ExternalDocumentation',
     'HTTPSecurityScheme',
-    'HTTPSecurityScheme1',
-    'HTTPSecuritySchemeItem',
-    'HTTPSecuritySchemeItem1',
     'Header',
     'ImplicitOAuthFlow',
     'In',
@@ -59,9 +56,6 @@ __all__ = [
     'Response',
     'Responses',
     'Schema',
-    'SchemaXORContent',
-    'SchemaXORContentItem',
-    'Scheme',
     'SecurityRequirement',
     'SecurityScheme',
     'Server',
@@ -82,7 +76,6 @@ __all__ = [
 
 class Reference(BaseModel):
     class Config:
-        extra = Extra.forbid
         allow_population_by_field_name = True
 
     ref: Annotated[str, Field(alias='$ref')]
@@ -114,7 +107,7 @@ class Type(Enum):
     string = 'string'
 
 
-class Discriminator(ExtendableModel):
+class Discriminator(BaseModel):
     propertyName: str
     mapping: Optional[Dict[str, str]]
 
@@ -143,9 +136,6 @@ class SecurityRequirement(BaseModel):
 
 
 class ExternalDocumentation(ExtendableModel):
-    class Config:
-        extra = Extra.allow
-
     description: Optional[str]
     url: str
 
@@ -156,24 +146,6 @@ class ExampleXORExamples(BaseModel):
         Field(
             description='Example and examples are mutually exclusive',
             not_={'required': ['example', 'examples']},
-        ),
-    ]
-
-
-class SchemaXORContentItem(Reference):
-    """
-    Some properties are not allowed if content is present
-    """
-
-    pass
-
-
-class SchemaXORContent(BaseModel):
-    __root__: Annotated[
-        Union[Any, SchemaXORContentItem],
-        Field(
-            description='Schema and content are mutually exclusive, at least one is required',
-            not_={'required': ['schema', 'content']},
         ),
     ]
 
@@ -290,9 +262,8 @@ class In4(Enum):
     cookie = 'cookie'
 
 
-class APIKeySecurityScheme(BaseModel):
-    class Config:
-        extra = Extra.forbid
+class APIKeySecurityScheme(ExtendableModel):
+    class Config(ExtendableModel.Config):
         allow_population_by_field_name = True
 
     type: Type1
@@ -305,43 +276,18 @@ class Type2(Enum):
     http = 'http'
 
 
-class HTTPSecurityScheme1(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
+class HTTPSecurityScheme(ExtendableModel):
     scheme: str
     bearerFormat: Optional[str]
     description: Optional[str]
     type: Type2
 
+    @validator('bearerFormat')
+    def _validate_bearer_format(cls, value: str, values: Mapping[str, Any]) -> str:
+        if values['scheme'].lower() != 'bearer':
+            raise ValueError('bearerFormat is only allowed if "schema" is "bearer"')
 
-class Scheme(Enum):
-    bearer = 'bearer'
-
-
-class HTTPSecuritySchemeItem(HTTPSecurityScheme1):
-    """
-    Bearer
-    """
-
-    scheme: Optional[Scheme]
-
-
-class HTTPSecuritySchemeItem1(HTTPSecurityScheme1):
-    """
-    Non Bearer
-    """
-
-    scheme: Annotated[Optional[Any], Field(not_={'enum': ['bearer']})]
-
-
-class HTTPSecurityScheme(BaseModel):
-    class Config:
-        extra = Extra.forbid
-
-    __root__: Union[
-        HTTPSecuritySchemeItem, HTTPSecuritySchemeItem1
-    ]
+        return value
 
 
 class Type3(Enum):
@@ -570,7 +516,7 @@ class Response(ExtendableModel):
     links: Optional[Dict[str, Union[Link, Reference]]]
 
 
-class MediaType(ExtendableModel, ):
+class MediaType(ExtendableModel):
     class Config:
         allow_population_by_field_name = True
 
@@ -579,24 +525,39 @@ class MediaType(ExtendableModel, ):
     examples: Optional[Dict[str, Union[Example, Reference]]]
     encoding: Optional[Dict[str, Encoding]]
 
+    @validator('examples')
+    def _validate_example_xor_examples(cls, value, values):
+        if 'example' in values:
+            raise ValueError('Only either example or examples is allowed')
+        return parse_obj_as(dict[str, Union[Example, Reference]], value)
 
-class Header(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
+def validate_schema_xor_content(value, values: Mapping[str, Any], field: fields.ModelField):
+    if values.get('content'):
+        raise ValueError(f'{field.alias or field.name} not allowed when content is present')
+
+    return parse_obj_as(field.type_, value)
+
+
+class Header(ExtendableModel):
     description: Optional[str]
     required: Optional[bool] = False
     deprecated: Optional[bool] = False
     allowEmptyValue: Optional[bool] = False
+    content: Annotated[
+        Optional[Dict[str, MediaType]], Field(maxProperties=1, minProperties=1)
+    ]
     style: Optional[Style] = 'simple'
     explode: Optional[bool]
     allowReserved: Optional[bool] = False
     schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
-    content: Annotated[
-        Optional[Dict[str, MediaType]], Field(maxProperties=1, minProperties=1)
-    ]
     example: Optional[Any]
     examples: Optional[Dict[str, Union[Example, Reference]]]
+
+    _validate_schema_xor_content = validator(
+        'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples'
+        , allow_reuse=True
+    )(validate_schema_xor_content)
 
 
 class PathItem(ExtendableModel):
@@ -650,7 +611,13 @@ class Operation(ExtendableModel):
 class Responses(DynamicExtendableModel[Union[Response, Reference]]):
     @classmethod
     def _validate_key(cls, key: str) -> bool:
-        return key == 'default' or re.match(r'^[1-5][0-9X]{2}$', key)
+        return key == 'default' or re.match(r'^[1-5](?:\d{2}|XX)$', key)
+
+    @root_validator
+    def _validate_min_properties(cls, values):
+        if not values:
+            raise ValueError('minProperties')
+        return values
 
 
 class Parameter(ExtendableModel):
@@ -663,17 +630,22 @@ class Parameter(ExtendableModel):
     required: bool = False
     deprecated: bool = False
     allowEmptyValue: bool = False
+    content: Annotated[
+        Optional[Dict[str, MediaType]], Field(maxProperties=1, minProperties=1)
+    ]
     style: Optional[str]
     explode: Optional[bool]
     allowReserved: Optional[bool] = False
     schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
-    content: Annotated[
-        Optional[Dict[str, MediaType]], Field(maxProperties=1, minProperties=1)
-    ]
     example: Optional[Any]
     examples: Optional[Dict[str, Union[Example, Reference]]]
 
     lapidary_name: Annotated[Union[str, None], Field(alias='x-lapidary-name')] = None
+
+    _validate_schema_xor_content = validator(
+        'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples'
+        , allow_reuse=True
+    )(validate_schema_xor_content)
 
 
 class RequestBody(ExtendableModel):
@@ -692,12 +664,9 @@ class Encoding(ExtendableModel):
 
 Schema.update_forward_refs()
 OpenApiModel.update_forward_refs()
-# Callback.update_forward_refs()
 Components.update_forward_refs()
 Response.update_forward_refs()
-# Responses.update_forward_refs()
 MediaType.update_forward_refs()
 PathItem.update_forward_refs()
-# Paths.update_forward_refs()
 Operation.update_forward_refs()
 Paths.update_forward_refs()

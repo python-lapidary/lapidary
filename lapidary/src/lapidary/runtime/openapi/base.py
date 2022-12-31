@@ -5,13 +5,13 @@ from collections.abc import ItemsView
 from typing import Mapping, Any, TypeVar, Generic
 
 import pydantic
-from pydantic import BaseModel, root_validator, Extra
+from pydantic import BaseModel, root_validator, Extra, BaseConfig
 
 
 class ExtendableModel(BaseModel):
     """Base model class for model classes that accept extension fields, i.e. with keys start with 'x-'"""
 
-    class Config:
+    class Config(BaseConfig):
         extra = Extra.allow
 
     @root_validator(pre=True)
@@ -25,7 +25,7 @@ class ExtendableModel(BaseModel):
                     or key in aliases
                     or key.startswith('x-')
             ):
-                raise ValueError(key, "Extension field key doesn't match pattern 'x-*'")
+                raise ValueError(key, f"Key not allowed")
         return values
 
     def __getitem__(self, item: str) -> Any:
