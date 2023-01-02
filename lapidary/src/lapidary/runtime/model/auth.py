@@ -46,11 +46,7 @@ def _(scheme: openapi.APIKeySecurityScheme):
 
 @get_auth_model.register(openapi.HTTPSecurityScheme)
 def _(scheme: openapi.HTTPSecurityScheme):
-    import enum
-    scheme_value = scheme.__root__.scheme
-    if isinstance(scheme_value, enum.Enum):
-        scheme_value = scheme_value.value
     return HttpAuthModel(
-        scheme=scheme_value,
-        bearer_format=scheme.__root__.bearerFormat,
+        scheme=scheme.scheme,
+        bearer_format=scheme.bearerFormat,
     )
