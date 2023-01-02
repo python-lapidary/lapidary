@@ -1,3 +1,4 @@
+from typing import cast
 from unittest import TestCase
 
 from pydantic import ValidationError
@@ -6,7 +7,7 @@ from lapidary.runtime import openapi
 
 
 def test_validate_model():
-    openapi.OpenApiModel(
+    model = openapi.OpenApiModel(
         openapi='3.0.3',
         info=openapi.Info(
             title='test',
@@ -15,9 +16,13 @@ def test_validate_model():
         paths=openapi.Paths(),
     )
 
+    assert model.openapi == '3.0.3'
+    assert model.info.title == 'test'
+    assert model.info.version == '1'
+
 
 def test_validate_extended_model():
-    openapi.OpenApiModel(
+    model = openapi.OpenApiModel(
         openapi='3.0.3',
         info=openapi.Info(
             title='test',
@@ -26,6 +31,12 @@ def test_validate_extended_model():
         paths=openapi.Paths(),
         **{'x-test-key': 'test-value'}
     )
+
+    assert model.openapi == '3.0.3'
+    assert model.openapi == '3.0.3'
+    assert model.info.title == 'test'
+    assert model.info.version == '1'
+    assert model['x-test-key'] == 'test-value'
 
 
 class TestValidation(TestCase):
@@ -67,7 +78,10 @@ class TestValidation(TestCase):
 
 
 def test_validate_paths_noarg():
-    openapi.Paths()
+    model = openapi.Paths()
+
+    assert model is not None
+    assert len(model.items()) == 0
 
 
 def test_validate_paths():
@@ -176,4 +190,31 @@ class XORTestCase(TestCase):
             style='simple',
             schema=openapi.Schema(),
         )
+
         self.assertEqual('simple', model.style)
+
+    def test_xor_validation(self):
+        model = openapi.Parameter(**dict(
+            name='test_param',
+            in_='path',
+            examples=dict(
+                Example={}
+            ),
+        ))
+
+        self.assertEqual(1, len(model.examples))
+
+
+def test_validate_schema():
+    doc = {
+        'in': 'query',
+        'name': 'format',
+        'schema': {
+            'type': 'string',
+            'enum': ['json', 'xml'],
+        },
+    }
+    model = openapi.Parameter.parse_obj(doc)
+
+    assert model.schema_ is not None
+    assert cast(openapi.Schema, model.schema_).type is openapi.Type.string

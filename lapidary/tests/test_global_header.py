@@ -22,4 +22,4 @@ class GlobalHeadersTest(unittest.TestCase):
         module_path = ModulePath('test')
         client_model = get_client_model(model, module_path, get_resolver(model, 'test'))
 
-        self.assertEqual(client_model.init_method.headers, [('user-agent', 'james-bond',)])
+        self.assertEqual([('user-agent', 'james-bond',)], client_model.init_method.headers)

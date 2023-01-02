@@ -62,7 +62,7 @@ class ClientBase(ABC):
         await self._client.__aenter__()
         return self
 
-    async def __aexit__(self, __exc_type=None, __exc_value=None, __traceback=None, ) -> Optional[bool]:
+    async def __aexit__(self, __exc_type=None, __exc_value=None, __traceback=None) -> Optional[bool]:
         return await self._client.__aexit__(__exc_type, __exc_value, __traceback)
 
     async def _request(

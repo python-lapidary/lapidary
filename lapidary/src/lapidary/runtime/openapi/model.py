@@ -8,9 +8,9 @@ from collections.abc import Mapping
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Optional, Union
 
-from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field, validator, root_validator, parse_obj_as, fields
+from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field, validator, root_validator, parse_obj_as
 
-from .base import ExtendableModel, DynamicExtendableModel
+from .base import ExtendableModel, DynamicExtendableModel, cross_validate_content
 from .ext import PluginModel, LapidaryModelType
 
 __all__ = [
@@ -355,7 +355,7 @@ class Server(ExtendableModel):
 
 
 class Schema(ExtendableModel):
-    class Config:
+    class Config(ExtendableModel.Config):
         allow_population_by_field_name = True
 
     title: Optional[str]
@@ -468,7 +468,7 @@ class OpenApiModel(ExtendableModel):
     Validation schema for OpenAPI Specification 3.0.X.
     """
 
-    class Config:
+    class Config(ExtendableModel.Config):
         allow_population_by_field_name = True
 
     openapi: Annotated[str, Field(regex='^3\\.0\\.\\d(-.+)?$')]
@@ -517,7 +517,7 @@ class Response(ExtendableModel):
 
 
 class MediaType(ExtendableModel):
-    class Config:
+    class Config(ExtendableModel.Config):
         allow_population_by_field_name = True
 
     schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
@@ -527,16 +527,9 @@ class MediaType(ExtendableModel):
 
     @validator('examples')
     def _validate_example_xor_examples(cls, value, values):
-        if 'example' in values:
+        if values.get('example'):
             raise ValueError('Only either example or examples is allowed')
         return parse_obj_as(dict[str, Union[Example, Reference]], value)
-
-
-def validate_schema_xor_content(value, values: Mapping[str, Any], field: fields.ModelField):
-    if values.get('content'):
-        raise ValueError(f'{field.alias or field.name} not allowed when content is present')
-
-    return parse_obj_as(field.type_, value)
 
 
 class Header(ExtendableModel):
@@ -555,9 +548,9 @@ class Header(ExtendableModel):
     examples: Optional[Dict[str, Union[Example, Reference]]]
 
     _validate_schema_xor_content = validator(
-        'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples'
-        , allow_reuse=True
-    )(validate_schema_xor_content)
+        'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples',
+        allow_reuse=True
+    )(cross_validate_content)
 
 
 class PathItem(ExtendableModel):
@@ -621,7 +614,7 @@ class Responses(DynamicExtendableModel[Union[Response, Reference]]):
 
 
 class Parameter(ExtendableModel):
-    class Config:
+    class Config(ExtendableModel.Config):
         allow_population_by_field_name = True
 
     name: str
@@ -645,7 +638,7 @@ class Parameter(ExtendableModel):
     _validate_schema_xor_content = validator(
         'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples'
         , allow_reuse=True
-    )(validate_schema_xor_content)
+    )(cross_validate_content)
 
 
 class RequestBody(ExtendableModel):

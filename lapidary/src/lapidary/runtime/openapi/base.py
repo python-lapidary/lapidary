@@ -4,8 +4,7 @@ from abc import abstractmethod
 from collections.abc import ItemsView
 from typing import Mapping, Any, TypeVar, Generic
 
-import pydantic
-from pydantic import BaseModel, root_validator, Extra, BaseConfig
+from pydantic import BaseModel, root_validator, Extra, BaseConfig, parse_obj_as, fields
 
 
 class ExtendableModel(BaseModel):
@@ -16,6 +15,8 @@ class ExtendableModel(BaseModel):
 
     @root_validator(pre=True)
     def validate_extras(cls, values: Mapping[str, Any]) -> Mapping[str, Any]:
+        if not values:
+            return values
         aliases = (info.alias for info in cls.__fields__.values() if info.alias)
 
         for key, value in values.items():
@@ -25,7 +26,7 @@ class ExtendableModel(BaseModel):
                     or key in aliases
                     or key.startswith('x-')
             ):
-                raise ValueError(key, f"Key not allowed")
+                raise ValueError(f'{key} field not permitted')
         return values
 
     def __getitem__(self, item: str) -> Any:
@@ -58,11 +59,11 @@ class DynamicExtendableModel(Generic[T], BaseModel):
                 result[key] = value
             else:
                 if not cls._validate_key(key):
-                    raise ValueError(f'Invalid property: "{key}"')
+                    raise ValueError(f'{key} field not permitted')
                 this_superclass = next(cls_ for cls_ in cls.__orig_bases__ if cls_.__origin__ is DynamicExtendableModel)
                 item_type = this_superclass.__args__[0]
                 if not isinstance(value, item_type):
-                    result[key] = pydantic.parse_obj_as(item_type, value)
+                    result[key] = parse_obj_as(item_type, value)
                 else:
                     result[key] = value
 
@@ -85,3 +86,11 @@ class DynamicExtendableModel(Generic[T], BaseModel):
 
     def get(self, key: str, default_value: Any) -> Any:
         return self.__dict__.get(key, default_value)
+
+
+def cross_validate_content(value, values: Mapping[str, Any], field: fields.ModelField):
+    if values.get('content'):
+        raise ValueError(f'{field.alias or field.name} not allowed when content is present')
+
+    parsed = parse_obj_as(field.outer_type_, value) or parse_obj_as(field.type_, value)
+    return parsed

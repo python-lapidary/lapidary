@@ -62,6 +62,6 @@ def update_openapi(project_root: Path, config: Config) -> dict:
 
 
 def render_client_(project_root: Path, config: Config, oa_doc: dict) -> None:
-    logger.info('Prepare elems model')
+    logger.info('Prepare model')
     model = openapi.OpenApiModel.parse_obj(oa_doc)
     render_client(model, project_root, config)

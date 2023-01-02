@@ -40,6 +40,16 @@ _FIELD_PROPS = dict(
 def get_operation_param(
         param: Union[openapi.Parameter, openapi.Reference], parent_name: str, module: ModulePath, resolve: ResolverFunc
 ) -> AttributeModel:
+    try:
+        return get_operation_param_(param, parent_name, module, resolve)
+    except:
+        logger.warning("Error while handling parameter %s/%s", parent_name, param.name)
+        raise
+
+
+def get_operation_param_(
+        param: Union[openapi.Parameter, openapi.Reference], parent_name: str, module: ModulePath, resolve: ResolverFunc
+) -> AttributeModel:
     if isinstance(param, openapi.Reference):
         param, module, _ = resolve(param, openapi.Parameter)
 
