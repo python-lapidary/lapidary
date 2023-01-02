@@ -1,6 +1,0 @@
-{% from 'type_hint.py.jinja2' import type_hint %}
-class {{ model.class_name }}({{ type_hint(model.base_type, path) }}):
-{% for attr in model.attributes %}    {{ attr.name }} = {{ attr.annotation.field_props.default }}
-{% else %}
-    pass
-{%- endfor -%}
