@@ -3,11 +3,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
 ### Added
-- Support for Specification extensions (x- properties).
+- Support for arbitrary specification extensions (x- properties).
 - Support iterator result and paging plugin.
 
 ### Fixed
 - Property cross-validation (e.g. only one property of example and examples is allowed).
+- Bearer security scheme.
 
 ## [0.7.3](https://github.com/python-lapidary/lapidary/releases/tag/v0.7.3) - 2022-12-15
 ### Fixed

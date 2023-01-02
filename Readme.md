@@ -1,6 +1,9 @@
-# Lapidary - Python async OpenAPI client generator
+# Lapidary - Python async OpenAPI client
 
-Generate data model and client stub for OpenAPI 3.0, that are easy to understand and debug.
+Lapidary is a client library for remote APIs described with the OpenAPI specification,
+and a program to generate models and clients stubs for those APIs.
+
+Together, the generated client and the library, let developers use remote APIs as if they were local libraries.
 
 Leverages [Pydantic](https://github.com/pydantic/pydantic) as the base classes for models,
 [HTTPX](https://github.com/encode/httpx) as the HTTP client
@@ -10,16 +13,15 @@ See [render](./lapidary-render) readme for command line interface to generate an
 
 ## Supported and planned OpenAPI features
 
-- Parameter names: operation parameters are uniquely identified by their name the value of an `in` attribute. It is possible to have parameter named `param` in
-  all of: path, query, cookies and headers.
+### Schema objects
 
-  Lapidary uses Hungarian notation for method parameter names. See [issue 29](#29)
+- Schema objects of object type are source to generate model classes.
 - Enums:
 
   Currently only primitive values are supported, but OpenAPI specifies no such limitation - any valid JSON value should be supported ([#30](#30)).
 - oneOf, allOf, anyOf, not: see [discussion](#20) and concepts below.
 
-  Currently, oneOf is implemented as `typing.Union`, which is not ideal. Also Pydantic doesn't allow models to have both \_\_root__ and own properties, which
+  Currently, oneOf is implemented as `typing.Union`, which is not ideal. Also, Pydantic doesn't allow models to have both \_\_root__ and own properties, which
   isn't compatible with OpenAPI.
 - Recursive references between schemas.
 
@@ -40,20 +42,29 @@ See [render](./lapidary-render) readme for command line interface to generate an
   Recursive composing or inheritance is not supported:
     ```yaml
     components:
-        B:
-          schema:
-            oneOf:
-            - $ref: /components/schemas/C // invalid
-        C:
-          schema:
-            oneOf:
-            - $ref: /components/schemas/B // invalid
+      B:
+        schema:
+          oneOf:
+          - $ref: /components/schemas/C # invalid
+      C:
+        schema:
+          oneOf:
+          - $ref: /components/schemas/B # invalid
     ```
 
-- References to other schemas: unsupported.
-- Read- and writeOnly properties:
+### Operations
 
-  Currently rendered as not-required fields.
+- Parameter names 
+  
+  Operation parameters are uniquely identified by their name and the value of the `in` attribute. It is possible to have parameter named `param` in
+  all of: path, query, cookies and headers.
+
+  Lapidary uses Hungarian notation for method parameter names. See [#29](#29)
+
+### Planned
+
+- References to other schemas.
+- Read- and writeOnly properties (Currently rendered as not-required fields).
 
 ## APIs that contradict their specifications
 
@@ -228,7 +239,8 @@ By default, an operation method returns the parsed body of a single response.
 
 When a paging plugin is used, it returns an async iterator over the paged responses.
 
-When the plugin is combined with `x-lapidary-modelType: iterator` and the response body is an array, the result is an async iterator over all items in all pages.
+When the plugin is combined with `x-lapidary-modelType: iterator` and the response body is an array, the result is an async iterator over all items in all
+pages.
 The paging plugin has an option to convert the response body object for cases when the array is wrapped in another object.
 
 Paging is implemented using AsyncGenerator. Pages are fetched lazily, when the first item of the next page is accessed.
