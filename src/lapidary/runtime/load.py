@@ -1,5 +1,7 @@
 import hashlib
+import logging
 import pickle
+import sys
 from pathlib import Path
 
 import yaml
@@ -7,6 +9,8 @@ import yaml
 from .model import ClientModel, get_client_model, get_resolver
 from .module_path import ModulePath
 from .openapi import model as openapi
+
+logger = logging.getLogger(__name__)
 
 
 def load_yaml_cached(path: Path, cache_root: Path, use_cache: bool) -> dict:
@@ -34,10 +38,13 @@ def load_yaml_cached_(text: str, cache_root: Path, use_cache: bool) -> dict:
 
 
 def load_model(mod: str) -> openapi.OpenApiModel:
-    from importlib.resources import open_text
-    import sys
-    module = sys.modules[mod]
-    with open_text(module, 'openapi.yaml') as stream:
+    if sys.version_info < (3, 10):
+        from importlib_resources import open_text
+    else:
+        from importlib.resources import open_text
+
+    logger.debug("Loading OpenAPI from %s", mod)
+    with open_text(mod, 'openapi.yaml') as stream:
         text = stream.read()
 
     import platformdirs
@@ -46,7 +53,7 @@ def load_model(mod: str) -> openapi.OpenApiModel:
 
 
 def get_model(module: str) -> ClientModel:
-    root = ModulePath(module).parent()
+    openapi_model = load_model(str(module))
 
-    openapi_model = load_model(str(root))
+    root = ModulePath(module).parent()
     return get_client_model(openapi_model, root, get_resolver(openapi_model, str(root)))

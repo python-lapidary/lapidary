@@ -1,5 +1,5 @@
 from functools import singledispatch
-from typing import Optional, Union, Any, Mapping
+from typing import Optional, Union, Any, Mapping, Dict
 
 from pydantic import BaseModel
 
@@ -21,7 +21,7 @@ class HttpAuthModel(AuthModel):
     bearer_format: Optional[str]
 
 
-def get_auth_models(model: dict[str, Union[openapi.Reference, openapi.SecurityScheme]]) -> Mapping[str, AuthModel]:
+def get_auth_models(model: Dict[str, Union[openapi.Reference, openapi.SecurityScheme]]) -> Mapping[str, AuthModel]:
     result: Mapping[str, AuthModel] = {name: get_auth_model(scheme) for name, scheme in model.items()}
     return result
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import importlib
 import logging
-from typing import Union
+from typing import Union, List, Tuple
 from uuid import UUID
 
 from pydantic import BaseModel, Extra
@@ -64,7 +64,7 @@ def _get_one_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str,
 
 
 def _get_composite_type_hint(
-        component_schemas: list[Union[openapi.Schema, openapi.Reference]], module: ModulePath, name: str, resolve: ResolverFunc
+        component_schemas: List[Union[openapi.Schema, openapi.Reference]], module: ModulePath, name: str, resolve: ResolverFunc
 ) -> TypeHint:
     if len(component_schemas) != 1:
         raise NotImplementedError(name, 'Multiple component schemas (allOf, anyOf, oneOf) are currently unsupported.')
@@ -138,22 +138,22 @@ class TypeHint(BaseModel):
         if hasattr(typ, '__origin__'):
             raise ValueError('Generic types unsupported', typ)
         module = typ.__module__
-        name = typ.__name__
+        name = getattr(typ, '__name__', None) or typ._name
         if module == 'builtins':
             return BuiltinTypeHint.from_str(name)
         else:
             return TypeHint(module=module, name=name)
 
-    def imports(self) -> list[str]:
+    def imports(self) -> List[str]:
         return [self.module]
 
     def union_with(self, other: TypeHint) -> GenericTypeHint:
         return GenericTypeHint(module='typing', name='Union', args=[self, other])
 
     def list_of(self) -> GenericTypeHint:
-        return GenericTypeHint(module='builtins', name='list', args=[self])
+        return GenericTypeHint(module='typing', name='List', args=[self])
 
-    def _types(self) -> list[TypeHint]:
+    def _types(self) -> List[TypeHint]:
         return [self]
 
     def __eq__(self, other) -> bool:
@@ -186,7 +186,7 @@ class BuiltinTypeHint(TypeHint):
     def from_str(name: str) -> BuiltinTypeHint:
         return BuiltinTypeHint(name=name)
 
-    def imports(self) -> list[str]:
+    def imports(self) -> List[str]:
         return []
 
     def full_name(self):
@@ -194,7 +194,7 @@ class BuiltinTypeHint(TypeHint):
 
 
 class GenericTypeHint(TypeHint):
-    args: tuple[TypeHint, ...]
+    args: Tuple[TypeHint, ...]
 
     class Config:
         extra = Extra.forbid
@@ -206,7 +206,7 @@ class GenericTypeHint(TypeHint):
             return super().union_with(other)
 
     @staticmethod
-    def union_of(types: tuple[TypeHint, ...]) -> GenericTypeHint:
+    def union_of(types: Tuple[TypeHint, ...]) -> GenericTypeHint:
         args = set()
         for typ in types:
             if isinstance(typ, GenericTypeHint) and typ.module == 'typing' and typ.name == 'Union':
@@ -215,15 +215,15 @@ class GenericTypeHint(TypeHint):
                 args.add(typ)
         return GenericTypeHint(module='typing', name='Union', args=args)
 
-    def imports(self) -> list[str]:
+    def imports(self) -> List[str]:
         return [
             imp
             for typ in self._types()
-            for imp in TypeHint.imports(typ)
+            for imp in typ.imports()
             if imp != 'builtins'
         ]
 
-    def _types(self) -> list[TypeHint]:
+    def _types(self) -> List[TypeHint]:
         return [self, *[typ for arg in self.args for typ in arg._types()]]
 
     def resolve(self) -> type:

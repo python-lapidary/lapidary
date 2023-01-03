@@ -1,7 +1,6 @@
 import inspect
 import logging
-from collections.abc import Iterator, AsyncIterator, Iterable, AsyncGenerator
-from typing import Optional, Type, TypeVar, Callable, Any
+from typing import Optional, Type, TypeVar, Callable, Any, Iterator, AsyncIterator, Iterable, AsyncGenerator
 
 import httpx
 import pydantic

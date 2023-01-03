@@ -1,8 +1,7 @@
 import pkgutil
 import re
-from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Optional, Type
+from typing import Optional, Type, Mapping, Any
 
 from .plugins import PagingPlugin
 from .refs import ResolverFunc
@@ -22,6 +21,16 @@ class OperationModel:
     paging: Optional[PagingPlugin]
 
 
+def _resolve_name(name: str) -> Any:
+    import sys
+    if sys.version_info < (3, 9):
+        import pkgutil_resolve_name
+        return pkgutil_resolve_name.resolve_name(name)
+    else:
+        import pkgutil
+        return pkgutil.resolve_name(name)
+
+
 def get_operation(
         op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc
 ) -> OperationModel:
@@ -30,7 +39,7 @@ def get_operation(
     return OperationModel(
         method=method,
         path=re.compile(r'\{([^}]+)\}').sub(r'{p_\1}', url_path),
-        params_model=pkgutil.resolve_name(names.param_model_name(module, op.operationId)) if op.parameters else None,
+        params_model=_resolve_name(names.param_model_name(module, op.operationId)) if op.parameters else None,
         response_map=response_map,
         paging=instantiate_plugin(op.paging) if op.paging else None,
     )
@@ -45,5 +54,5 @@ def get_operation_functions(openapi_model: openapi.OpenApiModel, module: ModuleP
 
 
 def instantiate_plugin(model: Optional[PluginModel]) -> Optional[PagingPlugin]:
-    type_ = pkgutil.resolve_name(model.factory)
+    type_ = _resolve_name(model.factory)
     return type_()

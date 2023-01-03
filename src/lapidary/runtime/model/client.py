@@ -1,5 +1,5 @@
-from collections.abc import Mapping
 from dataclasses import dataclass, field
+from typing import Mapping
 
 from .client_init import get_client_init, ClientInit
 from .op import OperationModel, get_operation_functions
