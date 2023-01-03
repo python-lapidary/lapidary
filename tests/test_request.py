@@ -1,5 +1,7 @@
 import unittest
-from typing import Annotated
+
+from typing import List
+from typing_extensions import Annotated
 
 import httpx
 import pydantic
@@ -41,14 +43,14 @@ class BuildRequestTestCase(unittest.TestCase):
 
     def test_request_param_list_simple(self):
         class ParamModel(pydantic.BaseModel):
-            a: Annotated[list[str], pydantic.Field(in_=ParamLocation.query)]
+            a: Annotated[List[str], pydantic.Field(in_=ParamLocation.query)]
 
         query, _, _ = process_params(ParamModel(a=['hello', 'world']))
         self.assertEqual(['hello,world'], query.get_list('a'))
 
     def test_request_param_list_exploded(self):
         class ParamModel(pydantic.BaseModel):
-            a: Annotated[list[str], pydantic.Field(in_=ParamLocation.query, explode=True)]
+            a: Annotated[List[str], pydantic.Field(in_=ParamLocation.query, explode=True)]
 
         query, _, _ = process_params(ParamModel(a=['hello', 'world']))
         self.assertEqual(['hello', 'world'], query.get_list('a'))

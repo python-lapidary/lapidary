@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Union, Iterable
+from typing import Union, Iterable, List
 
 
 class ModulePath:
     _SEP = '.'
 
-    def __init__(self, module: Union[str, list[str]]):
+    def __init__(self, module: Union[str, List[str]]):
         if isinstance(module, str):
             module = module.strip()
             if module == "" or module.strip() != module:

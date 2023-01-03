@@ -1,3 +1,5 @@
+from typing import List
+
 from lapidary.runtime import openapi
 from lapidary.runtime.http_consts import MIME_JSON
 from lapidary.runtime.model import get_client_model, get_resolver, ClientModel, ClientInit, OperationModel
@@ -43,7 +45,7 @@ def test_parse_iterator():
                 params_model=None,
                 response_map={
                     '200': {
-                        MIME_JSON: ReturnTypeInfo(list[str], True)
+                        MIME_JSON: ReturnTypeInfo(List[str], True)
                     }
                 },
                 paging=None

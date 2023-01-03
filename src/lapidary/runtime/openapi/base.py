@@ -5,6 +5,7 @@ from collections.abc import ItemsView
 from typing import Mapping, Any, TypeVar, Generic
 
 from pydantic import BaseModel, root_validator, Extra, BaseConfig, parse_obj_as, fields
+from pydantic.utils import lenient_isinstance
 
 
 class ExtendableModel(BaseModel):
@@ -62,7 +63,7 @@ class DynamicExtendableModel(Generic[T], BaseModel):
                     raise ValueError(f'{key} field not permitted')
                 this_superclass = next(cls_ for cls_ in cls.__orig_bases__ if cls_.__origin__ is DynamicExtendableModel)
                 item_type = this_superclass.__args__[0]
-                if not isinstance(value, item_type):
+                if not lenient_isinstance(value, item_type):
                     result[key] = parse_obj_as(item_type, value)
                 else:
                     result[key] = value

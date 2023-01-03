@@ -6,7 +6,8 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Optional, Union
+from typing_extensions import Annotated
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field, validator, root_validator, parse_obj_as
 
@@ -132,7 +133,7 @@ class Style(Enum):
 
 
 class SecurityRequirement(BaseModel):
-    __root__: Annotated[dict[str, list[str]], Field(default_factory=dict)]
+    __root__: Annotated[Dict[str, List[str]], Field(default_factory=dict)]
 
 
 class ExternalDocumentation(ExtendableModel):
@@ -282,7 +283,7 @@ class HTTPSecurityScheme(ExtendableModel):
     description: Optional[str]
     type: Type2
 
-    @validator('bearerFormat')
+    @validator('bearerFormat', allow_reuse=True)
     def _validate_bearer_format(cls, value: str, values: Mapping[str, Any]) -> str:
         if values['scheme'].lower() != 'bearer':
             raise ValueError('bearerFormat is only allowed if "schema" is "bearer"')
@@ -408,7 +409,7 @@ class Schema(ExtendableModel):
     xml: Optional[XML]
 
     lapidary_names: Annotated[
-        Optional[dict[Union[str, None], Any]],
+        Optional[Dict[Union[str, None], Any]],
         Field(
             alias='x-lapidary-names',
             default_factory=dict,
@@ -482,8 +483,8 @@ class OpenApiModel(ExtendableModel):
 
     lapidary_headers_global: Annotated[
         Optional[Union[
-            dict[str, Union[str, list[str]]],
-            list[tuple[str, str]]
+            Dict[str, Union[str, List[str]]],
+            List[Tuple[str, str]]
         ]],
         Field(
             alias='x-lapidary-headers-global',
@@ -529,7 +530,7 @@ class MediaType(ExtendableModel):
     def _validate_example_xor_examples(cls, value, values):
         if values.get('example'):
             raise ValueError('Only either example or examples is allowed')
-        return parse_obj_as(dict[str, Union[Example, Reference]], value)
+        return parse_obj_as(Dict[str, Union[Example, Reference]], value)
 
 
 class Header(ExtendableModel):

@@ -1,6 +1,5 @@
 import pkgutil
-from collections.abc import Mapping
-from typing import Union, TypeVar, NamedTuple
+from typing import Union, TypeVar, NamedTuple, Tuple, Mapping
 
 from .refs import ResolverFunc, get_resolver
 from .type_hint import get_type_hint
@@ -53,7 +52,7 @@ def resolve_response(
         op_name: str,
         module: ModulePath,
         resolve_ref: ResolverFunc
-) -> tuple[openapi.Response, ModulePath, str]:
+) -> Tuple[openapi.Response, ModulePath, str]:
     if isinstance(response, openapi.Reference):
         response, sub_module, sub_name = resolve_ref(response, openapi.Response)
     else:

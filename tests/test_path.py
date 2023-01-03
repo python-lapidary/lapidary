@@ -1,6 +1,6 @@
 import enum
 import unittest
-from typing import Annotated
+from typing_extensions import Annotated
 
 import pydantic
 

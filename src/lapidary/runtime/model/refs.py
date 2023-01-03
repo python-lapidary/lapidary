@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Callable, TypeVar, Union, cast, Optional, Any, Mapping
+from typing import Callable, TypeVar, Union, cast, Optional, Any, Mapping, Tuple, Type, List
 
 import inflection
 from typing_extensions import TypeAlias
@@ -13,12 +13,12 @@ from ..openapi import model as openapi
 logger = logging.getLogger(__name__)
 
 T = TypeVar('T', openapi.Schema, openapi.Parameter, openapi.SecurityScheme, openapi.Response)
-ResolverFunc = Callable[[openapi.Reference, type[T]], tuple[T, ModulePath, str]]
+ResolverFunc = Callable[[openapi.Reference, Type[T]], Tuple[T, ModulePath, str]]
 
 SchemaOrRef: TypeAlias = Union[openapi.Schema, openapi.Reference]
 
 
-def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, typ: type[T]) -> tuple[T, ModulePath, str]:
+def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, typ: type[T]) -> Tuple[T, ModulePath, str]:
     """
     module = {root_package}.{path[0:4]}
     name = path[4:]
@@ -41,11 +41,11 @@ def get_resolver(model: openapi.OpenApiModel, package: str) -> ResolverFunc:
     return cast(ResolverFunc, functools.partial(resolve, model, package))
 
 
-def _mkref(s: list[str]) -> str:
+def _mkref(s: List[str]) -> str:
     return '/'.join(['#', *s])
 
 
-def ref_to_path(ref: str) -> list[str]:
+def ref_to_path(ref: str) -> List[str]:
     return ref.split('/')[1:]
 
 

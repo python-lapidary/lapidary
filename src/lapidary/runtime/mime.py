@@ -1,5 +1,4 @@
-from collections.abc import Collection
-from typing import Optional
+from typing import Collection, Optional
 
 from mimeparse import best_match
 

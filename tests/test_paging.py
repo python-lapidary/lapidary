@@ -1,6 +1,6 @@
 import unittest
 from collections.abc import AsyncIterator
-from typing import Generator
+from typing import Generator, List
 
 import httpx
 import starlette.requests
@@ -14,7 +14,7 @@ from lapidary.runtime.model import ClientModel, ClientInit, OperationModel, Pagi
 from lapidary.runtime.model.response_map import ReturnTypeInfo
 
 
-class TestPagingPlugin(PagingPlugin):
+class XTestPagingPlugin(PagingPlugin):
     def page_flow(self, request: httpx.Request) -> Generator[httpx.Request, httpx.Response, None]:
         while True:
             response: httpx.Response = yield request
@@ -51,10 +51,10 @@ class TestIterator(unittest.IsolatedAsyncioTestCase):
                     None,
                     {
                         '200': {
-                            MIME_JSON: ReturnTypeInfo(list[str], False)
+                            MIME_JSON: ReturnTypeInfo(List[str], False)
                         }
                     },
-                    TestPagingPlugin(),
+                    XTestPagingPlugin(),
                 ),
             ),
         )
@@ -82,10 +82,10 @@ class TestIterator(unittest.IsolatedAsyncioTestCase):
                     None,
                     {
                         '200': {
-                            MIME_JSON: ReturnTypeInfo(list[str], True)
+                            MIME_JSON: ReturnTypeInfo(List[str], True)
                         }
                     },
-                    TestPagingPlugin(),
+                    XTestPagingPlugin(),
                 ),
             ),
         )

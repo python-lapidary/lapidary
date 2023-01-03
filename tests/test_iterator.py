@@ -1,6 +1,6 @@
 import unittest
 from collections.abc import AsyncIterator
-from typing import Union
+from typing import Union, List
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
@@ -32,7 +32,7 @@ class TestIterator(unittest.IsolatedAsyncioTestCase):
                     None,
                     {
                         '200': {
-                            'application/json': ReturnTypeInfo(list[str], True)
+                            'application/json': ReturnTypeInfo(List[str], True)
                         }
                     },
                     None,
@@ -66,7 +66,7 @@ class TestIterator(unittest.IsolatedAsyncioTestCase):
                     None,
                     {
                         '200': {
-                            'application/json': ReturnTypeInfo(Union[str, list[str]], True)
+                            'application/json': ReturnTypeInfo(Union[str, List[str]], True)
                         }
                     },
                     None,
