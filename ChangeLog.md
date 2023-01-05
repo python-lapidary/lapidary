@@ -2,6 +2,12 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
+### Added
+- Support for pyteon 3.8 .
+
+### Changed
+- Split project into separate repos.
+- Added Github Action configuration for pytest.
 
 ## [0.8.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.8.0) - 2023-01-02
 ### Added
