@@ -5,13 +5,14 @@ import re
 
 import inflection
 
-from lapidary.runtime.module_path import ModulePath
+from . import openapi
 
 logger = logging.getLogger(__name__)
 
 PARAM_MODEL = 'param_model'
 REQUEST_BODY = 'request_body'
 RESPONSE_BODY = 'response_body'
+PATHS = 'paths'
 
 VALID_IDENTIFIER_RE = re.compile(r'^[a-zA-Z]\w*$', re.ASCII)
 
@@ -83,5 +84,5 @@ def request_type_name(name):
     return inflection.camelize(name) + 'Request'
 
 
-def param_model_name(module: ModulePath, op_id: str) -> str:
-    return (module / PARAM_MODEL).str() + ':' + inflection.camelize(op_id)
+def get_param_python_name(param: openapi.Parameter) -> str:
+    return param.in_[0] + '_' + maybe_mangle_name(param.effective_name, False)

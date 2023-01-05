@@ -1,73 +1,44 @@
 import enum
 import uuid
-from enum import Enum, unique
-from typing import Any, Tuple, List, Iterator, Mapping
+from typing import Any, Tuple, List, Iterator, Mapping, Iterable
 
 import httpx
-import pydantic
 
 from .absent import ABSENT
-from .model import ParamLocation
+from .model.params import ParamLocation, Param, ParamStyle
 
 
-@unique
-class ParamStyle(Enum):
-    matrix = 'matrix'
-    label = 'label'
-    form = 'form'
-    simple = 'simple'
-    spaceDelimited = 'spaceDelimited'
-    pipeDelimited = 'pipeDelimited'
-    deepObject = 'deepObject'
+def process_params(
+        model: Iterable[Param], actual_params: Mapping[str, Any]
+) -> Tuple[httpx.QueryParams, httpx.Headers, httpx.Cookies, Mapping[str, str]]:
 
-
-default_style = {
-    ParamLocation.cookie: ParamStyle.form,
-    ParamLocation.header: ParamStyle.simple,
-    ParamLocation.path: ParamStyle.simple,
-    ParamLocation.query: ParamStyle.form,
-}
-
-
-def get_style(param: pydantic.fields.ModelField) -> ParamStyle:
-    # allowed styles:
-    # path: matrix, label, simple
-    # query: form, spaceDelimited, pipeDelimited, deepObject
-    # cookie: form,
-    # header: simple
-
-    location = param.field_info.extra['in_']
-    return param.field_info.extra.get('style', default_style[location])
-
-
-def process_params(model: pydantic.BaseModel) -> Tuple[httpx.QueryParams, httpx.Headers, httpx.Cookies]:
+    formal_params: Mapping[str, Param] = {param.name: param for param in model}
     containers: Mapping[ParamLocation, List[Any]] = {
         ParamLocation.cookie: [],
         ParamLocation.header: [],
         ParamLocation.query: [],
+        ParamLocation.path: [],
     }
 
-    for attr_name, param in model.__fields__.items():
-        param: pydantic.fields.ModelField
-        value = getattr(model, attr_name)
+    for param_name, value in actual_params.items():
         if value is ABSENT:
             continue
 
-        param_name = param.alias
-        placement = param.field_info.extra['in_']
-        if placement is ParamLocation.path:
+        formal_param = formal_params.get(param_name)
+        if not formal_param:
             continue
 
-        style = get_style(param)
+        formal_param: Param
+        placement = formal_param.location
 
-        value = [(param_name, value) for value in serialize_param(value, style, bool(param.field_info.extra.get('explode')))]
-
+        value = [(formal_param.alias, value) for value in serialize_param(value, formal_param.style, formal_param.explode)]
         containers[placement].extend(value)
 
     return (
         httpx.QueryParams(containers[ParamLocation.query]),
         httpx.Headers(containers[ParamLocation.header]),
-        httpx.Cookies(containers[ParamLocation.cookie])
+        httpx.Cookies(containers[ParamLocation.cookie]),
+        {item[0]: item[1] for item in containers[ParamLocation.path]},
     )
 
 

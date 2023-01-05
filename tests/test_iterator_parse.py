@@ -42,7 +42,7 @@ def test_parse_iterator():
             'test_op': OperationModel(
                 method='get',
                 path='/',
-                params_model=None,
+                params=[],
                 response_map={
                     '200': {
                         MIME_JSON: ReturnTypeInfo(List[str], True)

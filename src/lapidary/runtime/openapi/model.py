@@ -637,9 +637,13 @@ class Parameter(ExtendableModel):
     lapidary_name: Annotated[Union[str, None], Field(alias='x-lapidary-name')] = None
 
     _validate_schema_xor_content = validator(
-        'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples'
-        , allow_reuse=True
+        'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples',
+        allow_reuse=True
     )(cross_validate_content)
+
+    @property
+    def effective_name(self) -> str:
+        return self.lapidary_name or self.name
 
 
 class RequestBody(ExtendableModel):

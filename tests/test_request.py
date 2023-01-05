@@ -1,14 +1,14 @@
 import unittest
-
 from typing import List
-from typing_extensions import Annotated
+from unittest.mock import Mock
 
 import httpx
 import pydantic
+from httpx import QueryParams, Headers, Cookies
 
 from lapidary.runtime import ParamLocation
-from lapidary.runtime._params import process_params
-from lapidary.runtime.http_consts import CONTENT_TYPE, MIME_JSON
+from lapidary.runtime.model import OperationModel, Param
+from lapidary.runtime.model.params import ParamStyle
 from lapidary.runtime.request import build_request
 
 
@@ -17,40 +17,81 @@ class BuildRequestTestCase(unittest.TestCase):
         class RequestBodyModel(pydantic.BaseModel):
             a: str
 
-        request_parts = build_request(
-            param_model=None,
+        request_factory = Mock()
+        build_request(
+            op=OperationModel('GET', 'path', [], {}, None),
+            actual_params={},
             request_body=[RequestBodyModel(a='a')],
             response_map=None,
             global_response_map=None,
+            request_factory=request_factory,
         )
 
-        self.assertEqual(
-            dict(
-                content='[{"a": "a"}]',
-                params=None,
-                headers=httpx.Headers({CONTENT_TYPE: MIME_JSON}),
-                cookies=None,
-            ),
-            request_parts
+        request_factory.assert_called_with(
+            'GET',
+            'path',
+            content='[{"a": "a"}]',
+            params=None,
+            headers=httpx.Headers({'content-type': 'application/json'}),
+            cookies=None,
         )
 
     def test_build_request_none(self):
-        request = build_request(
-            param_model=None, request_body=None, response_map=None, global_response_map=None
+        request_factory = Mock()
+        build_request(
+            op=OperationModel('GET', 'path', [], {}, None),
+            actual_params={},
+            request_body=None,
+            response_map=None,
+            global_response_map=None,
+            request_factory=request_factory,
         )
 
-        self.assertEqual(None, request['content'])
+        request_factory.assert_called_with(
+            'GET',
+            'path',
+            content=None,
+            params=None,
+            headers=None,
+            cookies=None,
+        )
 
     def test_request_param_list_simple(self):
-        class ParamModel(pydantic.BaseModel):
-            a: Annotated[List[str], pydantic.Field(in_=ParamLocation.query)]
+        request_factory = Mock()
+        build_request(
+            op=OperationModel('GET', 'path', [Param('q_a', 'a', ParamLocation.query, List[str], ParamStyle.form, False)], {}, None),
+            actual_params=dict(q_a=['hello', 'world']),
+            request_body=None,
+            response_map=None,
+            global_response_map=None,
+            request_factory=request_factory,
+        )
 
-        query, _, _ = process_params(ParamModel(a=['hello', 'world']))
-        self.assertEqual(['hello,world'], query.get_list('a'))
+        request_factory.assert_called_with(
+            'GET',
+            'path',
+            content=None,
+            params=QueryParams(a='hello,world'),
+            headers=Headers(),
+            cookies=Cookies(),
+        )
 
     def test_request_param_list_exploded(self):
-        class ParamModel(pydantic.BaseModel):
-            a: Annotated[List[str], pydantic.Field(in_=ParamLocation.query, explode=True)]
+        request_factory = Mock()
+        build_request(
+            op=OperationModel('GET', 'path', [Param('q_a', 'a', ParamLocation.query, List[str], ParamStyle.form, True)], {}, None),
+            actual_params=dict(q_a=['hello', 'world']),
+            request_body=None,
+            response_map=None,
+            global_response_map=None,
+            request_factory=request_factory,
+        )
 
-        query, _, _ = process_params(ParamModel(a=['hello', 'world']))
-        self.assertEqual(['hello', 'world'], query.get_list('a'))
+        request_factory.assert_called_with(
+            'GET',
+            'path',
+            content=None,
+            params=QueryParams([('a', 'hello'), ('a', 'world')]),
+            headers=Headers(),
+            cookies=Cookies(),
+        )

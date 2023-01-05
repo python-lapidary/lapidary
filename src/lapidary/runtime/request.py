@@ -1,6 +1,5 @@
 import enum
-import typing
-from typing import Optional, Any, Union
+from typing import Optional, Any, Mapping, Callable
 
 import httpx
 import pydantic
@@ -8,8 +7,10 @@ import pydantic
 from ._params import process_params
 from .http_consts import MIME_JSON, CONTENT_TYPE, ACCEPT
 from .mime import find_mime
-from .model import ResponseMap, ParamLocation
+from .model import ResponseMap, ParamLocation, OperationModel
 from .pydantic_utils import to_model
+
+RequestFactory = Callable[..., httpx.Request]
 
 
 def get_accept_header(response_map: Optional[ResponseMap], global_response_map: Optional[ResponseMap]) -> Optional[str]:
@@ -23,24 +24,21 @@ def get_accept_header(response_map: Optional[ResponseMap], global_response_map: 
     return find_mime(all_mime_types, MIME_JSON)
 
 
-class RequestParts(typing.TypedDict):
-    content: Union[str, bytes, None]
-    params: Optional[httpx.QueryParams]
-    headers: Optional[httpx.Headers]
-    cookies: Optional[httpx.Cookies]
-
-
 def build_request(
-        param_model: Optional[pydantic.BaseModel],
+        op: OperationModel,
+        actual_params: Mapping[str, Any],
         request_body: Any,
         response_map: Optional[ResponseMap],
         global_response_map: Optional[ResponseMap],
-) -> RequestParts:
-    if param_model:
-        params, headers, cookies = process_params(param_model)
+        request_factory: RequestFactory,
+) -> httpx.Request:
+    if actual_params:
+        query_params, headers, cookies, path_params = process_params(op.params, actual_params)
     else:
-        params = cookies = None
+        cookies = path_params = query_params = None
         headers = httpx.Headers()
+
+    url = op.path.format_map(path_params) if path_params else op.path
 
     if request_body is not None:
         headers[CONTENT_TYPE] = MIME_JSON
@@ -57,11 +55,13 @@ def build_request(
         else None
     )
 
-    return dict(
+    return request_factory(
+        op.method,
+        url,
         content=content,
-        params=params,
+        params=query_params,
         headers=headers,
-        cookies=cookies
+        cookies=cookies,
     )
 
 

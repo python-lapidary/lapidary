@@ -1,4 +1,13 @@
 import enum
+from dataclasses import dataclass
+from enum import unique, Enum
+from typing import Type, cast, Union
+
+from .refs import ResolverFunc
+from .type_hint import get_type_hint, TypeHint
+from .. import openapi
+from ..module_path import ModulePath
+from ..names import get_param_python_name, get_subtype_name, PARAM_MODEL
 
 
 class ParamDirection(enum.Flag):
@@ -14,5 +23,75 @@ class ParamLocation(enum.Enum):
     path = 'path'
     query = 'query'
 
+    def code(self) -> str:
+        return self.value[0]
+
 
 ParamPlacement = ParamLocation
+
+
+@unique
+class ParamStyle(Enum):
+    matrix = 'matrix'
+    label = 'label'
+    form = 'form'
+    simple = 'simple'
+    spaceDelimited = 'spaceDelimited'
+    pipeDelimited = 'pipeDelimited'
+    deepObject = 'deepObject'
+
+
+@dataclass(frozen=True)
+class Param:
+    name: str
+    """Name on python side"""
+    alias: str
+    """Name on OpenAPI side"""
+    location: ParamLocation
+    type: Type
+
+    style: ParamStyle
+    explode: bool
+
+
+def get_param_model(model_: Union[openapi.Parameter, openapi.Reference], op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Param:
+    if isinstance(model_, openapi.Reference):
+        model, module, _ = resolve(model_, openapi.Parameter)
+    else:
+        model = cast(openapi.Parameter, model_)
+
+    return _get_param_model(model, op, module, resolve)
+
+
+def _get_param_model(model: openapi.Parameter, parent_op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Param:
+    location = ParamLocation[model.in_]
+    return Param(
+        name=get_param_python_name(model),
+        alias=model.name,
+        location=location,
+        type=get_param_type(model, parent_op.operationId, module, resolve).resolve() if model.schema_ else None,
+        style=model.style or default_style[location],
+        explode=model.explode,
+    )
+
+
+def get_param_type(
+        param: openapi.Parameter, op_id: str, module_: ModulePath, resolve: ResolverFunc
+) -> TypeHint:
+    if isinstance(param.schema_, openapi.Reference):
+        schema, module, schema_name = resolve(param.schema_, openapi.Schema)
+    else:
+        schema = param.schema_
+        param_name = param.effective_name
+        schema_name = get_subtype_name(op_id, param_name)
+        module = module_ / PARAM_MODEL
+
+    return get_type_hint(schema, module, schema_name, param.required, resolve)
+
+
+default_style = {
+    ParamLocation.cookie: ParamStyle.form,
+    ParamLocation.header: ParamStyle.simple,
+    ParamLocation.path: ParamStyle.simple,
+    ParamLocation.query: ParamStyle.form,
+}

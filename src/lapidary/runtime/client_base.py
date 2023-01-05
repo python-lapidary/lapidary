@@ -5,14 +5,13 @@ __all__ = [
 import logging
 from abc import ABC
 from functools import partial
-from typing import Optional, Any, cast, Callable
+from typing import Optional, Any, Callable, Mapping
 
 import httpx
-import pydantic
 
 from .load import get_model
 from .model import OperationModel, ClientModel
-from .request import build_request, get_path
+from .request import build_request
 from .response import handle_response, mk_generator
 
 logger = logging.getLogger(__name__)
@@ -44,15 +43,9 @@ class ClientBase(ABC):
 
     def __getattr__(self, item: str):
         async def op_handler(op: OperationModel, request_body=None, **kwargs):
-            if op.params_model:
-                param_model = cast(pydantic.BaseModel, op.params_model).parse_obj(kwargs)
-            else:
-                param_model = None
-
             return await self._request(
                 op,
-                get_path(op.path, param_model),
-                param_model=param_model,
+                actual_params=kwargs,
                 request_body=request_body,
             )
 
@@ -68,13 +61,18 @@ class ClientBase(ABC):
     async def _request(
             self,
             operation: OperationModel,
-            url: str,
-            param_model: Optional[pydantic.BaseModel],
+            actual_params: Mapping[str, Any],
             request_body: Any,
             auth: Optional[httpx.Auth] = httpx.USE_CLIENT_DEFAULT,
     ):
-        request_ = build_request(param_model, request_body, operation.response_map, self._model.init_method.response_map)
-        request = self._client.build_request(operation.method, url, **request_)
+        request = build_request(
+            operation,
+            actual_params,
+            request_body,
+            operation.response_map,
+            self._model.init_method.response_map,
+            self._client.build_request
+        )
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s", f'{request.method} {request.url} {request.headers}')

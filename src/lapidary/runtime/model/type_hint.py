@@ -29,8 +29,9 @@ PRIMITIVE_TYPES = {
 }
 
 
-def get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, required: bool,
-                  resolver: ResolverFunc) -> TypeHint:
+def get_type_hint(
+        schema: openapi.Schema, module: ModulePath, name: str, required: bool, resolver: ResolverFunc
+) -> TypeHint:
     typ = _get_type_hint(schema, module, name, resolver)
 
     if schema.nullable:
@@ -224,7 +225,7 @@ class GenericTypeHint(TypeHint):
         ]
 
     def _types(self) -> List[TypeHint]:
-        return [self, *[typ for arg in self.args for typ in arg._types()]]
+        return [self.origin, *[typ for arg in self.args for typ in arg._types()]]
 
     def resolve(self) -> type:
         generic = super().resolve()

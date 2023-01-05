@@ -1,22 +1,19 @@
-import pkgutil
-import re
 from dataclasses import dataclass
-from typing import Optional, Type, Mapping, Any
+from typing import Optional, Mapping, Any, List
 
+from .params import Param, get_param_model
 from .plugins import PagingPlugin
 from .refs import ResolverFunc
 from .response_map import get_response_map, ResponseMap
-from .. import names
 from ..module_path import ModulePath
-from ..openapi import model as openapi, PluginModel
-from ..openapi.utils import get_operations
+from ..openapi import model as openapi, PluginModel, get_operations
 
 
 @dataclass(frozen=True)
 class OperationModel:
     method: str
     path: str
-    params_model: Optional[Type]
+    params: List[Param]
     response_map: Optional[ResponseMap]
     paging: Optional[PagingPlugin]
 
@@ -24,11 +21,11 @@ class OperationModel:
 def _resolve_name(name: str) -> Any:
     import sys
     if sys.version_info < (3, 9):
-        import pkgutil_resolve_name
-        return pkgutil_resolve_name.resolve_name(name)
+        from pkgutil_resolve_name import resolve_name
     else:
-        import pkgutil
-        return pkgutil.resolve_name(name)
+        from pkgutil import resolve_name
+
+    return resolve_name(name)
 
 
 def get_operation(
@@ -38,8 +35,8 @@ def get_operation(
 
     return OperationModel(
         method=method,
-        path=re.compile(r'\{([^}]+)\}').sub(r'{p_\1}', url_path),
-        params_model=_resolve_name(names.param_model_name(module, op.operationId)) if op.parameters else None,
+        path=url_path,
+        params=[get_param_model(param, op, module, resolver) for param in op.parameters] if op.parameters else [],
         response_map=response_map,
         paging=instantiate_plugin(op.paging) if op.paging else None,
     )

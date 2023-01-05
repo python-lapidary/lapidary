@@ -1,4 +1,3 @@
-import pkgutil
 from typing import Union, TypeVar, NamedTuple, Tuple, Mapping
 
 from .refs import ResolverFunc, get_resolver
@@ -65,13 +64,3 @@ def resolve_response(
 def get_api_responses(model: openapi.OpenApiModel, module: ModulePath) -> ResponseMap:
     resolve_ref = get_resolver(model, module.str())
     return get_response_map(model.lapidary_responses_global, 'API', module, resolve_ref)
-
-
-def resolve_type(schema: Union[openapi.Schema, openapi.Reference], module: ModulePath, resolve_ref: ResolverFunc) -> type:
-    if isinstance(schema, openapi.Reference):
-        _, module, name = resolve_ref(schema, openapi.Schema)
-    elif schema.lapidary_name is not None:
-        name = schema.lapidary_name
-    else:
-        raise NotImplementedError('Schema needs name')
-    return pkgutil.resolve_name(module.str() + ':' + name)
