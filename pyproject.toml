@@ -33,5 +33,7 @@ testpaths = [
     "tests",
 ]
 pythonpath = [
-    "src"
+    "src",
+    "tests"
 ]
+addopts="--color=yes"
