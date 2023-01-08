@@ -3,16 +3,16 @@ from __future__ import annotations
 import pathlib
 from typing import Union, Iterable, List
 
+_SEP = '.'
+
 
 class ModulePath:
-    _SEP = '.'
-
     def __init__(self, module: Union[str, List[str]]):
         if isinstance(module, str):
             module = module.strip()
             if module == "" or module.strip() != module:
-                raise ValueError()
-            parts = module.split(ModulePath._SEP)
+                raise ValueError
+            parts = module.split(_SEP)
         else:
             parts = module
 
@@ -23,8 +23,8 @@ class ModulePath:
         else:
             raise ValueError(module)
 
-    def str(self):
-        return ModulePath._SEP.join(self.parts)
+    def __str__(self):
+        return _SEP.join(self.parts)
 
     def to_path(self, root: pathlib.Path, is_module=True):
         path = root.joinpath(*self.parts)
@@ -43,8 +43,8 @@ class ModulePath:
             other = [other]
         return ModulePath([*self.parts, *other])
 
-    def __repr__(self):
-        return self.str()
+    def __repr__(self) -> str:
+        return f"ModulePath('{self}')"
 
     def __eq__(self, other: ModulePath):
         return self.parts == other.parts

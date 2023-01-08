@@ -76,7 +76,7 @@ def _get_composite_type_hint(
 def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeHint:
     class_name = name.replace(' ', '_')
     if schema.enum:
-        return TypeHint(module=module.str(), name=class_name)
+        return TypeHint(module=str(module), name=class_name)
     elif schema.type == openapi.Type.string:
         return TypeHint.from_type(STRING_FORMATS.get(schema.format, str))
     elif schema.type in PRIMITIVE_TYPES:
@@ -97,11 +97,8 @@ def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolv
         raise NotImplementedError
 
 
-def _get_type_hint_object(schema: openapi.Schema, module: ModulePath, name: str) -> TypeHint:
-    if schema.properties or schema.allOf:
-        return TypeHint(module=module.str(), name=name)
-    else:
-        return TypeHint(module=module.str(), name=name)
+def _get_type_hint_object(_: openapi.Schema, module: ModulePath, name: str) -> TypeHint:
+    return TypeHint(module=str(module), name=name)
 
 
 def _get_type_hint_array(schema: openapi.Schema, module: ModulePath, parent_name: str,

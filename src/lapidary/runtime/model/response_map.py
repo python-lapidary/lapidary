@@ -62,5 +62,5 @@ def resolve_response(
 
 
 def get_api_responses(model: openapi.OpenApiModel, module: ModulePath) -> ResponseMap:
-    resolve_ref = get_resolver(model, module.str())
+    resolve_ref = get_resolver(model, str(module))
     return get_response_map(model.lapidary_responses_global, 'API', module, resolve_ref)
