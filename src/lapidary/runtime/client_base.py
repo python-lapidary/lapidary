@@ -37,8 +37,11 @@ class ClientBase(ABC):
         if base_url is None:
             raise ValueError('Missing base_url.')
 
-        scheme_name, scheme = next(iter(auth.__dict__.items())) if auth else (None, None)
-        auth_handler = scheme.create(self._model.init_method.auth_models[scheme_name]) if scheme else None
+        if auth and auth.__dict__:
+            scheme_name, scheme = next(iter(auth.__dict__.items()))
+            auth_handler = scheme.create(self._model.init_method.auth_models[scheme_name])
+        else:
+            auth_handler = None
 
         self._client = httpx.AsyncClient(auth=auth_handler, base_url=base_url, app=_app)
 
