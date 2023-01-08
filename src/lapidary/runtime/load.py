@@ -52,8 +52,6 @@ def load_model(mod: str) -> openapi.OpenApiModel:
     return openapi.OpenApiModel.parse_obj(d)
 
 
-def get_model(module: str) -> ClientModel:
-    openapi_model = load_model(str(module))
-
-    root = ModulePath(module).parent()
-    return get_client_model(openapi_model, root, get_resolver(openapi_model, str(root)))
+def get_model(package: ModulePath) -> ClientModel:
+    openapi_model = load_model(str(package))
+    return get_client_model(openapi_model, package, get_resolver(openapi_model, str(package)))

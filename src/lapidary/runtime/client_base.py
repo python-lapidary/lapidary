@@ -11,6 +11,7 @@ import httpx
 
 from .load import get_model
 from .model import OperationModel, ClientModel
+from .module_path import ModulePath
 from .request import build_request
 from .response import handle_response, mk_generator
 
@@ -29,7 +30,7 @@ class ClientBase(ABC):
         if _model:
             self._model = _model
         else:
-            self._model = get_model(self.__module__)
+            self._model = get_model(ModulePath(self.__module__).parent())
 
         if base_url is None:
             base_url = self._model.init_method.base_url
