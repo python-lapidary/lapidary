@@ -1,6 +1,6 @@
 from typing import Collection, Optional
 
-from mimeparse import best_match
+from mimeparse import best_match  # type: ignore[import]
 
 
 def find_mime(supported_mimes: Optional[Collection[str]], search_mime: str) -> Optional[str]:

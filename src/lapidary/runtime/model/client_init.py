@@ -1,6 +1,6 @@
-from collections.abc import Mapping, Collection
+import collections.abc
 from dataclasses import dataclass, field
-from typing import Optional, Union, Dict, List, Tuple
+from typing import Optional, Union, Dict, List, Tuple, Mapping
 
 from .auth import AuthModel, get_auth_models
 from .response_map import get_api_responses, ResponseMap
@@ -11,10 +11,10 @@ from ..openapi import model as openapi
 @dataclass(frozen=True)
 class ClientInit:
     default_auth: Optional[str]
-    auth_models: Dict[str, AuthModel] = field(default_factory=dict)
+    auth_models: Mapping[str, AuthModel] = field(default_factory=dict)
     base_url: Optional[str] = None
     headers: List[Tuple[str, str]] = field(default_factory=list)
-    response_map: Optional[ResponseMap] = field(default_factory=dict)
+    response_map: ResponseMap = field(default_factory=dict)
 
 
 def get_client_init(openapi_model: openapi.OpenApiModel, module: ModulePath) -> ClientInit:
@@ -53,7 +53,7 @@ def get_global_headers(global_headers: Optional[Union[
     result_headers = []
     input_header_list = global_headers.items() if isinstance(global_headers, Mapping) else global_headers
     for key, values in input_header_list:
-        if not isinstance(values, Collection) or isinstance(values, str):
+        if not isinstance(values, collections.abc.Collection) or isinstance(values, str):
             values = [values]
         for value in values:
             result_headers.append((key, value,))

@@ -20,8 +20,8 @@ class ExtendableModel(BaseModel):
             return values
         aliases = (info.alias for info in cls.__fields__.values() if info.alias)
 
+        key: str
         for key, value in values.items():
-            key: str
             if not (
                     key in cls.__fields__
                     or key in aliases
@@ -61,7 +61,11 @@ class DynamicExtendableModel(Generic[T], BaseModel):
             else:
                 if not cls._validate_key(key):
                     raise ValueError(f'{key} field not permitted')
-                this_superclass = next(cls_ for cls_ in cls.__orig_bases__ if cls_.__origin__ is DynamicExtendableModel)
+                this_superclass = next(
+                    cls_
+                    for cls_ in cls.__orig_bases__  # type: ignore[attr-defined]
+                    if cls_.__origin__ is DynamicExtendableModel
+                )
                 item_type = this_superclass.__args__[0]
                 if not lenient_isinstance(value, item_type):
                     result[key] = parse_obj_as(item_type, value)

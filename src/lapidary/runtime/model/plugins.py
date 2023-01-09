@@ -1,5 +1,5 @@
 import abc
-from typing import Generic, TypeVar, Generator
+from typing import Generic, TypeVar, Generator, cast
 
 import httpx
 
@@ -13,4 +13,4 @@ class PagingPlugin(abc.ABC, Generic[T_original, T_paged]):
         raise NotImplementedError
 
     def map_response(self, response_body: T_original) -> T_paged:
-        return response_body
+        return cast(T_paged, response_body)

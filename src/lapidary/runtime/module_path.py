@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Union, Iterable, List
+from typing import Union, Iterable, List, Any
 
 _SEP = '.'
 
@@ -46,5 +46,5 @@ class ModulePath:
     def __repr__(self) -> str:
         return f"ModulePath('{self}')"
 
-    def __eq__(self, other: ModulePath):
-        return self.parts == other.parts
+    def __eq__(self, other: Any):
+        return hasattr(other, 'parts') and self.parts == other.parts

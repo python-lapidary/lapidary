@@ -9,6 +9,7 @@ from typing import Optional, Any, Callable, Mapping
 
 import httpx
 
+from .auth.common import AuthT
 from .load import get_model
 from .model import OperationModel, ClientModel
 from .module_path import ModulePath
@@ -60,14 +61,15 @@ class ClientBase(ABC):
         return self
 
     async def __aexit__(self, __exc_type=None, __exc_value=None, __traceback=None) -> Optional[bool]:
-        return await self._client.__aexit__(__exc_type, __exc_value, __traceback)
+        await self._client.__aexit__(__exc_type, __exc_value, __traceback)
+        return None
 
     async def _request(
             self,
             operation: OperationModel,
             actual_params: Mapping[str, Any],
             request_body: Any,
-            auth: Optional[httpx.Auth] = httpx.USE_CLIENT_DEFAULT,
+            auth: AuthT = httpx.USE_CLIENT_DEFAULT,
     ):
         request = build_request(
             operation,

@@ -11,7 +11,6 @@ from .model.params import ParamLocation, Param, ParamStyle
 def process_params(
         model: Iterable[Param], actual_params: Mapping[str, Any]
 ) -> Tuple[httpx.QueryParams, httpx.Headers, httpx.Cookies, Mapping[str, str]]:
-
     formal_params: Mapping[str, Param] = {param.name: param for param in model}
     containers: Mapping[ParamLocation, List[Any]] = {
         ParamLocation.cookie: [],
@@ -28,7 +27,7 @@ def process_params(
         if not formal_param:
             continue
 
-        formal_param: Param
+        formal_param: Param  # type: ignore[no-redef]
         placement = formal_param.location
 
         value = [(formal_param.alias, value) for value in serialize_param(value, formal_param.style, formal_param.explode)]

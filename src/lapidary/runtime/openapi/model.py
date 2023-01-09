@@ -171,7 +171,7 @@ class ParameterLocationItem(BaseModel):
     """
 
     in_: Annotated[Optional[In], Field(alias='in')]
-    style: Optional[Style1] = 'simple'
+    style: Optional[Style1] = Style1.simple
     required: Required
 
     class Config:
@@ -196,7 +196,7 @@ class ParameterLocationItem1(BaseModel):
     """
 
     in_: Annotated[Optional[In1], Field(alias='in')]
-    style: Optional[Style2] = 'form'
+    style: Optional[Style2] = Style2.form
 
     class Config:
         extra = Extra.forbid
@@ -213,7 +213,7 @@ class ParameterLocationItem2(BaseModel):
     """
 
     in_: Annotated[Optional[In2], Field(alias='in')]
-    style: Optional[Style] = 'simple'
+    style: Optional[Style] = Style.simple
 
     class Config:
         extra = Extra.forbid
@@ -234,7 +234,7 @@ class ParameterLocationItem3(BaseModel):
     """
 
     in_: Annotated[Optional[In3], Field(alias='in')]
-    style: Optional[Style4] = 'form'
+    style: Optional[Style4] = Style4.form
 
     class Config:
         extra = Extra.forbid
@@ -492,9 +492,10 @@ class OpenApiModel(ExtendableModel):
         )
     ] = None
 
-    lapidary_responses_global: Optional[Responses] = Field(
+    lapidary_responses_global: Responses = Field(
         alias='x-lapidary-responses-global',
         description='Base Responses. Values in Responses declared in Operations override values in this one.',
+        default_factory=dict,
     )
 
 
@@ -541,7 +542,7 @@ class Header(ExtendableModel):
     content: Annotated[
         Optional[Dict[str, MediaType]], Field(maxProperties=1, minProperties=1)
     ]
-    style: Optional[Style] = 'simple'
+    style: Optional[Style] = Style.simple
     explode: Optional[bool]
     allowReserved: Optional[bool] = False
     schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
@@ -605,7 +606,7 @@ class Operation(ExtendableModel):
 class Responses(DynamicExtendableModel[Union[Response, Reference]]):
     @classmethod
     def _validate_key(cls, key: str) -> bool:
-        return key == 'default' or re.match(r'^[1-5](?:\d{2}|XX)$', key)
+        return key == 'default' or bool(re.match(r'^[1-5](?:\d{2}|XX)$', key))
 
     @root_validator
     def _validate_min_properties(cls, values):

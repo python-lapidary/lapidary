@@ -1,7 +1,7 @@
 import enum
 from dataclasses import dataclass
 from enum import unique, Enum
-from typing import Type, cast, Union
+from typing import Type, cast, Union, Any
 
 from .refs import ResolverFunc
 from .type_hint import get_type_hint, TypeHint
@@ -63,15 +63,23 @@ def get_param_model(model_: Union[openapi.Parameter, openapi.Reference], op: ope
     return _get_param_model(model, op, module, resolve)
 
 
+def default_explode(style: ParamStyle) -> bool:
+    return style is ParamStyle.form
+
+
 def _get_param_model(model: openapi.Parameter, parent_op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Param:
+    assert parent_op.operationId
+
     location = ParamLocation[model.in_]
+    style = ParamStyle[model.style] if model.style else default_style[location]
+
     return Param(
         name=get_param_python_name(model),
         alias=model.name,
         location=location,
-        type=get_param_type(model, parent_op.operationId, module, resolve).resolve() if model.schema_ else None,
-        style=model.style or default_style[location],
-        explode=model.explode,
+        type=get_param_type(model, parent_op.operationId, module, resolve).resolve() if model.schema_ else type(Any),
+        style=style,
+        explode=model.explode or default_explode(style),
     )
 
 

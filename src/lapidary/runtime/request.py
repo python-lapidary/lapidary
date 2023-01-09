@@ -32,6 +32,10 @@ def build_request(
         global_response_map: Optional[ResponseMap],
         request_factory: RequestFactory,
 ) -> httpx.Request:
+    query_params: Optional[httpx.QueryParams]
+    cookies: Optional[httpx.Cookies]
+    path_params: Optional[Mapping[str, str]]
+
     if actual_params:
         query_params, headers, cookies, path_params = process_params(op.params, actual_params)
     else:

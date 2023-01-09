@@ -5,6 +5,7 @@ from typing import Optional, Type, TypeVar, Callable, Any, Iterator, AsyncIterat
 import httpx
 import pydantic
 
+from .auth.common import AuthT
 from .http_consts import CONTENT_TYPE
 from .mime import find_mime
 from .model import ResponseMap, PagingPlugin
@@ -17,8 +18,8 @@ P = TypeVar('P')
 
 
 def handle_response(
-        response_map: Optional[ResponseMap],
-        global_response_map: Optional[ResponseMap],
+        response_map: ResponseMap,
+        global_response_map: ResponseMap,
         response: httpx.Response,
 ) -> Any:
     response.read()
@@ -32,7 +33,7 @@ def handle_response(
     type_, iterator = type_info
 
     try:
-        obj = parse_model(response, type_)
+        obj: Any = parse_model(response, type_)
     except pydantic.ValidationError:
         raise ValueError(response.content)
 
@@ -53,7 +54,7 @@ async def aiter2(values: Iterable[T]) -> AsyncIterator[T]:
 def parse_model(response: httpx.Response, typ: Type[T]) -> T:
     if inspect.isclass(typ):
         if issubclass(typ, Exception):
-            return typ(response.json())
+            return typ(response.json())  # type: ignore[return-value]
         elif pydantic.BaseModel in inspect.getmro(typ):
             return typ.parse_raw(response.content)
 
@@ -104,7 +105,7 @@ def _status_code_matches(code: str) -> Iterator[str]:
 
 
 async def mk_generator(
-        paging: PagingPlugin[T, P], request: httpx.Request, auth: Optional[httpx.Auth], client: httpx.AsyncClient,
+        paging: PagingPlugin[T, P], request: httpx.Request, auth: AuthT, client: httpx.AsyncClient,
         response_handler: Callable[[httpx.Response], T]
 ) -> AsyncIterator[P]:
     async for response in get_pages(paging, request, auth, client):
@@ -119,7 +120,7 @@ async def mk_generator(
 
 
 async def get_pages(
-        paging: PagingPlugin, request: httpx.Request, auth: Optional[httpx.Auth], client: httpx.AsyncClient
+        paging: PagingPlugin, request: httpx.Request, auth: AuthT, client: httpx.AsyncClient
 ) -> AsyncGenerator[httpx.Response, None]:
     flow = paging.page_flow(request)
     request = next(flow)

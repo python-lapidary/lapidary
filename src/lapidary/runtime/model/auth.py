@@ -27,7 +27,7 @@ def get_auth_models(model: Dict[str, Union[openapi.Reference, openapi.SecuritySc
 
 
 @singledispatch
-def get_auth_model(scheme: Any) -> Optional[AuthModel]:
+def get_auth_model(scheme: Any) -> AuthModel:
     raise NotImplementedError(scheme)
 
 

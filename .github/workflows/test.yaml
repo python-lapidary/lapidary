@@ -82,7 +82,10 @@ jobs:
         run: poetry lock --check
 
       - name: Install dependencies
-        run: poetry install --with github-actions
+        run: poetry install
 
       - name: Run pytest
         run: poetry run pytest -s
+
+      - name: run mypy
+        run: poetry run mypy src

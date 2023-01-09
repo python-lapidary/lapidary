@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import importlib
 import logging
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Set, Type
 from uuid import UUID
 
 from pydantic import BaseModel, Extra
@@ -42,19 +42,20 @@ def get_type_hint(
     return typ
 
 
-def _get_one_of_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolve: ResolverFunc) -> TypeHint:
+def _get_one_of_type_hint(component_schemas: List[Union[openapi.Schema, openapi.Reference]], module: ModulePath, name: str, resolve: ResolverFunc) -> TypeHint:
     args = []
-    for idx, sub_schema in enumerate(schema.oneOf):
+    for idx, sub_schema in enumerate(component_schemas):
         if isinstance(sub_schema, openapi.Reference):
-            sub_schema, sub_module, sub_name = resolve(sub_schema, openapi.Schema)
+            sub_schema_, sub_module, sub_name = resolve(sub_schema, openapi.Schema)
         else:
             sub_name = name + str(idx)
             sub_module = module
+            sub_schema_ = sub_schema
 
-        if sub_schema.lapidary_name is not None:
-            sub_name = sub_schema.lapidary_name
+        if sub_schema_.lapidary_name is not None:
+            sub_name = sub_schema_.lapidary_name
 
-        type_hint = get_type_hint(sub_schema, sub_module, sub_name, True, resolve)
+        type_hint = get_type_hint(sub_schema_, sub_module, sub_name, True, resolve)
         args.append(type_hint)
 
     return GenericTypeHint(
@@ -78,7 +79,7 @@ def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolv
     if schema.enum:
         return TypeHint(module=str(module), name=class_name)
     elif schema.type == openapi.Type.string:
-        return TypeHint.from_type(STRING_FORMATS.get(schema.format, str))
+        return TypeHint.from_type(STRING_FORMATS.get(schema.format, str) if schema.format else str)
     elif schema.type in PRIMITIVE_TYPES:
         return BuiltinTypeHint.from_str(PRIMITIVE_TYPES[schema.type].__name__)
     elif schema.type == openapi.Type.object:
@@ -88,7 +89,7 @@ def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolv
     elif schema.anyOf:
         return _get_composite_type_hint(schema.anyOf, module, class_name, resolver)
     elif schema.oneOf:
-        return _get_one_of_type_hint(schema, module, class_name, resolver)
+        return _get_one_of_type_hint(schema.oneOf, module, class_name, resolver)
     elif schema.allOf:
         return _get_composite_type_hint(schema.allOf, module, class_name, resolver)
     elif schema.type is None:
@@ -136,7 +137,7 @@ class TypeHint(BaseModel):
         if hasattr(typ, '__origin__'):
             raise ValueError('Generic types unsupported', typ)
         module = typ.__module__
-        name = getattr(typ, '__name__', None) or typ._name
+        name = getattr(typ, '__name__', None) or typ._name  # type: ignore[attr-defined]
         if module == 'builtins':
             return BuiltinTypeHint.from_str(name)
         else:
@@ -166,7 +167,7 @@ class TypeHint(BaseModel):
     def __hash__(self) -> int:
         return self.module.__hash__() * 14159 + self.name.__hash__()
 
-    def resolve(self) -> type:
+    def resolve(self) -> Type:
         mod = importlib.import_module(self.module)
         return getattr(mod, self.name)
 
@@ -205,7 +206,7 @@ class GenericTypeHint(TypeHint):
 
     @staticmethod
     def union_of(types: Tuple[TypeHint, ...]) -> GenericTypeHint:
-        args = set()
+        args: Set[TypeHint] = set()
         for typ in types:
             if isinstance(typ, GenericTypeHint) and typ.module == 'typing' and typ.name == 'Union':
                 args.update(typ.args)
@@ -224,7 +225,7 @@ class GenericTypeHint(TypeHint):
     def _types(self) -> List[TypeHint]:
         return [self.origin, *[typ for arg in self.args for typ in arg._types()]]
 
-    def resolve(self) -> type:
+    def resolve(self) -> Type:
         generic = super().resolve()
         return generic[tuple(arg.resolve() for arg in self.args)]
 
@@ -253,8 +254,11 @@ class GenericTypeHint(TypeHint):
         return hash_
 
 
-def resolve_type_hint(typ: Union[openapi.Schema, openapi.Reference], module: ModulePath, name: str,
-                      resolver: ResolverFunc) -> TypeHint:
-    if isinstance(typ, openapi.Reference):
-        typ, module, name = resolver(typ, openapi.Schema)
-    return get_type_hint(typ, module, name, True, resolver)
+def resolve_type_hint(
+        schema: Union[openapi.Schema, openapi.Reference], module: ModulePath, name: str, resolver: ResolverFunc
+) -> TypeHint:
+    if isinstance(schema, openapi.Reference):
+        schema_, module, name = resolver(schema, openapi.Schema)
+    else:
+        schema_ = schema
+    return get_type_hint(schema_, module, name, True, resolver)

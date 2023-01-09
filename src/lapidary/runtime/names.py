@@ -46,7 +46,7 @@ def _mangle_name(name: str) -> str:
     name = name.replace('u_', 'u' + _escape_char('_'))
     return (
             re.sub('[^a-zA-Z]', lambda match: _escape_char(match.group()), name[0])
-            + re.sub('[^a-zA-Z0-9_]', lambda match: _escape_char(match.group()), name[1:])
+            + re.sub('[^a-zA-Z0-9_]', lambda match: _escape_char(match.group()), name[1:])  # type: ignore[arg-type]
     )
 
 

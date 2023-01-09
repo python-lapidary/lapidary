@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Mapping, Any, List
+from typing import Optional, Mapping, Any, List, cast, Iterator, Tuple
 
 from .params import Param, get_param_model
 from .plugins import PagingPlugin
@@ -14,14 +14,14 @@ class OperationModel:
     method: str
     path: str
     params: List[Param]
-    response_map: Optional[ResponseMap]
+    response_map: ResponseMap
     paging: Optional[PagingPlugin]
 
 
 def _resolve_name(name: str) -> Any:
     import sys
     if sys.version_info < (3, 9):
-        from pkgutil_resolve_name import resolve_name
+        from pkgutil_resolve_name import resolve_name  # type: ignore[import]
     else:
         from pkgutil import resolve_name
 
@@ -31,6 +31,7 @@ def _resolve_name(name: str) -> Any:
 def get_operation(
         op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc
 ) -> OperationModel:
+    assert op.operationId
     response_map = get_response_map(op.responses, op.operationId, module, resolver)
 
     return OperationModel(
@@ -44,12 +45,13 @@ def get_operation(
 
 def get_operation_functions(openapi_model: openapi.OpenApiModel, module: ModulePath, resolver: ResolverFunc) -> Mapping[str, OperationModel]:
     return {
-        op.operationId: get_operation(op, method, url_path, module / 'paths' / op.operationId, resolver)
+        cast(str, op.operationId): get_operation(op, method, url_path, module / 'paths' / op.operationId, resolver)
         for url_path, path_item in openapi_model.paths.items()
-        for method, op in get_operations(path_item, True)
+        if isinstance(path_item, openapi.PathItem)
+        for method, op in cast(Iterator[Tuple[str, openapi.Operation]], get_operations(path_item, True))
     }
 
 
-def instantiate_plugin(model: Optional[PluginModel]) -> Optional[PagingPlugin]:
+def instantiate_plugin(model: PluginModel) -> PagingPlugin:
     type_ = _resolve_name(model.factory)
     return type_()

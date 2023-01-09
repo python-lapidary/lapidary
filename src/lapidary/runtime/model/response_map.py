@@ -5,10 +5,10 @@ from .type_hint import get_type_hint
 from .. import openapi
 from ..module_path import ModulePath
 from ..names import RESPONSE_BODY, response_type_name
-from ..openapi import model as openapi, LapidaryModelType
 
 T = TypeVar('T')
-MimeType = ResponseCode = str
+MimeType = str
+ResponseCode = str
 
 
 class ReturnTypeInfo(NamedTuple):
@@ -38,7 +38,7 @@ def get_response_map(
                 resp_module = sub_module
                 resp_name = sub_name
             type_ = get_type_hint(resp_schema, resp_module, resp_name, True, resolve_ref).resolve()
-            mime_map[mime] = ReturnTypeInfo(type_, resp_schema.lapidary_model_type is LapidaryModelType.iterator)
+            mime_map[mime] = ReturnTypeInfo(type_, resp_schema.lapidary_model_type is openapi.LapidaryModelType.iterator)
 
         result[resp_code] = mime_map
 
@@ -53,12 +53,13 @@ def resolve_response(
         resolve_ref: ResolverFunc
 ) -> Tuple[openapi.Response, ModulePath, str]:
     if isinstance(response, openapi.Reference):
-        response, sub_module, sub_name = resolve_ref(response, openapi.Response)
+        response_, sub_module, sub_name = resolve_ref(response, openapi.Response)
     else:
+        response_ = response
         sub_module = module / RESPONSE_BODY
         response_type_name(op_name, resp_code)
         sub_name = response_type_name(op_name, resp_code)
-    return response, sub_module, sub_name
+    return response_, sub_module, sub_name
 
 
 def get_api_responses(model: openapi.OpenApiModel, module: ModulePath) -> ResponseMap:
