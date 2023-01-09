@@ -3,7 +3,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Next]
 ### Added
-- Support for pyteon 3.8 .
+- Support for python 3.8 .
 
 ### Changed
 - Split project into separate repos.
