@@ -27,9 +27,6 @@ class ParamLocation(enum.Enum):
         return self.value[0]
 
 
-ParamPlacement = ParamLocation
-
-
 @unique
 class ParamStyle(Enum):
     matrix = 'matrix'
