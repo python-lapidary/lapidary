@@ -2,7 +2,7 @@ from typing import List
 
 from lapidary.runtime import openapi
 from lapidary.runtime.http_consts import MIME_JSON
-from lapidary.runtime.model import get_client_model, get_resolver, ClientModel, ClientInit, OperationModel
+from lapidary.runtime.model import get_client_model, get_resolver, ClientModel, OperationModel
 from lapidary.runtime.model.response_map import ReturnTypeInfo
 from lapidary.runtime.module_path import ModulePath
 from lapidary.runtime.openapi import LapidaryModelType
@@ -37,7 +37,7 @@ def test_parse_iterator():
     )
     model = get_client_model(oa_model, ModulePath('test'), get_resolver(oa_model, 'test'))
     expected = ClientModel(
-        init_method=ClientInit(default_auth=None),
+        default_auth=None,
         methods={
             'test_op': OperationModel(
                 method='get',

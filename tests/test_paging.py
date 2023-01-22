@@ -10,7 +10,7 @@ from starlette.routing import Route
 
 from lapidary.runtime import ClientBase
 from lapidary.runtime.http_consts import MIME_JSON
-from lapidary.runtime.model import ClientModel, ClientInit, OperationModel, PagingPlugin
+from lapidary.runtime.model import ClientModel, OperationModel, PagingPlugin
 from lapidary.runtime.model.response_map import ReturnTypeInfo
 
 
@@ -39,16 +39,14 @@ class TestIterator(unittest.IsolatedAsyncioTestCase):
         ])
 
         model = ClientModel(
-            init_method=ClientInit(
-                response_map=None,
-                base_url='https://example.com/',
-                default_auth=None,
-            ),
+            response_map={},
+            base_url='https://example.com/',
+            default_auth=None,
             methods=dict(
                 get_strings=OperationModel(
                     'GET',
                     '/strings',
-                    None,
+                    [],
                     {
                         '200': {
                             MIME_JSON: ReturnTypeInfo(List[str], False)
@@ -70,16 +68,14 @@ class TestIterator(unittest.IsolatedAsyncioTestCase):
         ])
 
         model = ClientModel(
-            init_method=ClientInit(
-                response_map=None,
-                base_url='http://example.com/',
-                default_auth=None,
-            ),
+            response_map={},
+            base_url='http://example.com/',
+            default_auth=None,
             methods=dict(
                 get_strings=OperationModel(
                     'GET',
                     '/strings',
-                    None,
+                    [],
                     {
                         '200': {
                             MIME_JSON: ReturnTypeInfo(List[str], True)

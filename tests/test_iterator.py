@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Route
 
 from lapidary.runtime import ClientBase
-from lapidary.runtime.model import ClientModel, ClientInit, OperationModel, ReturnTypeInfo
+from lapidary.runtime.model import ClientModel, OperationModel, ReturnTypeInfo
 
 
 class TestIterator(unittest.IsolatedAsyncioTestCase):
@@ -20,16 +20,14 @@ class TestIterator(unittest.IsolatedAsyncioTestCase):
         ])
 
         model = ClientModel(
-            init_method=ClientInit(
-                response_map=None,
-                base_url='http://example.com/',
-                default_auth=None,
-            ),
+            response_map={},
+            base_url='http://example.com/',
+            default_auth=None,
             methods=dict(
                 get_strings=OperationModel(
                     'GET',
                     '/strings',
-                    None,
+                    [],
                     {
                         '200': {
                             'application/json': ReturnTypeInfo(List[str], True)
@@ -54,16 +52,14 @@ class TestIterator(unittest.IsolatedAsyncioTestCase):
         ])
 
         model = ClientModel(
-            init_method=ClientInit(
-                response_map=None,
-                base_url='https://example.com/',
-                default_auth=None,
-            ),
+            response_map={},
+            base_url='https://example.com/',
+            default_auth=None,
             methods=dict(
                 get_strings=OperationModel(
                     'GET',
                     '/strings',
-                    None,
+                    [],
                     {
                         '200': {
                             'application/json': ReturnTypeInfo(Union[str, List[str]], True)

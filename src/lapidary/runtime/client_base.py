@@ -34,13 +34,13 @@ class ClientBase(ABC):
             self._model = get_model(ModulePath(self.__module__).parent())
 
         if base_url is None:
-            base_url = self._model.init_method.base_url
+            base_url = self._model.base_url
         if base_url is None:
             raise ValueError('Missing base_url.')
 
         if auth and auth.__dict__:
             scheme_name, scheme = next(iter(auth.__dict__.items()))
-            auth_handler = scheme.create(self._model.init_method.auth_models[scheme_name])
+            auth_handler = scheme.create(self._model.auth_models[scheme_name])
         else:
             auth_handler = None
 
@@ -76,14 +76,14 @@ class ClientBase(ABC):
             actual_params,
             request_body,
             operation.response_map,
-            self._model.init_method.response_map,
+            self._model.response_map,
             self._client.build_request
         )
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s", f'{request.method} {request.url} {request.headers}')
 
-        response_handler = partial(handle_response, operation.response_map, self._model.init_method.response_map)
+        response_handler = partial(handle_response, operation.response_map, self._model.response_map)
 
         if operation.paging:
             return mk_generator(operation.paging, request, auth, self._client, response_handler)

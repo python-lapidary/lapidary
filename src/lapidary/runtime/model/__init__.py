@@ -1,6 +1,5 @@
 from .auth import AuthModel
 from .client import ClientModel, get_client_model
-from .client_init import get_client_init, ClientInit
 from .op import OperationModel, get_operation_functions
 from .params import ParamLocation, Param
 from .plugins import PagingPlugin
