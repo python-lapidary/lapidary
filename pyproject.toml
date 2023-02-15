@@ -39,3 +39,6 @@ pythonpath = [
     "tests"
 ]
 addopts="--color=yes"
+
+[tool.mypy]
+mypy_path = "src"
