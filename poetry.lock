@@ -202,6 +202,24 @@ http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (>=1.0.0,<2.0.0)"]
 
 [[package]]
+name = "httpx-auth"
+version = "0.15.0"
+description = "Authentication for HTTPX"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "httpx_auth-0.15.0-py3-none-any.whl", hash = "sha256:ca252bffcfb1d4dbfdf74b69d4e6a06e387bca3dd896ef9c5ddd85787b56652b"},
+    {file = "httpx_auth-0.15.0.tar.gz", hash = "sha256:52e649f7e4dd1486bd040ee70c6bd00e26cb987a68c2aeffc76a38ac5931cc61"},
+]
+
+[package.dependencies]
+httpx = ">=0.23.0,<0.24.0"
+
+[package.extras]
+testing = ["pyjwt (>=2.0.0,<3.0.0)", "pytest-cov (>=3.0.0,<4.0.0)", "pytest-httpx (>=0.21.0,<0.22.0)"]
+
+[[package]]
 name = "hyperframe"
 version = "6.0.1"
 description = "HTTP/2 framing layer for Python"
@@ -631,4 +649,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "a8a0370e6f5749bbd9e978fe114b2ba669454aa5dc3938208c974c7f0a875c2a"
+content-hash = "a7578e283259729bf704cf03892ef73f377a88294e045e70a746d3390c74b715"

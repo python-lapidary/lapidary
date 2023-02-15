@@ -1,8 +1,7 @@
 import collections.abc
 from dataclasses import dataclass, field
-from typing import Mapping, Optional, Union, List, Tuple, Dict
+from typing import Mapping, Optional, Union, List, Tuple, Dict, Any
 
-from .auth import get_auth_models, AuthModel
 from .op import OperationModel, get_operation_functions
 from .refs import ResolverFunc
 from .response_map import ResponseMap, get_api_responses
@@ -12,7 +11,7 @@ from ..openapi import model as openapi
 
 @dataclass(frozen=True)
 class ClientModel:
-    auth_models: Mapping[str, AuthModel] = field(default_factory=dict)
+    auth_models: Mapping[str, Any] = field(default_factory=dict)
     base_url: Optional[str] = None
     default_auth: Optional[str] = None
     headers: List[Tuple[str, str]] = field(default_factory=list)
