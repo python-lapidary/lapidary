@@ -4,10 +4,11 @@ from enum import unique, Enum
 from typing import Type, cast, Union, Any
 
 from .refs import ResolverFunc
-from .type_hint import get_type_hint, TypeHint
+from .type_hint import TypeHint
+from .types import get_type_hint
 from .. import openapi
 from ..module_path import ModulePath
-from ..names import get_param_python_name, get_subtype_name, PARAM_MODEL
+from ..names import get_param_python_name, PARAM_MODEL
 
 
 class ParamDirection(enum.Flag):
@@ -88,7 +89,7 @@ def get_param_type(
     else:
         schema = param.schema_
         param_name = param.effective_name
-        schema_name = get_subtype_name(op_id, param_name)
+        schema_name = param_name
         module = module_ / PARAM_MODEL
 
     return get_type_hint(schema, module, schema_name, param.required, resolve)

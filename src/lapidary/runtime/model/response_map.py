@@ -1,10 +1,10 @@
 from typing import Union, TypeVar, NamedTuple, Tuple, Mapping
 
 from .refs import ResolverFunc, get_resolver
-from .type_hint import get_type_hint
+from .types import get_type_hint
 from .. import openapi
+from ..json_pointer import encode_json_pointer
 from ..module_path import ModulePath
-from ..names import RESPONSE_BODY, response_type_name
 
 T = TypeVar('T')
 MimeType = str
@@ -21,11 +21,11 @@ ResponseMap = Mapping[ResponseCode, MimeMap]
 
 
 def get_response_map(
-        responses: openapi.Responses, op_name: str, module: ModulePath, resolve_ref: ResolverFunc
+        responses: openapi.Responses, module: ModulePath, resolve_ref: ResolverFunc
 ) -> ResponseMap:
     result = {}
     for resp_code, response in responses.items():
-        response, sub_module, sub_name = resolve_response(resp_code, response, op_name, module, resolve_ref)
+        response, sub_module, sub_name = resolve_response(resp_code, response, module, resolve_ref)
         if not response.content:
             continue
 
@@ -48,7 +48,6 @@ def get_response_map(
 def resolve_response(
         resp_code: str,
         response: Union[openapi.Response, openapi.Reference],
-        op_name: str,
         module: ModulePath,
         resolve_ref: ResolverFunc
 ) -> Tuple[openapi.Response, ModulePath, str]:
@@ -56,12 +55,11 @@ def resolve_response(
         response_, sub_module, sub_name = resolve_ref(response, openapi.Response)
     else:
         response_ = response
-        sub_module = module / RESPONSE_BODY
-        response_type_name(op_name, resp_code)
-        sub_name = response_type_name(op_name, resp_code)
+        sub_module = module / encode_json_pointer(resp_code) / "content"
+        sub_name = "schema"
     return response_, sub_module, sub_name
 
 
 def get_api_responses(model: openapi.OpenApiModel, module: ModulePath) -> ResponseMap:
     resolve_ref = get_resolver(model, str(module))
-    return get_response_map(model.lapidary_responses_global, 'API', module, resolve_ref)
+    return get_response_map(model.lapidary_responses_global, module, resolve_ref)

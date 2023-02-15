@@ -6,6 +6,7 @@ from .plugins import PagingPlugin
 from .refs import ResolverFunc
 from .response_map import get_response_map, ResponseMap
 from ..module_path import ModulePath
+from ..names import get_ops_module
 from ..openapi import model as openapi, PluginModel, get_operations
 
 
@@ -29,10 +30,12 @@ def _resolve_name(name: str) -> Any:
 
 
 def get_operation(
-        op: openapi.Operation, method: str, url_path: str, module: ModulePath, resolver: ResolverFunc
+        op: openapi.Operation, method: str, url_path: str, parent_module: ModulePath, resolver: ResolverFunc
 ) -> OperationModel:
     assert op.operationId
-    response_map = get_response_map(op.responses, op.operationId, module, resolver)
+
+    module = parent_module / op.operationId
+    response_map = get_response_map(op.responses, module / "responses", resolver)
 
     return OperationModel(
         method=method,
@@ -45,7 +48,7 @@ def get_operation(
 
 def get_operation_functions(openapi_model: openapi.OpenApiModel, module: ModulePath, resolver: ResolverFunc) -> Mapping[str, OperationModel]:
     return {
-        cast(str, op.operationId): get_operation(op, method, url_path, module / 'paths' / op.operationId, resolver)
+        cast(str, op.operationId): get_operation(op, method, url_path, get_ops_module(module, op), resolver)
         for url_path, path_item in openapi_model.paths.items()
         if isinstance(path_item, openapi.PathItem)
         for method, op in cast(Iterator[Tuple[str, openapi.Operation]], get_operations(path_item, True))

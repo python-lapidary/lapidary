@@ -89,7 +89,7 @@ class DynamicExtendableModel(Generic[T], BaseModel):
     def __contains__(self, item: str) -> bool:
         return item in self.__dict__
 
-    def get(self, key: str, default_value: Any) -> Any:
+    def get(self, key: str, default_value: Any = None) -> Any:
         return self.__dict__.get(key, default_value)
 
 

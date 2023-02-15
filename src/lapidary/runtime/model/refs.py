@@ -2,23 +2,31 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Callable, TypeVar, Union, cast, Optional, Any, Mapping, Tuple, Type, List
+from typing import Callable, TypeVar, Union, cast, Optional, Any, Tuple, Type, List
 
-import inflection
+from pydantic import BaseModel
 from typing_extensions import TypeAlias
 
+from ..json_pointer import decode_json_pointer, encode_json_pointer
 from ..module_path import ModulePath
 from ..openapi import model as openapi
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T', openapi.Schema, openapi.Parameter, openapi.SecurityScheme, openapi.Response)
+T = TypeVar(
+    'T',
+    openapi.Schema,
+    openapi.Parameter,
+    openapi.SecurityScheme,
+    openapi.Response,
+    openapi.Operation,
+)
 ResolverFunc = Callable[[openapi.Reference, Type[T]], Tuple[T, ModulePath, str]]
 
 SchemaOrRef: TypeAlias = Union[openapi.Schema, openapi.Reference]
 
 
-def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, typ: type[T]) -> Tuple[T, ModulePath, str]:
+def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, type_: type[T] = Any) -> Tuple[T, ModulePath, str]:
     """
     module = {root_package}.{path[0:4]}
     name = path[4:]
@@ -26,14 +34,11 @@ def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Referen
 
     path = ref_to_path(recursive_resolve(model, ref.ref))
 
-    if path[0] == 'paths':
-        op = resolve_ref(model, _mkref(path[:4]), openapi.Operation)
-        if op.operationId:
-            path[2:4] = op.operationId
+    module = ModulePath.from_reference(root_package, recursive_resolve(model, ref.ref), model)
+    result = resolve_ref(model, ref.ref, type_)
+    if type_ is not Any and not isinstance(result, type_):
+        raise TypeError(type(result))
 
-    module = ModulePath(root_package) / path[:-1] / inflection.underscore(path[-1])
-    result = resolve_ref(model, _mkref(path), typ)
-    assert isinstance(result, typ)
     return result, module, path[-1]
 
 
@@ -42,19 +47,19 @@ def get_resolver(model: openapi.OpenApiModel, package: str) -> ResolverFunc:
 
 
 def _mkref(s: List[str]) -> str:
-    return '/'.join(['#', *s])
+    return '/'.join(['#', *map(encode_json_pointer, s)])
 
 
-def ref_to_path(ref: str) -> List[str]:
-    return ref.split('/')[1:]
+def ref_to_path(ref: str) -> list[str]:
+    return list(map(decode_json_pointer, ref.split('/')[1:]))
 
 
-def resolve_ref(model: openapi.OpenApiModel, ref: str, t: Optional[type]) -> Any:
+def resolve_ref(model: openapi.OpenApiModel, ref: str, t: Optional[type[T]] = Any) -> T:
     result = _schema_get(model, recursive_resolve(model, ref))
-    if t is not None and not isinstance(result, t):
+    if t is not Any and not isinstance(result, t):
         raise TypeError(ref, t, type(result))
     else:
-        return result
+        return cast(T, result)
 
 
 def recursive_resolve(model: openapi.OpenApiModel, ref: str) -> str:
@@ -77,8 +82,29 @@ def recursive_resolve(model: openapi.OpenApiModel, ref: str) -> str:
             return ref
 
 
-def _schema_get(model: openapi.OpenApiModel, ref: str) -> Any:
-    path = ref_to_path(ref)
-    for part in path:
-        model = model[part] if isinstance(model, Mapping) else getattr(model, part)
-    return model
+def _schema_get(model: openapi.OpenApiModel, path: str, as_: Type[T] = Any) -> T:
+    def resolve_attr_(obj: Any, name: str) -> Any:
+        name = decode_json_pointer(name)
+        if hasattr(obj, name):
+            return getattr(obj, name)
+        if hasattr(obj, "__root__") and name in obj.__root__:
+            return obj.__root__[name]
+        if hasattr(obj, "__contains__") and hasattr(obj, "__getitem__") and name in obj:
+            """handle Mapping and DynamicExtendableModel"""
+            return obj[name]
+        raise KeyError(name)
+
+    def resolve_attr(obj: Any, name: str) -> Any:
+        if isinstance(obj, BaseModel) and name in dir(BaseModel):
+            return resolve_attr_(obj, name + "_")
+        return resolve_attr_(obj, name)
+
+    var = model
+    for part in path.split("/")[1:]:
+        var = resolve_attr(var, part)
+
+    if as_ is not Any:
+        if not isinstance(var, as_):
+            raise TypeError(type(var))
+
+    return var

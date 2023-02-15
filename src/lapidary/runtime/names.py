@@ -2,21 +2,27 @@ import builtins
 import keyword
 import logging
 import re
+from typing import Any
 
 import inflection
+from typing_extensions import TYPE_CHECKING
 
-from . import openapi
+from .openapi import model as openapi
+
+if TYPE_CHECKING:
+    from .module_path import ModulePath
 
 logger = logging.getLogger(__name__)
 
-PARAM_MODEL = 'param_model'
-REQUEST_BODY = 'request_body'
-RESPONSE_BODY = 'response_body'
+PARAM_MODEL = 'parameters'
+REQUEST_BODY = 'requestBody'
+RESPONSE_BODY = 'responseBody'
 PATHS = 'paths'
 
 VALID_IDENTIFIER_RE = re.compile(r'^[a-zA-Z]\w*$', re.ASCII)
 
 
+# TODO remove, use nested classes instead
 def get_subtype_name(parent_name: str, schema_name: str) -> str:
     subtype_name = inflection.camelize(parent_name) + inflection.camelize(schema_name)
     subtype_name = maybe_mangle_name(subtype_name)
@@ -42,7 +48,7 @@ def _escape_char(s: str) -> str:
     return 'u_{x:06x}'.format(x=ord(s))
 
 
-def _mangle_name(name: str) -> str:
+def escape_name(name: str) -> str:
     name = name.replace('u_', 'u' + _escape_char('_'))
     return (
             re.sub('[^a-zA-Z]', lambda match: _escape_char(match.group()), name[0])
@@ -66,13 +72,13 @@ def maybe_mangle_name(name: str, check_builtins=True) -> str:
     ):
         return name + '_'
     elif not VALID_IDENTIFIER_RE.match(name) or 'u_' in name:
-        return _mangle_name(name)
+        return escape_name(name)
     else:
         return name
 
 
 def response_type_name(operation_id: str, status_code: str) -> str:
-    return inflection.camelize(operation_id) + status_code + 'Response'
+    return 'Response'
 
 
 def get_schema_module_name(name):
@@ -85,4 +91,15 @@ def request_type_name(name):
 
 
 def get_param_python_name(param: openapi.Parameter) -> str:
-    return param.in_[0] + '_' + maybe_mangle_name(param.effective_name, False)
+    return maybe_mangle_name(param.effective_name, False) + "_" + param.in_[0]
+
+
+def get_ops_module(module: "ModulePath", op: openapi.Operation) -> "ModulePath":
+    return module / 'ops'
+
+
+def get_enum_field_name(value: Any) -> str:
+    if isinstance(value, (str, int, float)):
+        return maybe_mangle_name(str(value), False)
+    else:
+        raise ValueError("Can't determine field name")

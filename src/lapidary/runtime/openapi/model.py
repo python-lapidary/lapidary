@@ -317,13 +317,15 @@ class ImplicitOAuthFlow(BaseModel):
     scopes: Dict[str, str]
 
 
-class PasswordOAuthFlow(BaseModel):
+class PasswordOAuthFlow(ExtendableModel):
     class Config:
         extra = Extra.forbid
 
     tokenUrl: str
     refreshUrl: Optional[str]
     scopes: Optional[Dict[str, str]]
+
+    plugin: Annotated[Optional[str], Field(alias='x-plugin')]
 
 
 class ClientCredentialsFlow(PasswordOAuthFlow):
@@ -606,7 +608,7 @@ class Operation(ExtendableModel):
 class Responses(DynamicExtendableModel[Union[Response, Reference]]):
     @classmethod
     def _validate_key(cls, key: str) -> bool:
-        return key == 'default' or bool(re.match(r'^[1-5](?:\d{2}|XX)$', key))
+        return key == 'default' or bool(re.match(r'^[1-5](?:\d\d|XX)$', key))
 
     @root_validator
     def _validate_min_properties(cls, values):
