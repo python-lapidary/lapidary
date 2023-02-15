@@ -95,12 +95,7 @@ def find_type_(code: str, mime: str, response_map: ResponseMap) -> Optional[Retu
 
 def _status_code_matches(code: str) -> Iterator[str]:
     yield code
-
-    code_as_list = list(code)
-    for pos in [-1, -2]:
-        code_as_list[pos] = 'X'
-        yield ''.join(code_as_list)
-
+    yield code[0] + "XX"
     yield 'default'
 
 
