@@ -29,7 +29,7 @@ def get_client_model(openapi_model: openapi.OpenApiModel, module: ModulePath, re
     )
 
     auth_models = (
-        get_auth_models(openapi_model.components.securitySchemes)
+        openapi_model.components.securitySchemes
         if openapi_model.components and openapi_model.components.securitySchemes
         else {}
     )

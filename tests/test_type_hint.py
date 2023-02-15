@@ -60,10 +60,6 @@ class OneOfTypeHintTest(TestCase):
             )
         )
 
-    def test_resolve(self):
-        from lapidary.runtime.model.auth import AuthModel
-        self.assertEqual(AuthModel, TypeHint.from_str('lapidary.runtime.model.auth.AuthModel').resolve())
-
 
 def test_from_type_union():
     assert TypeHint.from_type(typing.Union) == TypeHint(module='typing', name='Union')

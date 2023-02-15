@@ -1,4 +1,3 @@
-from .auth import AuthModel
 from .client import ClientModel, get_client_model
 from .op import OperationModel, get_operation_functions
 from .params import ParamLocation, Param

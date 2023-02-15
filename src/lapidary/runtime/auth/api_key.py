@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import httpx
 
 from .common import PageFlowGenT
-from ..model.auth import ApiKeyAuthModel
+from .. import openapi
 from ..model.params import ParamLocation
 
 
@@ -11,11 +11,11 @@ from ..model.params import ParamLocation
 class APIKey:
     api_key: str
 
-    def create(self, model: ApiKeyAuthModel) -> httpx.Auth:
+    def create(self, model: openapi.APIKeySecurityScheme) -> httpx.Auth:
         return ApiKeyAuth(
             api_key=self.api_key,
-            name=model.param_name,
-            placement=model.placement,
+            name=model.name,
+            placement=ParamLocation[model.in_.value],
         )
 
 
