@@ -6,7 +6,7 @@ import itertools
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Union, List, Tuple, Set, Type, Any
+from typing import Union, List, Tuple, Set, Type, Any, cast
 
 BUILTINS = "builtins"
 
@@ -25,7 +25,7 @@ class TypeHint:
     def __repr__(self):
         return self.full_name()
 
-    def str(self, module: str | None = None) -> str:
+    def to_str(self, module: str | None = None) -> str:
         if self.module in (module, "builtins"):
             return self.type_name
         else:
@@ -63,7 +63,7 @@ class TypeHint:
         item = mod
         for name in self.type_name.split("."):
             item = getattr(item, name)
-        return item
+        return cast(Type, item)
 
 
 @dataclass
@@ -87,7 +87,7 @@ class GenericTypeHint(TypeHint):
         return f'{super().full_name()}[{", ".join(arg.full_name() for arg in self.args)}]'
 
     def str(self, module: str | None = None) -> str:
-        return f'{super().str(module)}[{", ".join(arg.str(module) for arg in self.args)}]'
+        return f'{super().to_str(module)}[{", ".join(arg.to_str(module) for arg in self.args)}]'
 
     @property
     def origin(self) -> TypeHint:
@@ -122,7 +122,7 @@ class UnionTypeHint(GenericTypeHint):
         )
 
     def __hash__(self) -> int:
-        hash_ = super(GenericTypeHint).__hash__()
+        hash_ = super(GenericTypeHint, self).__hash__()
         for arg in self.args:
             hash_ += functools.reduce(
                 lambda x, y: x + y,
@@ -141,7 +141,7 @@ class UnionTypeHint(GenericTypeHint):
         return UnionTypeHint(args=tuple(args))
 
 
-def from_type(typ: Union[Type, type(Any)]) -> TypeHint:
+def from_type(typ: Any) -> TypeHint:
     if hasattr(typ, '__origin__'):
         raise ValueError('Generic types unsupported', typ)
     module = typ.__module__

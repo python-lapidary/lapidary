@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Callable, TypeVar, Union, cast, Optional, Any, Tuple, Type, List
+from typing import Callable, TypeVar, Union, cast, Any, Tuple, Type, List
 
 from pydantic import BaseModel
 from typing_extensions import TypeAlias
@@ -26,7 +26,7 @@ ResolverFunc = Callable[[openapi.Reference, Type[T]], Tuple[T, ModulePath, str]]
 SchemaOrRef: TypeAlias = Union[openapi.Schema, openapi.Reference]
 
 
-def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, type_: type[T] = Any) -> Tuple[T, ModulePath, str]:
+def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, type_: Union[Type[T], Any] = Any) -> Tuple[T, ModulePath, str]:
     """
     module = {root_package}.{path[0:4]}
     name = path[4:]
@@ -39,7 +39,7 @@ def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Referen
     if type_ is not Any and not isinstance(result, type_):
         raise TypeError(type(result))
 
-    return result, module, path[-1]
+    return cast(T, result), module, path[-1]
 
 
 def get_resolver(model: openapi.OpenApiModel, package: str) -> ResolverFunc:
@@ -54,8 +54,8 @@ def ref_to_path(ref: str) -> list[str]:
     return list(map(decode_json_pointer, ref.split('/')[1:]))
 
 
-def resolve_ref(model: openapi.OpenApiModel, ref: str, t: Optional[type[T]] = Any) -> T:
-    result = _schema_get(model, recursive_resolve(model, ref))
+def resolve_ref(model: openapi.OpenApiModel, ref: str, t: Union[Type[T], Any] = Any) -> T:
+    result = _schema_get(model, recursive_resolve(model, ref), t)
     if t is not Any and not isinstance(result, t):
         raise TypeError(ref, t, type(result))
     else:
@@ -82,7 +82,7 @@ def recursive_resolve(model: openapi.OpenApiModel, ref: str) -> str:
             return ref
 
 
-def _schema_get(model: openapi.OpenApiModel, path: str, as_: Type[T] = Any) -> T:
+def _schema_get(model: openapi.OpenApiModel, path: str, as_: Union[Type[T], Any] = Any) -> T:
     def resolve_attr_(obj: Any, name: str) -> Any:
         name = decode_json_pointer(name)
         if hasattr(obj, name):
@@ -99,7 +99,7 @@ def _schema_get(model: openapi.OpenApiModel, path: str, as_: Type[T] = Any) -> T
             return resolve_attr_(obj, name + "_")
         return resolve_attr_(obj, name)
 
-    var = model
+    var: Any = model
     for part in path.split("/")[1:]:
         var = resolve_attr(var, part)
 
@@ -107,4 +107,4 @@ def _schema_get(model: openapi.OpenApiModel, path: str, as_: Type[T] = Any) -> T
         if not isinstance(var, as_):
             raise TypeError(type(var))
 
-    return var
+    return cast(T, var)

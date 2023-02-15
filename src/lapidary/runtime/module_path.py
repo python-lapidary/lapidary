@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 from itertools import chain
-from typing import Union, Iterable, Sequence, Any, Iterator
+from typing import Union, Iterable, Sequence, Any, Iterator, List, cast
 
 from . import openapi
 from .json_pointer import decode_json_pointer, resolve
@@ -12,7 +12,7 @@ _SEP = '.'
 
 
 class ModulePath:
-    def __init__(self, module: Union[str, Sequence[str]]):
+    def __init__(self, module: Union[str, List[str]]):
         if isinstance(module, str):
             module = module.strip()
             if module == "" or module.strip() != module:
@@ -73,7 +73,7 @@ def _to_module_parts(parts: Sequence[str], model: openapi.OpenApiModel) -> Itera
     if parts[1] == 'paths' and parts_len > 3:
         yield "ops"
         op: openapi.Operation = resolve(model, parts[1:4])
-        yield op.operationId
+        yield cast(str, op.operationId)
 
         if parts_len < 5:
             return
