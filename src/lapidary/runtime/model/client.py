@@ -23,7 +23,7 @@ def get_client_model(openapi_model: openapi.OpenApiModel, module: ModulePath, re
     default_auth = next(iter(openapi_model.security[0].__root__.keys())) if openapi_model.security else None
 
     base_url = (
-        openapi_model.servers[0].url if openapi_model.servers and openapi_model.servers
+        openapi_model.servers[0].url if openapi_model.servers
         else None
     )
 
