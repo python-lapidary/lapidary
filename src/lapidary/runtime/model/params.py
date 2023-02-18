@@ -75,14 +75,14 @@ def _get_param_model(model: openapi.Parameter, parent_op: openapi.Operation, mod
         name=get_param_python_name(model),
         alias=model.name,
         location=location,
-        type=get_param_type(model, parent_op.operationId, module, resolve).resolve() if model.schema_ else type(Any),
+        type=get_param_type(model, module, resolve).resolve() if model.schema_ else type(Any),
         style=style,
         explode=model.explode or default_explode(style),
     )
 
 
 def get_param_type(
-        param: openapi.Parameter, op_id: str, module_: ModulePath, resolve: ResolverFunc
+        param: openapi.Parameter, module_: ModulePath, resolve: ResolverFunc
 ) -> TypeHint:
     if isinstance(param.schema_, openapi.Reference):
         schema, module, schema_name = resolve(param.schema_, openapi.Schema)
