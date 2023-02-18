@@ -1,11 +1,10 @@
-name: test
+name: Test and publish
 
 on:
   push:
     branches:
       - main
       - develop
-
 
 concurrency:
   group: tests-${{ github.head_ref || github.ref }}
@@ -60,7 +59,8 @@ jobs:
         run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
 
       - name: Configure poetry
-        run: poetry config virtualenvs.in-project true
+        run: |
+          poetry config virtualenvs.in-project true
 
       - name: Set up cache
         uses: actions/cache@v3
@@ -89,3 +89,44 @@ jobs:
 
       - name: run mypy
         run: poetry run mypy -p lapidary
+  publish:
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up cache
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          # `timeout` is not available on macOS, so we define a custom function.
+          [ "$(command -v timeout)" ] || function timeout() { perl -e 'alarm shift; exec @ARGV' "$@"; }
+
+          # Using `timeout` is a safeguard against the Poetry command hanging for some reason.
+          timeout 10s poetry run pip --version || rm -rf .venv
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Set uo Poetry
+        run: |
+          pip install poetry
+          poetry config pypi-token.pypi ${{ secrets.PYPI_KEY }}          
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: Publish to PyPI
+        run: poetry publish --build
