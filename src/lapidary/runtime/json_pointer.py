@@ -15,10 +15,8 @@ def _resolve_part(model: Any, part: str) -> Any:
     part_ = decode_json_pointer(part)
     if hasattr(model, '__getitem__') and part_ in model:
         return model[part_]
-    if hasattr(model, part_):
+    if hasattr(model, part_) or hasattr(model, '__getattr__'):
         return getattr(model, part_)
-    if hasattr(model, '__getattr__'):
-        return model.__getattr__(part_)
     raise KeyError(part_)
 
 

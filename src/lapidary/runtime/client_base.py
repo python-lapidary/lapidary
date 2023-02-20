@@ -47,9 +47,9 @@ class ClientBase(ABC):
         self._client = httpx.AsyncClient(auth=auth_handler, base_url=base_url, app=_app)
 
     def __getattr__(self, item: str):
-        async def op_handler(op: OperationModel, request_body=None, **kwargs):
+        async def op_handler(operation: OperationModel, request_body=None, **kwargs):
             return await self._request(
-                op,
+                operation,
                 actual_params=kwargs,
                 request_body=request_body,
             )
@@ -77,7 +77,7 @@ class ClientBase(ABC):
             request_body,
             operation.response_map,
             self._model.response_map,
-            self._client.build_request
+            self._client.build_request,
         )
 
         if logger.isEnabledFor(logging.DEBUG):

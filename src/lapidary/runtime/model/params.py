@@ -52,13 +52,15 @@ class Param:
     explode: bool
 
 
-def get_param_model(model_: Union[openapi.Parameter, openapi.Reference], op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Param:
+def get_param_model(
+        model_: Union[openapi.Parameter, openapi.Reference], operation: openapi.Operation, module: ModulePath, resolve: ResolverFunc
+) -> Param:
     if isinstance(model_, openapi.Reference):
         model, module, _ = resolve(model_, openapi.Parameter)
     else:
         model = cast(openapi.Parameter, model_)
 
-    return _get_param_model(model, op, module, resolve)
+    return _get_param_model(model, operation, module, resolve)
 
 
 def default_explode(style: ParamStyle) -> bool:

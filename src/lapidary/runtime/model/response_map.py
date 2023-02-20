@@ -38,7 +38,7 @@ def get_response_map(
                 resp_module = sub_module
                 resp_name = sub_name
             type_ = get_type_hint(resp_schema, resp_module, resp_name, True, resolve_ref).resolve()
-            mime_map[mime] = ReturnTypeInfo(type_, resp_schema.lapidary_model_type is openapi.LapidaryModelType.iterator)
+            mime_map[mime] = ReturnTypeInfo(type_, resp_schema.lapidary_model_type is openapi.LapidaryModelType.ITERATOR)
 
         result[resp_code] = mime_map
 

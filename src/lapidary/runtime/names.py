@@ -45,7 +45,7 @@ def check_name(name: str, check_builtins=True) -> None:
 
 
 def _escape_char(s: str) -> str:
-    return 'u_{x:06x}'.format(x=ord(s))
+    return f"u_{ord(s):06x}"
 
 
 def escape_name(name: str) -> str:
@@ -77,10 +77,6 @@ def maybe_mangle_name(name: str, check_builtins=True) -> str:
         return name
 
 
-def response_type_name(operation_id: str, status_code: str) -> str:
-    return 'Response'
-
-
 def get_schema_module_name(name):
     from inflection import underscore
     return underscore(name)
@@ -94,7 +90,7 @@ def get_param_python_name(param: openapi.Parameter) -> str:
     return maybe_mangle_name(param.effective_name, False) + "_" + param.in_[0]
 
 
-def get_ops_module(module: "ModulePath", op: openapi.Operation) -> "ModulePath":
+def get_ops_module(module: "ModulePath") -> "ModulePath":
     return module / 'ops'
 
 

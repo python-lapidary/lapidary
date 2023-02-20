@@ -6,7 +6,7 @@ import itertools
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Union, List, Tuple, Set, Type, Any, cast
+from typing import List, Tuple, Set, Type, Any, cast
 
 BUILTINS = "builtins"
 
@@ -77,7 +77,7 @@ class GenericTypeHint(TypeHint):
         return GenericTypeHint(module='typing', type_name='List', args=(type_hint,))
 
     def _types(self) -> List[TypeHint]:
-        return [self, *[typ for arg in self.args for typ in arg._types()]]
+        return [self, *[typ for arg in self.args for typ in arg._types()]]  # pylint: disable=protected-access
 
     def resolve(self) -> Type:
         generic = super().resolve()
@@ -131,7 +131,7 @@ class UnionTypeHint(GenericTypeHint):
         return hash_
 
     @staticmethod
-    def of(*types: TypeHint) -> GenericTypeHint:
+    def of(*types: TypeHint) -> GenericTypeHint:  # pylint: disable=invalid-name
         args: Set[TypeHint] = set()
         for typ in types:
             if isinstance(typ, GenericTypeHint) and typ.module == 'typing' and typ.type_name == 'Union':
@@ -145,5 +145,5 @@ def from_type(typ: Any) -> TypeHint:
     if hasattr(typ, '__origin__'):
         raise ValueError('Generic types unsupported', typ)
     module = typ.__module__
-    name = getattr(typ, '__name__', None) or typ._name  # type: ignore[attr-defined]
+    name = getattr(typ, '__name__', None) or typ._name  # type: ignore[attr-defined] # pylint: disable=protected-access
     return TypeHint(module=module, type_name=name)

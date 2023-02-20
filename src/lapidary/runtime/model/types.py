@@ -70,7 +70,7 @@ def _get_composite_type_hint(
     return resolve_type_hint(component_schemas[0], module, name, resolve)
 
 
-def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeHint:
+def _get_type_hint(schema: openapi.Schema, module: ModulePath, name: str, resolver: ResolverFunc) -> TypeHint:  # pylint: disable=too-many-return-statements
     class_name = name.replace(' ', '_')
     if schema.enum:
         return TypeHint(module=str(module), type_name=class_name)

@@ -89,7 +89,12 @@ def test_resolve_operation():
 
 
 def test_resolve_schema():
-    schema, path, name = resolve(model, root, openapi.Reference(ref="#/paths/~1helo~1/get/responses/default/content/application~1json/schema"), openapi.Schema)
+    schema, path, name = resolve(
+        model,
+        root,
+        openapi.Reference(ref="#/paths/~1helo~1/get/responses/default/content/application~1json/schema"),
+        openapi.Schema,
+    )
     assert schema == schema_bob
     assert path == ModulePath("lapidary_test.ops.helo.responses.default.content.applicationu_00002fjson")
     assert name == "schema"

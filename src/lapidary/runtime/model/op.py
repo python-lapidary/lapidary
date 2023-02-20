@@ -30,25 +30,30 @@ def _resolve_name(name: str) -> Any:
 
 
 def get_operation(
-        op: openapi.Operation, method: str, url_path: str, parent_module: ModulePath, resolver: ResolverFunc
+        operation: openapi.Operation, method: str, url_path: str, parent_module: ModulePath, resolver: ResolverFunc
 ) -> OperationModel:
-    assert op.operationId
+    assert operation.operationId
 
-    module = parent_module / op.operationId
-    response_map = get_response_map(op.responses, module / "responses", resolver)
+    module = parent_module / operation.operationId
+    response_map = get_response_map(operation.responses, module / "responses", resolver)
 
     return OperationModel(
         method=method,
         path=url_path,
-        params=[get_param_model(param, op, module, resolver) for param in op.parameters] if op.parameters else [],
+        params=[
+            get_param_model(param, operation, module, resolver)
+            for param in operation.parameters
+        ] if operation.parameters else [],
         response_map=response_map,
-        paging=instantiate_plugin(op.paging) if op.paging else None,
+        paging=instantiate_plugin(operation.paging) if operation.paging else None,
     )
 
 
-def get_operation_functions(openapi_model: openapi.OpenApiModel, module: ModulePath, resolver: ResolverFunc) -> Mapping[str, OperationModel]:
+def get_operation_functions(
+        openapi_model: openapi.OpenApiModel, module: ModulePath, resolver: ResolverFunc
+) -> Mapping[str, OperationModel]:
     return {
-        cast(str, op.operationId): get_operation(op, method, url_path, get_ops_module(module, op), resolver)
+        cast(str, op.operationId): get_operation(op, method, url_path, get_ops_module(module), resolver)
         for url_path, path_item in openapi_model.paths.items()
         if isinstance(path_item, openapi.PathItem)
         for method, op in cast(Iterator[Tuple[str, openapi.Operation]], get_operations(path_item, True))

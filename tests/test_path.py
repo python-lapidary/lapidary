@@ -9,7 +9,7 @@ from lapidary.runtime.request import get_path
 
 
 class PathTestCase(unittest.TestCase):
-    def test_enum_param(self):
+    def test_enum_param(self) -> None:
         class MyEnum(enum.Enum):
             entry = 'value'
 

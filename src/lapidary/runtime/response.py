@@ -34,8 +34,8 @@ def handle_response(
 
     try:
         obj: Any = parse_model(response, type_)
-    except pydantic.ValidationError:
-        raise ValueError(response.content)
+    except pydantic.ValidationError as error:
+        raise ValueError(response.content) from error
 
     if isinstance(obj, Exception):
         raise obj
@@ -118,7 +118,7 @@ async def get_pages(
         paging: PagingPlugin, request: httpx.Request, auth: AuthT, client: httpx.AsyncClient
 ) -> AsyncGenerator[httpx.Response, None]:
     flow = paging.page_flow(request)
-    request = next(flow)
+    request = next(flow) # pylint: disable=stop-iteration-return
     while True:
         response = await client.send(request, auth=auth)
         yield response

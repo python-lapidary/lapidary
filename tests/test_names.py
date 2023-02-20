@@ -37,4 +37,3 @@ class EnumFieldNamesTests(TestCase):
 
     def test_float_value(self):
         self.assertEqual("u_000030u_00002e3", get_enum_field_name(.3))
-

@@ -15,13 +15,13 @@ class ExtendableModel(BaseModel):
         extra = Extra.allow
 
     @root_validator(pre=True)
-    def validate_extras(cls, values: Mapping[str, Any]) -> Mapping[str, Any]:
+    def validate_extras(cls, values: Mapping[str, Any]) -> Mapping[str, Any]:  # pylint: disable=no-self-argument
         if not values:
             return values
         aliases = (info.alias for info in cls.__fields__.values() if info.alias)
 
         key: str
-        for key, value in values.items():
+        for key in values.keys():
             if not (
                     key in cls.__fields__
                     or key in aliases
@@ -53,7 +53,7 @@ class DynamicExtendableModel(Generic[T], BaseModel):
         extra = Extra.allow
 
     @root_validator
-    def _validate_model(cls, values: Mapping[str, Any]):
+    def _validate_model(cls, values: Mapping[str, Any]):  # pylint: disable=no-self-argument
         result = {}
         for key, value in values.items():
             if key.startswith('x-'):

@@ -26,7 +26,9 @@ ResolverFunc = Callable[[openapi.Reference, Type[T]], Tuple[T, ModulePath, str]]
 SchemaOrRef: TypeAlias = Union[openapi.Schema, openapi.Reference]
 
 
-def resolve(model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, type_: Union[Type[T], Any] = Any) -> Tuple[T, ModulePath, str]:
+def resolve(
+        model: openapi.OpenApiModel, root_package: str, ref: openapi.Reference, type_: Union[Type[T], Any] = Any
+) -> Tuple[T, ModulePath, str]:
     """
     module = {root_package}.{path[0:4]}
     name = path[4:]
@@ -90,7 +92,7 @@ def _schema_get(model: openapi.OpenApiModel, path: str, as_: Union[Type[T], Any]
         if hasattr(obj, "__root__") and name in obj.__root__:
             return obj.__root__[name]
         if hasattr(obj, "__contains__") and hasattr(obj, "__getitem__") and name in obj:
-            """handle Mapping and DynamicExtendableModel"""
+            # handle Mapping and DynamicExtendableModel
             return obj[name]
         raise KeyError(name)
 

@@ -18,16 +18,16 @@ class PluginModel(pydantic.BaseModel):
 
 
 class LapidaryModelType(enum.Enum):
-    model = 'model'
+    MODEL = 'model'
     """The default type, rendered as a subclass of pydantic.BaseModel."""
 
-    exception = 'exception'
+    EXCEPTION = 'exception'
     """Error typy, not used as return type, if received, it's raised."""
 
-    iterator = 'iterator'
+    ITERATOR = 'iterator'
     """
     If the received object is an Iterable, it's returned as an Iterator.
     Mappings are returned as an iterators of tuples of the keys-value pairs.
-    
+
     Particularly useful in combination with a paging plugin.
     """

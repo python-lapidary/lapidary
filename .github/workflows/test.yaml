@@ -122,7 +122,7 @@ jobs:
       - name: Set uo Poetry
         run: |
           pip install poetry
-          poetry config pypi-token.pypi ${{ secrets.PYPI_KEY }}          
+          poetry config pypi-token.pypi ${{ secrets.PYPI_KEY }}
 
       - name: Install dependencies
         run: |

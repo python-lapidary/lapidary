@@ -28,11 +28,11 @@ model = openapi.OpenApiModel(
                         **{
                             "200": openapi.Reference(ref="#/components/responses/helo200Response"),
                             "4XX": openapi.Response(
-                            description="",
-                            content={
-                                MIME_JSON: openapi.MediaType(schema_=schema_bob)
-                            }
-                        )
+                                description="",
+                                content={
+                                    MIME_JSON: openapi.MediaType(schema_=schema_bob)
+                                }
+                            )
                         }
                     ),
                 )
@@ -66,11 +66,10 @@ model = openapi.OpenApiModel(
 
 class MatchResponseCodeTest(unittest.TestCase):
     def test__status_code_matches(self):
-        matches = [m for m in _status_code_matches('400')]
+        matches = list(_status_code_matches('400'))
         self.assertEqual(['400', '4XX', 'default'], matches)
 
 
 class ResponseMapTest(unittest.TestCase):
     def test_response_type_hint(self):
         pass
-

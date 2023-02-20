@@ -24,8 +24,8 @@ def get_accept_header(response_map: Optional[ResponseMap], global_response_map: 
     return find_mime(all_mime_types, MIME_JSON)
 
 
-def build_request(
-        op: OperationModel,
+def build_request(  # pylint: disable=too-many-arguments
+        operation: OperationModel,
         actual_params: Mapping[str, Any],
         request_body: Any,
         response_map: Optional[ResponseMap],
@@ -37,12 +37,12 @@ def build_request(
     path_params: Optional[Mapping[str, str]]
 
     if actual_params:
-        query_params, headers, cookies, path_params = process_params(op.params, actual_params)
+        query_params, headers, cookies, path_params = process_params(operation.params, actual_params)
     else:
         cookies = path_params = query_params = None
         headers = httpx.Headers()
 
-    url = op.path.format_map(path_params) if path_params else op.path
+    url = operation.path.format_map(path_params) if path_params else operation.path
 
     if request_body is not None:
         headers[CONTENT_TYPE] = MIME_JSON
@@ -60,7 +60,7 @@ def build_request(
     )
 
     return request_factory(
-        op.method,
+        operation.method,
         url,
         content=content,
         params=query_params,

@@ -27,7 +27,7 @@ def test_parse_iterator():
                                 items=openapi.Schema(
                                     type=openapi.Type.string
                                 ),
-                                lapidary_model_type=LapidaryModelType.iterator,
+                                lapidary_model_type=LapidaryModelType.ITERATOR,
                             ))},
                         )
                     })
