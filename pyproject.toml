@@ -22,8 +22,11 @@ python-mimeparse = "^1.6.0"
 pyyaml = "^6.0"
 
 [tool.poetry.group.dev.dependencies]
+mypy = "^1.0.1"
+pylint = "^2.16.2"
 pytest = "^7.1"
 starlette = "^0.23.1"
+types-pyyaml = "^6.0.12.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -38,6 +41,12 @@ pythonpath = [
     "tests"
 ]
 addopts = "--color=yes"
+
+[tool.mypy]
+mypy_path = "src"
+namespace_packages = true
+ignore_missing_imports = true
+explicit_package_bases = true
 
 [tool.pylint]
 disable = [

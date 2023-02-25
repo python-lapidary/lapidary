@@ -63,7 +63,7 @@ class DynamicExtendableModel(Generic[T], BaseModel):
                     raise ValueError(f'{key} field not permitted')
                 this_superclass = next(
                     cls_
-                    for cls_ in cls.__orig_bases__  # type: ignore[attr-defined]
+                    for cls_ in cls.__orig_bases__  # type: ignore[attr-defined] # pylint: disable=no-member
                     if cls_.__origin__ is DynamicExtendableModel
                 )
                 item_type = this_superclass.__args__[0]
