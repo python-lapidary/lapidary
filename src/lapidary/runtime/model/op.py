@@ -1,25 +1,26 @@
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
-from typing import Optional, Mapping, Any, List, cast, Iterator, Tuple
+import typing as ty
 
 from .params import Param, get_param_model
 from .plugins import PagingPlugin
 from .refs import ResolverFunc
-from .response_map import get_response_map, ResponseMap
+from .response_map import ResponseMap, get_response_map
 from ..module_path import ModulePath
 from ..names import get_ops_module
-from ..openapi import model as openapi, PluginModel, get_operations
+from ..openapi import PluginModel, get_operations, model as openapi
 
 
 @dataclass(frozen=True)
 class OperationModel:
     method: str
     path: str
-    params: List[Param]
+    params: list[Param]
     response_map: ResponseMap
-    paging: Optional[PagingPlugin]
+    paging: ty.Optional[PagingPlugin]
 
 
-def _resolve_name(name: str) -> Any:
+def _resolve_name(name: str) -> ty.Any:
     from pkgutil import resolve_name
 
     return resolve_name(name)
@@ -49,10 +50,10 @@ def get_operation_functions(
         openapi_model: openapi.OpenApiModel, module: ModulePath, resolver: ResolverFunc
 ) -> Mapping[str, OperationModel]:
     return {
-        cast(str, op.operationId): get_operation(op, method, url_path, get_ops_module(module), resolver)
+        ty.cast(str, op.operationId): get_operation(op, method, url_path, get_ops_module(module), resolver)
         for url_path, path_item in openapi_model.paths.items()
         if isinstance(path_item, openapi.PathItem)
-        for method, op in cast(Iterator[Tuple[str, openapi.Operation]], get_operations(path_item, True))
+        for method, op in ty.cast(Iterator[tuple[str, openapi.Operation]], get_operations(path_item, True))
     }
 
 
