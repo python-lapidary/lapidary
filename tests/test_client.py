@@ -1,5 +1,5 @@
-import unittest
 from typing import List
+import unittest
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
