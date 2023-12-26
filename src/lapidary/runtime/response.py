@@ -1,6 +1,6 @@
 import inspect
 import logging
-from typing import Optional, Type, TypeVar, Callable, Any, Iterator, AsyncIterator, Iterable, AsyncGenerator
+from typing import Optional, Type, TypeVar, Callable, Any, Iterator, AsyncIterator, Iterable, AsyncGenerator, cast
 
 import httpx
 import pydantic
@@ -56,9 +56,9 @@ def parse_model(response: httpx.Response, typ: Type[T]) -> T:
         if issubclass(typ, Exception):
             return typ(response.json())  # type: ignore[return-value]
         elif pydantic.BaseModel in inspect.getmro(typ):
-            return typ.parse_raw(response.content)
+            return cast(Type[pydantic.BaseModel], typ).model_validate_json(response.content)
 
-    return pydantic.parse_raw_as(typ, response.content)
+    return pydantic.TypeAdapter(typ).validate_json(response.content)
 
 
 def find_type(response: httpx.Response, response_map: ResponseMap, global_response_map: ResponseMap) -> Optional[ReturnTypeInfo]:

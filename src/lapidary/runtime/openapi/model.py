@@ -5,16 +5,14 @@
 
 from __future__ import annotations
 
-import re
-from collections.abc import Mapping
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union, Tuple
+import re
+import typing as ty
 
-from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field, validator, root_validator, parse_obj_as
-from typing_extensions import Annotated
+import pydantic
 
-from .base import ExtendableModel, DynamicExtendableModel, cross_validate_content
-from .ext import PluginModel, LapidaryModelType
+from .base import DynamicExtendableModel, ExtendableModel, cross_validate_content
+from .ext import LapidaryModelType, PluginModel
 
 __all__ = [
     'APIKeySecurityScheme',
@@ -77,28 +75,29 @@ __all__ = [
 ]
 
 
-class Reference(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+class Reference(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(
+        populate_by_name=True,
+    )
 
-    ref: Annotated[str, Field(alias='$ref')]
+    ref: ty.Annotated[str, pydantic.Field(alias='$ref')]
 
 
 class Contact(ExtendableModel):
-    name: Optional[str]
-    url: Optional[str]
-    email: Optional[EmailStr]
+    name: ty.Optional[str] = None
+    url: ty.Optional[str] = None
+    email: ty.Optional[pydantic.EmailStr] = None
 
 
 class License(ExtendableModel):
     name: str
-    url: Optional[str]
+    url: ty.Optional[str] = None
 
 
 class ServerVariable(ExtendableModel):
-    enum: Optional[List[str]]
+    enum: ty.Optional[list[str]] = None
     default: str
-    description: Optional[str]
+    description: ty.Optional[str] = None
 
 
 class Type(Enum):
@@ -110,47 +109,39 @@ class Type(Enum):
     string = 'string'
 
 
-class Discriminator(BaseModel):
+class Discriminator(pydantic.BaseModel):
     propertyName: str
-    mapping: Optional[Dict[str, str]]
+    mapping: ty.Optional[dict[str, str]] = None
 
 
 class XML(ExtendableModel):
-    name: Optional[str]
-    namespace: Optional[AnyUrl]
-    prefix: Optional[str]
-    attribute: Optional[bool] = False
-    wrapped: Optional[bool] = False
+    name: ty.Optional[str] = None
+    namespace: ty.Optional[pydantic.AnyUrl] = None
+    prefix: ty.Optional[str] = None
+    attribute: ty.Optional[bool] = False
+    wrapped: ty.Optional[bool] = False
 
 
 class Example(ExtendableModel):
-    summary: Optional[str]
-    description: Optional[str]
-    value: Optional[Any]
-    externalValue: Optional[str]
+    summary: ty.Optional[str] = None
+    description: ty.Optional[str] = None
+    value: ty.Optional[ty.Any] = None
+    externalValue: ty.Optional[str] = None
 
 
 class Style(Enum):
     simple = 'simple'
 
 
-class SecurityRequirement(BaseModel):
-    __root__: Annotated[Dict[str, List[str]], Field(default_factory=dict)]
+SecurityRequirement = pydantic.RootModel[dict[str, list[str]]]
 
 
 class ExternalDocumentation(ExtendableModel):
-    description: Optional[str]
+    description: ty.Optional[str] = None
     url: str
 
 
-class ExampleXORExamples(BaseModel):
-    __root__: Annotated[
-        Any,
-        Field(
-            description='Example and examples are mutually exclusive',
-            not_={'required': ['example', 'examples']},
-        ),
-    ]
+ExampleXORExamples = pydantic.RootModel[ty.Any]
 
 
 class In(Enum):
@@ -167,18 +158,19 @@ class Required(Enum):
     bool_True = True
 
 
-class ParameterLocationItem(BaseModel):
+class ParameterLocationItem(pydantic.BaseModel):
     """
     Parameter in path
     """
 
-    in_: Annotated[Optional[In], Field(alias='in')]
-    style: Optional[Style1] = Style1.simple
+    in_: ty.Annotated[ty.Optional[In], pydantic.Field(alias='in')]
+    style: ty.Optional[Style1] = Style1.simple
     required: Required
 
-    class Config:
-        extra = Extra.forbid
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
 
 
 class In1(Enum):
@@ -192,34 +184,36 @@ class Style2(Enum):
     deepObject = 'deepObject'
 
 
-class ParameterLocationItem1(BaseModel):
+class ParameterLocationItem1(pydantic.BaseModel):
     """
     Parameter in query
     """
 
-    in_: Annotated[Optional[In1], Field(alias='in')]
-    style: Optional[Style2] = Style2.form
+    in_: ty.Annotated[ty.Optional[In1], pydantic.Field(alias='in')]
+    style: ty.Optional[Style2] = Style2.form
 
-    class Config:
-        extra = Extra.forbid
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
 
 
 class In2(Enum):
     header = 'header'
 
 
-class ParameterLocationItem2(BaseModel):
+class ParameterLocationItem2(pydantic.BaseModel):
     """
     Parameter in header
     """
 
-    in_: Annotated[Optional[In2], Field(alias='in')]
-    style: Optional[Style] = Style.simple
+    in_: ty.Annotated[ty.Optional[In2], pydantic.Field(alias='in')]
+    style: ty.Optional[Style] = Style.simple
 
-    class Config:
-        extra = Extra.forbid
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
 
 
 class In3(Enum):
@@ -230,29 +224,29 @@ class Style4(Enum):
     form = 'form'
 
 
-class ParameterLocationItem3(BaseModel):
+class ParameterLocationItem3(pydantic.BaseModel):
     """
     Parameter in cookie
     """
 
-    in_: Annotated[Optional[In3], Field(alias='in')]
-    style: Optional[Style4] = Style4.form
+    in_: ty.Annotated[ty.Optional[In3], pydantic.Field(alias='in')]
+    style: ty.Optional[Style4] = Style4.form
 
-    class Config:
-        extra = Extra.forbid
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
 
 
-class ParameterLocation(BaseModel):
-    __root__: Annotated[
-        Union[
-            ParameterLocationItem,
-            ParameterLocationItem1,
-            ParameterLocationItem2,
-            ParameterLocationItem3,
-        ],
-        Field(description='Parameter location'),
-    ]
+ParameterLocation = pydantic.RootModel[
+    ty.Union[
+        ParameterLocationItem,
+        ParameterLocationItem1,
+        ParameterLocationItem2,
+        ParameterLocationItem3,
+    ],
+]
+"""Parameter location"""
 
 
 class Type1(Enum):
@@ -266,13 +260,15 @@ class In4(Enum):
 
 
 class APIKeySecurityScheme(ExtendableModel):
-    class Config(ExtendableModel.Config):
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        **ExtendableModel.model_config,
+        populate_by_name=True,
+    )
 
     type: Type1
     name: str
-    in_: Annotated[In4, Field(alias='in')]
-    description: Optional[str]
+    in_: ty.Annotated[In4, pydantic.Field(alias='in')]
+    description: ty.Optional[str] = None
 
 
 class Type2(Enum):
@@ -280,17 +276,22 @@ class Type2(Enum):
 
 
 class HTTPSecurityScheme(ExtendableModel):
+    model_config = pydantic.ConfigDict(
+        **ExtendableModel.model_config,
+        populate_by_name=True,
+    )
+
     scheme: str
-    bearerFormat: Optional[str]
-    description: Optional[str]
+    bearerFormat: ty.Optional[str] = None
+    description: ty.Optional[str] = None
     type: Type2
 
-    @validator('bearerFormat', allow_reuse=True)
-    def _validate_bearer_format(cls, value: str, values: Mapping[str, Any]) -> str:
-        if values['scheme'].lower() != 'bearer':
+    @pydantic.model_validator(mode='before')
+    @staticmethod
+    def validate_bearer_format(values: dict) -> dict:
+        if 'bearerFormat' in values and values['scheme'].lower() != 'bearer':
             raise ValueError('bearerFormat is only allowed if "schema" is "bearer"')
-
-        return value
+        return values
 
 
 class Type3(Enum):
@@ -301,171 +302,182 @@ class Type4(Enum):
     openIdConnect = 'openIdConnect'
 
 
-class OpenIdConnectSecurityScheme(BaseModel):
-    class Config:
-        extra = Extra.forbid
+class OpenIdConnectSecurityScheme(ExtendableModel):
+    model_config = pydantic.ConfigDict(
+        **ExtendableModel.model_config,
+        populate_by_name=True,
+    )
 
     type: Type4
     openIdConnectUrl: str
-    description: Optional[str]
+    description: ty.Optional[str] = None
 
 
-class ImplicitOAuthFlow(BaseModel):
-    class Config:
-        extra = Extra.forbid
+class ImplicitOAuthFlow(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(
+        extra='forbid'
+    )
 
     authorizationUrl: str
-    refreshUrl: Optional[str]
-    scopes: Dict[str, str]
+    refreshUrl: ty.Optional[str] = None
+    scopes: dict[str, str]
 
 
 class PasswordOAuthFlow(ExtendableModel):
-    class Config:
-        extra = Extra.forbid
+    model_config = pydantic.ConfigDict(
+        extra='forbid'
+    )
 
     tokenUrl: str
-    refreshUrl: Optional[str]
-    scopes: Optional[Dict[str, str]]
+    refreshUrl: ty.Optional[str] = None
+    scopes: ty.Optional[dict[str, str]] = None
 
-    plugin: Annotated[Optional[str], Field(alias='x-plugin')]
+    plugin: ty.Annotated[ty.Optional[str], pydantic.Field(alias='x-plugin')] = None
 
 
 class ClientCredentialsFlow(PasswordOAuthFlow):
     pass
 
 
-class AuthorizationCodeOAuthFlow(BaseModel):
-    class Config:
-        extra = Extra.forbid
+class AuthorizationCodeOAuthFlow(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(
+        extra='forbid'
+    )
 
     authorizationUrl: str
     tokenUrl: str
-    refreshUrl: Optional[str]
-    scopes: Optional[Dict[str, str]]
+    refreshUrl: ty.Optional[str] = None
+    scopes: ty.Optional[dict[str, str]] = None
 
 
 class Info(ExtendableModel):
     title: str
-    description: Optional[str]
-    termsOfService: Optional[str]
-    contact: Optional[Contact]
-    license: Optional[License]
+    summary: str | None = None
+    description: ty.Optional[str] = None
+    termsOfService: ty.Optional[str] = None
+    contact: ty.Optional[Contact] = None
+    license: ty.Optional[License] = None
     version: str
 
 
 class Server(ExtendableModel):
     url: str
-    description: Optional[str]
-    variables: Optional[Dict[str, ServerVariable]]
+    description: ty.Optional[str] = None
+    variables: ty.Optional[dict[str, ServerVariable]] = None
 
 
 class Schema(ExtendableModel):
-    class Config(ExtendableModel.Config):
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        **ExtendableModel.model_config,
+        populate_by_name=True,
+        # frozen=True,
+    )
 
-    title: Optional[str]
-    type: Optional[Type]
+    title: ty.Optional[str] = None
+    type: ty.Optional[Type] = None
 
     # type == number or type == integer
-    multipleOf: Annotated[Optional[float], Field(gt=0.0)]
-    maximum: Optional[float]
-    exclusiveMaximum: Optional[bool] = False
-    minimum: Optional[float]
-    exclusiveMinimum: Optional[bool] = False
+    multipleOf: ty.Annotated[ty.Optional[float], pydantic.Field(gt=0.0)] = None
+    maximum: ty.Optional[float] = None
+    exclusiveMaximum: ty.Optional[bool] = False
+    minimum: ty.Optional[float] = None
+    exclusiveMinimum: ty.Optional[bool] = False
 
     # type == string
-    maxLength: Annotated[Optional[int], Field(ge=0)]
-    minLength: Annotated[int, Field(ge=0)] = 0
-    pattern: Optional[str]
+    maxLength: ty.Annotated[ty.Optional[int], pydantic.Field(ge=0)] = None
+    minLength: ty.Annotated[int, pydantic.Field(ge=0)] = 0
+    pattern: ty.Optional[str] = None
 
     # type == array
-    items: Optional[Union[Schema, Reference]]
-    maxItems: Annotated[Optional[int], Field(ge=0)]
-    minItems: Annotated[Optional[int], Field(ge=0)] = 0
-    uniqueItems: Optional[bool] = False
+    items: ty.Optional[ty.Union[Schema, Reference]] = None
+    maxItems: ty.Annotated[ty.Optional[int], pydantic.Field(ge=0)] = None
+    minItems: ty.Annotated[ty.Optional[int], pydantic.Field(ge=0)] = 0
+    uniqueItems: ty.Optional[bool] = False
 
     # type == object
-    maxProperties: Annotated[Optional[int], Field(ge=0)]
-    minProperties: Annotated[Optional[int], Field(ge=0)] = 0
-    required: Annotated[Optional[List[str]], Field(min_items=1, unique_items=True)]
-    properties: Optional[Dict[str, Union[Schema, Reference]]]
-    additionalProperties: Optional[Union[Schema, Reference, bool]] = True
+    maxProperties: ty.Annotated[ty.Optional[int], pydantic.Field(ge=0)] = None
+    minProperties: ty.Annotated[ty.Optional[int], pydantic.Field(ge=0)] = 0
+    required: ty.Annotated[ty.Optional[set[str]], pydantic.Field(min_items=1)] = None
+    properties: ty.Optional[dict[str, ty.Union[Schema, Reference]]] = None
+    additionalProperties: ty.Optional[ty.Union[Schema, Reference, bool]] = True
 
     # type == string or type = number or type == integer
-    format: Optional[str]
+    format: ty.Optional[str] = None
 
-    enum: Annotated[Optional[List], Field(min_items=1, unique_items=False)]
+    enum: ty.Annotated[ty.Optional[list], pydantic.Field(min_items=1)] = None
 
-    not_: Annotated[Optional[Union[Schema, Reference]], Field(alias='not')]
-    allOf: Optional[List[Union[Schema, Reference]]]
-    oneOf: Optional[List[Union[Schema, Reference]]]
-    anyOf: Optional[List[Union[Schema, Reference]]]
+    not_: ty.Annotated[ty.Optional[ty.Union[Schema, Reference]], pydantic.Field(alias='not')] = None
+    allOf: ty.Optional[list[ty.Union[Schema, Reference]]] = None
+    oneOf: ty.Optional[list[ty.Union[Schema, Reference]]] = None
+    anyOf: ty.Optional[list[ty.Union[Schema, Reference]]] = None
 
-    description: Optional[str]
-    default: Optional[Any]
-    nullable: Optional[bool] = False
-    discriminator: Optional[Discriminator]
-    readOnly: Optional[bool] = False
-    writeOnly: Optional[bool] = False
-    example: Optional[Any]
-    externalDocs: Optional[ExternalDocumentation]
-    deprecated: Optional[bool] = False
-    xml: Optional[XML]
+    description: ty.Optional[str] = None
+    default: ty.Optional[ty.Any] = None
+    nullable: ty.Optional[bool] = False
+    discriminator: ty.Optional[Discriminator] = None
+    readOnly: ty.Optional[bool] = False
+    writeOnly: ty.Optional[bool] = False
+    example: ty.Optional[ty.Any] = None
+    externalDocs: ty.Optional[ExternalDocumentation] = None
+    deprecated: ty.Optional[bool] = False
+    xml: ty.Optional[XML] = None
 
-    lapidary_names: Annotated[
-        Optional[Dict[Union[str, None], Any]],
-        Field(
+    lapidary_names: ty.Annotated[
+        dict[ty.Union[str, None], ty.Any],
+        pydantic.Field(
             alias='x-lapidary-names',
             default_factory=dict,
             description="Mapping of keys used in the JSON document and variable names in the generated Python code. "
                         "Applicable to enum values or object properties."
         )
-    ]
-    lapidary_name: Annotated[Optional[str], Field(alias='x-lapidary-type-name')] = None
-    lapidary_model_type: Annotated[Optional[LapidaryModelType], Field(alias='x-lapidary-modelType')] = None
+    ] = None
+    lapidary_name: ty.Annotated[ty.Optional[str], pydantic.Field(alias='x-lapidary-type-name')] = None
+    lapidary_model_type: ty.Annotated[ty.Optional[LapidaryModelType], pydantic.Field(alias='x-lapidary-modelType')] = None
 
 
 class Tag(ExtendableModel):
     name: str
-    description: Optional[str]
-    externalDocs: Optional[ExternalDocumentation]
+    description: ty.Optional[str]
+    externalDocs: ty.Optional[ExternalDocumentation]
 
 
-class OAuthFlows(BaseModel):
-    class Config:
-        extra = Extra.forbid
+class OAuthFlows(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(
+        extra='forbid'
+    )
 
-    implicit: Optional[ImplicitOAuthFlow]
-    password: Optional[PasswordOAuthFlow]
-    clientCredentials: Optional[ClientCredentialsFlow]
-    authorizationCode: Optional[AuthorizationCodeOAuthFlow]
+    implicit: ty.Optional[ImplicitOAuthFlow]
+    password: ty.Optional[PasswordOAuthFlow]
+    clientCredentials: ty.Optional[ClientCredentialsFlow]
+    authorizationCode: ty.Optional[AuthorizationCodeOAuthFlow]
 
 
 class Link(ExtendableModel):
-    operationId: Optional[str]
-    operationRef: Optional[str]
-    parameters: Optional[Dict[str, Any]]
-    requestBody: Optional[Any]
-    description: Optional[str]
-    server: Optional[Server]
+    operationId: ty.Optional[str]
+    operationRef: ty.Optional[str]
+    parameters: ty.Optional[dict[str, ty.Any]]
+    requestBody: ty.Optional[ty.Any]
+    description: ty.Optional[str]
+    server: ty.Optional[Server]
 
 
-class OAuth2SecurityScheme(BaseModel):
-    class Config:
-        extra = Extra.forbid
+class OAuth2SecurityScheme(ExtendableModel):
+    model_config = pydantic.ConfigDict(
+        **ExtendableModel.model_config,
+        populate_by_name=True,
+    )
 
     type: Type3
     flows: OAuthFlows
-    description: Optional[str]
+    description: ty.Optional[str]
 
 
-class SecurityScheme(BaseModel):
-    __root__: Union[
-        APIKeySecurityScheme,
-        HTTPSecurityScheme,
-        OAuth2SecurityScheme,
-        OpenIdConnectSecurityScheme,
-    ]
+SecurityScheme = pydantic.RootModel[ty.Union[
+    APIKeySecurityScheme,
+    HTTPSecurityScheme,
+    OAuth2SecurityScheme,
+    OpenIdConnectSecurityScheme,
+]]
 
 
 class OpenApiModel(ExtendableModel):
@@ -473,30 +485,33 @@ class OpenApiModel(ExtendableModel):
     Validation schema for OpenAPI Specification 3.0.X.
     """
 
-    class Config(ExtendableModel.Config):
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        **ExtendableModel.model_config,
+        populate_by_name=True,
 
-    openapi: Annotated[str, Field(regex='^3\\.0\\.\\d(-.+)?$')]
+    )
+
+    openapi: ty.Annotated[str, pydantic.Field(pattern='^3\\.0\\.\\d(-.+)?$')]
     info: Info
-    externalDocs: Optional[ExternalDocumentation]
-    servers: Optional[List[Server]]
-    security: Optional[List[SecurityRequirement]]
-    tags: Annotated[Optional[List[Tag]], Field(unique_items=True)]
-    paths: Paths
-    components: Optional[Components]
+    externalDocs: ty.Optional[ExternalDocumentation] = None
+    servers: ty.Annotated[list[Server], pydantic.Field(default_factory=list)]
+    security: ty.Annotated[list[SecurityRequirement], pydantic.Field(default_factory=list)]
+    tags: ty.Annotated[set[Tag], pydantic.Field(default_factory=set)]
+    paths: Paths | None = None
+    components: ty.Optional[Components] = None
 
-    lapidary_headers_global: Annotated[
-        Optional[Union[
-            Dict[str, Union[str, List[str]]],
-            List[Tuple[str, str]]
+    lapidary_headers_global: ty.Annotated[
+        ty.Optional[ty.Union[
+            dict[str, ty.Union[str, list[str]]],
+            list[tuple[str, str]]
         ]],
-        Field(
+        pydantic.Field(
             alias='x-lapidary-headers-global',
             description='Headers to add to every request.'
         )
     ] = None
 
-    lapidary_responses_global: Responses = Field(
+    lapidary_responses_global: Responses = pydantic.Field(
         alias='x-lapidary-responses-global',
         description='Base Responses. Values in Responses declared in Operations override values in this one.',
         default_factory=dict,
@@ -504,115 +519,113 @@ class OpenApiModel(ExtendableModel):
 
 
 class Components(ExtendableModel):
-    schemas: Optional[Dict[str, Union[Schema, Reference]]]
-    responses: Optional[Dict[str, Union[Reference, Response]]]
-    parameters: Optional[Dict[str, Union[Reference, Parameter]]]
-    examples: Optional[Dict[str, Union[Reference, Example]]]
-    requestBodies: Optional[Dict[str, Union[Reference, RequestBody]]]
-    headers: Optional[Dict[str, Union[Reference, Header]]]
-    securitySchemes: Optional[Dict[str, Union[Reference, SecurityScheme]]]
-    links: Optional[Dict[str, Union[Reference, Link]]]
-    callbacks: Optional[Dict[str, Union[Reference, Callback]]]
+    schemas: ty.Optional[dict[str, ty.Union[Schema, Reference]]] = None
+    responses: ty.Optional[dict[str, ty.Union[Reference, Response]]] = None
+    parameters: ty.Optional[dict[str, ty.Union[Reference, Parameter]]] = None
+    examples: ty.Optional[dict[str, ty.Union[Reference, Example]]] = None
+    requestBodies: ty.Optional[dict[str, ty.Union[Reference, RequestBody]]] = None
+    headers: ty.Optional[dict[str, ty.Union[Reference, Header]]] = None
+    securitySchemes: ty.Optional[dict[str, ty.Union[Reference, SecurityScheme]]] = None
+    links: ty.Optional[dict[str, ty.Union[Reference, Link]]] = None
+    callbacks: ty.Optional[dict[str, ty.Union[Reference, Callback]]] = None
 
 
 class Response(ExtendableModel):
     description: str
-    headers: Optional[Dict[str, Union[Header, Reference]]]
-    content: Optional[Dict[str, MediaType]]
-    links: Optional[Dict[str, Union[Link, Reference]]]
+    headers: ty.Optional[dict[str, ty.Union[Header, Reference]]] = {}
+    content: ty.Optional[dict[str, MediaType]] = {}
+    links: ty.Optional[dict[str, ty.Union[Link, Reference]]] = {}
 
 
 class MediaType(ExtendableModel):
-    class Config(ExtendableModel.Config):
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        **ExtendableModel.model_config,
+        populate_by_name=True,
+    )
 
-    schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
-    example: Optional[Any]
-    examples: Optional[Dict[str, Union[Example, Reference]]]
-    encoding: Optional[Dict[str, Encoding]]
+    schema_: ty.Annotated[ty.Union[Schema, Reference, None], pydantic.Field(alias='schema')] = None
+    example: ty.Optional[ty.Any] = None
+    examples: ty.Optional[dict[str, ty.Union[Example, Reference]]] = None
+    encoding: ty.Optional[dict[str, Encoding]] = None
 
-    @validator('examples')
-    def _validate_example_xor_examples(cls, value, values):  # pylint: disable=no-self-argument
-        if values.get('example'):
+    @pydantic.model_validator(mode='before')
+    @staticmethod
+    def validate_example_examples(values: dict) -> dict:
+        if 'example' in values and 'examples' in values:
             raise ValueError('Only either example or examples is allowed')
-        return parse_obj_as(Dict[str, Union[Example, Reference]], value)
+        return values
 
 
 class Header(ExtendableModel):
-    description: Optional[str]
-    required: Optional[bool] = False
-    deprecated: Optional[bool] = False
-    allowEmptyValue: Optional[bool] = False
-    content: Annotated[
-        Optional[Dict[str, MediaType]], Field(maxProperties=1, minProperties=1)
+    description: ty.Optional[str]
+    required: ty.Optional[bool] = False
+    deprecated: ty.Optional[bool] = False
+    allowEmptyValue: ty.Optional[bool] = False
+    content: ty.Annotated[
+        ty.Optional[dict[str, MediaType]], pydantic.Field(json_schema_extra={}, maxProperties=1, minProperties=1)
     ]
-    style: Optional[Style] = Style.simple
-    explode: Optional[bool]
-    allowReserved: Optional[bool] = False
-    schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
-    example: Optional[Any]
-    examples: Optional[Dict[str, Union[Example, Reference]]]
+    style: ty.Optional[Style] = Style.simple
+    explode: ty.Optional[bool]
+    allowReserved: ty.Optional[bool] = False
+    schema_: ty.Annotated[ty.Optional[ty.Union[Schema, Reference]], pydantic.Field(alias='schema')]
+    example: ty.Optional[ty.Any]
+    examples: ty.Optional[dict[str, ty.Union[Example, Reference]]]
 
-    _validate_schema_xor_content = validator(
-        'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples',
-        allow_reuse=True
-    )(cross_validate_content)
+    _validate_schema_xor_content = pydantic.model_validator(mode='before')(staticmethod(cross_validate_content))
 
 
 class PathItem(ExtendableModel):
-    summary: Optional[str]
-    description: Optional[str]
-    servers: Optional[List[Server]]
-    parameters: Annotated[
-        Optional[List[Union[Parameter, Reference]]], Field(unique_items=True)
-    ]
-    get: Optional[Operation]
-    put: Optional[Operation]
-    post: Optional[Operation]
-    delete: Optional[Operation]
-    options: Optional[Operation]
-    head: Optional[Operation]
-    patch: Optional[Operation]
-    trace: Optional[Operation]
+    summary: ty.Optional[str] = None
+    description: ty.Optional[str] = None
+    servers: ty.Annotated[list[Server], pydantic.Field(default_factory=list)]
+    parameters: ty.Annotated[set[ty.Union[Parameter, Reference]], pydantic.Field(default_factory=set)]
+
+    get: ty.Optional[Operation] = None
+    put: ty.Optional[Operation] = None
+    post: ty.Optional[Operation] = None
+    delete: ty.Optional[Operation] = None
+    options: ty.Optional[Operation] = None
+    head: ty.Optional[Operation] = None
+    patch: ty.Optional[Operation] = None
+    trace: ty.Optional[Operation] = None
 
 
-class Paths(DynamicExtendableModel[Union[PathItem, Reference]]):
+class Paths(DynamicExtendableModel[ty.Union[PathItem, Reference]]):
     @classmethod
     def _validate_key(cls, key: str) -> bool:
         return key.startswith('/')
 
 
-class Callback(DynamicExtendableModel[Union[PathItem, Reference]]):
+class Callback(DynamicExtendableModel[ty.Union[PathItem, Reference]]):
     @classmethod
     def _validate_key(cls, key: str) -> bool:
         return True
 
 
 class Operation(ExtendableModel):
-    tags: Optional[List[str]]
-    summary: Optional[str]
-    description: Optional[str]
-    externalDocs: Optional[ExternalDocumentation]
-    operationId: Optional[str]
-    parameters: Annotated[
-        Optional[List[Union[Parameter, Reference]]], Field(unique_items=True)
-    ]
-    requestBody: Optional[Union[RequestBody, Reference]]
-    responses: Responses
-    callbacks: Optional[Dict[str, Union[Callback, Reference]]]
-    deprecated: Optional[bool] = False
-    security: Optional[List[SecurityRequirement]]
-    servers: Optional[List[Server]]
+    tags: ty.Annotated[list[str], pydantic.Field(default_factory=list)]
+    summary: ty.Optional[str] = None
+    description: ty.Optional[str] = None
+    externalDocs: ty.Optional[ExternalDocumentation] = None
+    operationId: ty.Optional[str] = None
+    parameters: ty.Annotated[list[ty.Union[Parameter, Reference]], pydantic.Field(default_factory=set)]
+    requestBody: ty.Optional[ty.Union[RequestBody, Reference]] = None
+    responses: Responses | None = None
+    callbacks: ty.Annotated[dict[str, ty.Union[Callback, Reference]], pydantic.Field(default_factory=dict)]
+    deprecated: ty.Optional[bool] = False
+    security: ty.Optional[list[SecurityRequirement]] = None
+    servers: ty.Optional[list[Server]] = None
 
-    paging: Annotated[Optional[PluginModel], Field(alias='x-lapidary-pagingPlugin')]
+    paging: ty.Annotated[ty.Optional[PluginModel], pydantic.Field(alias='x-lapidary-pagingPlugin', default=None)]
 
 
-class Responses(DynamicExtendableModel[Union[Response, Reference]]):
+class Responses(DynamicExtendableModel[ty.Union[Response, Reference]]):
     @classmethod
     def _validate_key(cls, key: str) -> bool:
         return key == 'default' or bool(re.match(r'^[1-5](?:\d\d|XX)$', key))
 
-    @root_validator
+    @pydantic.model_validator(mode='before')
+    @classmethod
     def _validate_min_properties(cls, values):  # pylint: disable=no-self-argument
         if not values:
             raise ValueError('minProperties')
@@ -620,31 +633,33 @@ class Responses(DynamicExtendableModel[Union[Response, Reference]]):
 
 
 class Parameter(ExtendableModel):
-    class Config(ExtendableModel.Config):
-        allow_population_by_field_name = True
+    model_config = pydantic.ConfigDict(
+        populate_by_name=True,
+        # frozen=True,
+    )
 
     name: str
-    in_: Annotated[str, Field(alias='in')]
-    description: Optional[str]
+    in_: ty.Annotated[str, pydantic.Field(alias='in')]
+    description: ty.Optional[str] = None
     required: bool = False
     deprecated: bool = False
     allowEmptyValue: bool = False
-    content: Annotated[
-        Optional[Dict[str, MediaType]], Field(maxProperties=1, minProperties=1)
+    content: ty.Annotated[
+        dict[str, MediaType], pydantic.Field(maxProperties=1, minProperties=1, default_factory=dict)
     ]
-    style: Optional[str]
-    explode: Optional[bool]
-    allowReserved: Optional[bool] = False
-    schema_: Annotated[Optional[Union[Schema, Reference]], Field(alias='schema')]
-    example: Optional[Any]
-    examples: Optional[Dict[str, Union[Example, Reference]]]
+    style: ty.Optional[str] = None
+    explode: ty.Optional[bool] = None
+    allowReserved: ty.Optional[bool] = False
+    schema_: ty.Annotated[ty.Optional[ty.Union[Schema, Reference]], pydantic.Field(alias='schema')] = None
+    example: ty.Optional[ty.Any] = None
+    examples: ty.Annotated[dict[str, ty.Union[Example, Reference]], pydantic.Field(default_factory=dict)]
 
-    lapidary_name: Annotated[Union[str, None], Field(alias='x-lapidary-name')] = None
+    lapidary_name: ty.Annotated[ty.Union[str, None], pydantic.Field(alias='x-lapidary-name')] = None
 
-    _validate_schema_xor_content = validator(
-        'style', 'explode', 'allowReserved', 'schema_', 'example', 'examples',
-        allow_reuse=True
-    )(cross_validate_content)
+    _validate_schema_xor_content = pydantic.model_validator(mode='before')(staticmethod(cross_validate_content))
+
+    def __hash__(self) -> int:
+        return (hash(self.in_) << 3) + hash(self.name)
 
     @property
     def effective_name(self) -> str:
@@ -652,24 +667,24 @@ class Parameter(ExtendableModel):
 
 
 class RequestBody(ExtendableModel):
-    description: Optional[str]
-    content: Dict[str, MediaType]
-    required: Optional[bool] = False
+    description: ty.Optional[str] = None
+    content: dict[str, MediaType]
+    required: ty.Optional[bool] = False
 
 
 class Encoding(ExtendableModel):
-    contentType: Optional[str]
-    headers: Optional[Dict[str, Header]]
-    style: Optional[Style2]
-    explode: Optional[bool]
-    allowReserved: Optional[bool] = False
+    contentType: ty.Optional[str]
+    headers: ty.Optional[dict[str, Header]]
+    style: ty.Optional[Style2]
+    explode: ty.Optional[bool]
+    allowReserved: ty.Optional[bool] = False
 
 
-Schema.update_forward_refs()
-OpenApiModel.update_forward_refs()
-Components.update_forward_refs()
-Response.update_forward_refs()
-MediaType.update_forward_refs()
-PathItem.update_forward_refs()
-Operation.update_forward_refs()
-Paths.update_forward_refs()
+Schema.model_rebuild()
+OpenApiModel.model_rebuild()
+Components.model_rebuild()
+Response.model_rebuild()
+MediaType.model_rebuild()
+PathItem.model_rebuild()
+Operation.model_rebuild()
+Paths.model_rebuild()

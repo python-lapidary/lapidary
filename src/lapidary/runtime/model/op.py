@@ -20,11 +20,7 @@ class OperationModel:
 
 
 def _resolve_name(name: str) -> Any:
-    import sys
-    if sys.version_info < (3, 9):
-        from pkgutil_resolve_name import resolve_name  # type: ignore[import]
-    else:
-        from pkgutil import resolve_name
+    from pkgutil import resolve_name
 
     return resolve_name(name)
 

@@ -21,7 +21,10 @@ T = TypeVar(
     openapi.Response,
     openapi.Operation,
 )
-ResolverFunc = Callable[[openapi.Reference, Type[T]], Tuple[T, ModulePath, str]]
+ResolverFunc = Union[
+        Callable[[openapi.Reference, Type[T]], Tuple[T, ModulePath, str]],
+        Callable[[openapi.Reference], Tuple[T, ModulePath, str]]
+]
 
 SchemaOrRef: TypeAlias = Union[openapi.Schema, openapi.Reference]
 

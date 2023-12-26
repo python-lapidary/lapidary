@@ -1,14 +1,13 @@
 import enum
-from typing import Optional, Any, Mapping, Callable
+from typing import Any, Callable, Mapping, Optional
 
 import httpx
 import pydantic
 
 from ._params import process_params
-from .http_consts import MIME_JSON, CONTENT_TYPE, ACCEPT
+from .http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from .mime import find_mime
-from .model import ResponseMap, ParamLocation, OperationModel
-from .pydantic_utils import to_model
+from .model import OperationModel, ParamLocation, ResponseMap
 
 RequestFactory = Callable[..., httpx.Request]
 
@@ -50,9 +49,6 @@ def build_request(  # pylint: disable=too-many-arguments
     if (accept := get_accept_header(response_map, global_response_map)) is not None:
         headers[ACCEPT] = accept
 
-    if not isinstance(request_body, pydantic.BaseModel) and request_body is not None:
-        request_body = to_model(request_body)
-
     content = (
         request_body.json(by_alias=True, exclude_unset=True, exclude_defaults=True)
         if request_body is not None
@@ -72,8 +68,8 @@ def build_request(  # pylint: disable=too-many-arguments
 def get_path(path_format: str, param_model: pydantic.BaseModel) -> str:
     path_params = {
         param_name: param_to_str(param_model.__dict__[param_name])
-        for param_name in param_model.__fields_set__
-        if param_model.__fields__[param_name].field_info.extra['in_'] is ParamLocation.path
+        for param_name in param_model.model_fields
+        if param_model.model_fields[param_name].json_schema_extra['in_'] is ParamLocation.path
     } if param_model else {}
     return path_format.format(**path_params)
 

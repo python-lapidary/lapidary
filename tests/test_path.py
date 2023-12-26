@@ -21,7 +21,7 @@ class PathTestCase(unittest.TestCase):
                 allow_population_by_field_name = True
 
         param_model = ParamModel(
-            p_param=MyEnum.entry
+            param=MyEnum.entry
         )
 
         path = get_path('{p_param}', param_model)

@@ -33,10 +33,9 @@ def test_validate_extended_model():
     )
 
     assert model.openapi == '3.0.3'
-    assert model.openapi == '3.0.3'
     assert model.info.title == 'test'
     assert model.info.version == '1'
-    assert model['x-test-key'] == 'test-value'
+    assert model.model_extra['x-test-key'] == 'test-value'
 
 
 class TestValidation(TestCase):
@@ -92,53 +91,56 @@ def test_validate_paths():
 
     expected = {
         'x-extra': 'hello',
-        '/path': openapi.PathItem().dict()
+        '/path': openapi.PathItem().model_dump()
     }
 
     assert paths.dict() == expected
 
     assert paths.items() == {'/path': openapi.PathItem()}.items()
     assert paths['/path'] == openapi.PathItem()
-    assert paths['x-extra'] == 'hello'
+    assert paths.model_extra['x-extra'] == 'hello'
 
 
 def test_validate_apikey_security():
     model = openapi.Components(
         securitySchemes=dict(
-            t1=openapi.SecurityScheme(__root__=openapi.APIKeySecurityScheme(**{
+            # t1=openapi.SecurityScheme(openapi.APIKeySecurityScheme(**{
+            t1=openapi.APIKeySecurityScheme(**{
                 'type': openapi.Type1.apiKey,
                 'name': 't1',
                 'in': openapi.In4.header,
                 'x-extra': 'test',
-            }))
+            })
         )
     )
 
-    assert model.securitySchemes['t1'].__root__['x-extra'] == 'test'
+    assert model.securitySchemes['t1'].root.model_extra['x-extra'] == 'test'
 
 
 def test_validate_http_security():
     model = openapi.Components(
         securitySchemes=dict(
-            t1=openapi.SecurityScheme(__root__=openapi.HTTPSecurityScheme(**{
+            t1=openapi.HTTPSecurityScheme(**{
+            # t1=openapi.SecurityScheme(openapi.HTTPSecurityScheme(**{
                 'scheme': 'basic',
                 'type': openapi.Type2.http,
                 'x-extra': 'test',
-            }))
+            })
         )
     )
 
-    assert model.securitySchemes['t1'].__root__['x-extra'] == 'test'
+    assert model.securitySchemes['t1'].root.model_extra['x-extra'] == 'test'
 
 
 def test_validate_http_security_bearer():
     openapi.Components(
         securitySchemes=dict(
-            t1=openapi.SecurityScheme(__root__=openapi.HTTPSecurityScheme(**{
+            t1=openapi.HTTPSecurityScheme(**{
+            # t1=openapi.SecurityScheme(openapi.HTTPSecurityScheme(**{
                 'scheme': 'bearer',
                 'type': openapi.Type2.http,
                 'bearerFormat': 'Bearer {token}'
-            }))
+            })
         )
     )
 
@@ -148,11 +150,12 @@ class InvalidHTTPSecurity(TestCase):
         with self.assertRaises(ValidationError):
             openapi.Components(
                 securitySchemes=dict(
-                    t1=openapi.SecurityScheme(__root__=openapi.HTTPSecurityScheme(**{
+                    t1=openapi.HTTPSecurityScheme(**{
+                    # t1=openapi.SecurityScheme(openapi.HTTPSecurityScheme(**{
                         'scheme': 'basic',
                         'type': openapi.Type2.http,
                         'bearerFormat': 'Bearer {token}'
-                    }))
+                    })
                 )
             )
 
