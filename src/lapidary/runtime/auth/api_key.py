@@ -3,20 +3,7 @@ from dataclasses import dataclass
 import httpx
 
 from .common import PageFlowGenT
-from .. import openapi
 from ..model.params import ParamLocation
-
-
-@dataclass(eq=False, order=False, frozen=True)
-class APIKey:
-    api_key: str
-
-    def create(self, model: openapi.APIKeySecurityScheme) -> httpx.Auth:
-        return ApiKeyAuth(
-            api_key=self.api_key,
-            name=model.name,
-            placement=ParamLocation[model.in_.value],
-        )
 
 
 @dataclass(eq=False, order=False, frozen=True)

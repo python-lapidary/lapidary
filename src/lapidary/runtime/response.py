@@ -1,14 +1,13 @@
 import inspect
 import logging
-from typing import Optional, Type, TypeVar, Callable, Any, Iterator, AsyncIterator, Iterable, AsyncGenerator, cast
+from typing import Any, AsyncIterator, Iterable, Iterator, Optional, Type, TypeVar, cast
 
 import httpx
 import pydantic
 
-from .auth.common import AuthT
 from .http_consts import CONTENT_TYPE
 from .mime import find_mime
-from .model import ResponseMap, PagingPlugin
+from .model import ResponseMap
 from .model.response_map import ReturnTypeInfo
 
 logger = logging.getLogger(__name__)
@@ -19,27 +18,24 @@ P = TypeVar('P')
 
 def handle_response(
         response_map: ResponseMap,
-        global_response_map: ResponseMap,
         response: httpx.Response,
 ) -> Any:
     response.read()
 
-    type_info = find_type(response, response_map, global_response_map)
+    type_info = find_type(response, response_map)
 
     if type_info is None:
         response.raise_for_status()
         return response.content
 
-    type_, iterator = type_info
-
     try:
-        obj: Any = parse_model(response, type_)
+        obj: Any = parse_model(response, type_info.type)
     except pydantic.ValidationError as error:
         raise ValueError(response.content) from error
 
     if isinstance(obj, Exception):
         raise obj
-    elif iterator:
+    elif type_info.iterator:
         return aiter2(obj)
     else:
         return obj
@@ -61,7 +57,7 @@ def parse_model(response: httpx.Response, typ: Type[T]) -> T:
     return pydantic.TypeAdapter(typ).validate_json(response.content)
 
 
-def find_type(response: httpx.Response, response_map: ResponseMap, global_response_map: ResponseMap) -> Optional[ReturnTypeInfo]:
+def find_type(response: httpx.Response, response_map: ResponseMap) -> Optional[ReturnTypeInfo]:
     status_code = str(response.status_code)
     if CONTENT_TYPE not in response.headers:
         return None
@@ -74,9 +70,6 @@ def find_type(response: httpx.Response, response_map: ResponseMap, global_respon
 
     if response_map:
         typ = find_type_(status_code, content_type, response_map)
-
-    if typ is None and global_response_map is not None:
-        typ = find_type_(status_code, content_type, global_response_map)
 
     return typ
 
@@ -97,32 +90,3 @@ def _status_code_matches(code: str) -> Iterator[str]:
     yield code
     yield code[0] + "XX"
     yield 'default'
-
-
-async def mk_generator(
-        paging: PagingPlugin[T, P], request: httpx.Request, auth: AuthT, client: httpx.AsyncClient,
-        response_handler: Callable[[httpx.Response], T]
-) -> AsyncIterator[P]:
-    async for response in get_pages(paging, request, auth, client):
-        response_model = response_handler(response)
-        processed = paging.map_response(response_model)
-
-        if isinstance(processed, AsyncIterator):
-            async for elem in processed:
-                yield elem
-        else:
-            yield processed
-
-
-async def get_pages(
-        paging: PagingPlugin, request: httpx.Request, auth: AuthT, client: httpx.AsyncClient
-) -> AsyncGenerator[httpx.Response, None]:
-    flow = paging.page_flow(request)
-    request = next(flow) # pylint: disable=stop-iteration-return
-    while True:
-        response = await client.send(request, auth=auth)
-        yield response
-        try:
-            request = flow.send(response)
-        except StopIteration:
-            break

@@ -1,21 +1,11 @@
+import abc
+import dataclasses as dc
 import enum
-from dataclasses import dataclass
-from enum import unique, Enum
-from typing import Type, cast, Union, Any
+from enum import Enum, unique
+import uuid
 
-from .refs import ResolverFunc
-from .type_hint import TypeHint
-from .types import get_type_hint
-from .. import openapi
-from ..module_path import ModulePath
-from ..names import get_param_python_name, PARAM_MODEL
-
-
-class ParamDirection(enum.Flag):
-    """Use read for readOnly, write for writeOnly; read+write if unset"""
-
-    read = enum.auto()
-    write = enum.auto()
+import httpx
+import typing_extensions as ty
 
 
 class ParamLocation(enum.Enum):
@@ -23,9 +13,6 @@ class ParamLocation(enum.Enum):
     header = 'header'
     path = 'path'
     query = 'query'
-
-    def code(self) -> str:
-        return self.value[0]
 
 
 @unique
@@ -39,62 +26,44 @@ class ParamStyle(Enum):
     deepObject = 'deepObject'
 
 
-@dataclass(frozen=True)
+@dc.dataclass(frozen=True)
 class Param:
-    name: str
-    """Name on python side"""
-    alias: str
-    """Name on OpenAPI side"""
+    alias: ty.Optional[str]
+
     location: ParamLocation
-    type: Type
 
-    style: ParamStyle
-    explode: bool
+    style: ty.Optional[ParamStyle]
+    explode: ty.Optional[bool]
 
+    def get_style(self) -> ParamStyle:
+        if self.style:
+            return self.style
+        return default_style[self.location]
 
-def get_param_model(
-        model_: Union[openapi.Parameter, openapi.Reference], operation: openapi.Operation, module: ModulePath, resolve: ResolverFunc
-) -> Param:
-    if isinstance(model_, openapi.Reference):
-        model, module, _ = resolve(model_, openapi.Parameter)
-    else:
-        model = cast(openapi.Parameter, model_)
-
-    return _get_param_model(model, operation, module, resolve)
+    def get_explode(self) -> bool:
+        return self.explode or self.get_style() == ParamStyle.form
 
 
-def default_explode(style: ParamStyle) -> bool:
-    return style is ParamStyle.form
+@dc.dataclass(frozen=True)
+class FullParam:
+    alias: str
+
+    location: ParamLocation
+
+    style: ty.Optional[ParamStyle]
+    explode: ty.Optional[bool]
+
+    name: str
+    type: ty.Type
 
 
-def _get_param_model(model: openapi.Parameter, parent_op: openapi.Operation, module: ModulePath, resolve: ResolverFunc) -> Param:
-    assert parent_op.operationId
+@dc.dataclass(frozen=True)
+class ParamAnnotation(abc.ABC):
+    name: ty.Optional[str] = None
+    """Name on OpenAPI side"""
 
-    location = ParamLocation[model.in_]
-    style = ParamStyle[model.style] if model.style else default_style[location]
-
-    return Param(
-        name=get_param_python_name(model),
-        alias=model.name,
-        location=location,
-        type=get_param_type(model, module, resolve).resolve() if model.schema_ else type(Any),
-        style=style,
-        explode=model.explode or default_explode(style),
-    )
-
-
-def get_param_type(
-        param: openapi.Parameter, module_: ModulePath, resolve: ResolverFunc
-) -> TypeHint:
-    if isinstance(param.schema_, openapi.Reference):
-        schema, module, schema_name = resolve(param.schema_, openapi.Schema)
-    else:
-        schema = param.schema_
-        param_name = param.effective_name
-        schema_name = param_name
-        module = module_ / PARAM_MODEL
-
-    return get_type_hint(schema, module, schema_name, param.required, resolve)
+    style: ty.Optional[ParamStyle] = None
+    explode: ty.Optional[bool] = None
 
 
 default_style = {
@@ -103,3 +72,40 @@ default_style = {
     ParamLocation.path: ParamStyle.simple,
     ParamLocation.query: ParamStyle.form,
 }
+
+
+class ProcessedParams(ty.NamedTuple):
+    """All information parsed from the function parameters"""
+    query: httpx.QueryParams
+    headers: httpx.Headers
+    cookies: httpx.Cookies
+    path: ty.Mapping[str, ty.Any]
+    request_body: ty.Any
+
+
+def serialize_param(value, style: ParamStyle, explode_list: bool) -> ty.Iterator[str]:
+    if value is None:
+        return
+    elif isinstance(value, str):
+        yield value
+    elif isinstance(value, (
+            int,
+            float,
+            uuid.UUID,
+    )):
+        yield str(value)
+    elif isinstance(value, enum.Enum):
+        yield value.value
+    elif isinstance(value, list):
+        values = [
+            serialized
+            for val in value
+            for serialized in serialize_param(val, style, explode_list)]
+        if explode_list:
+            # httpx explodes lists, so just pass it thru
+            yield from values
+        else:
+            yield ','.join(values)
+
+    else:
+        raise NotImplementedError(value)

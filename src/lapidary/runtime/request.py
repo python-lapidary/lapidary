@@ -1,59 +1,47 @@
-import enum
-from typing import Any, Callable, Mapping, Optional
+import typing as ty
 
 import httpx
-import pydantic
 
-from ._params import process_params
 from .http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from .mime import find_mime
-from .model import OperationModel, ParamLocation, ResponseMap
+from .model import ResponseMap
+from .model.op import OperationModel
+from .model.request import RequestBodyModel
+from .types_ import Serializer
 
-RequestFactory = Callable[..., httpx.Request]
+# accepts parameters of httpx.Client.build_request
+RequestFactory = ty.Callable[..., httpx.Request]
 
 
-def get_accept_header(response_map: Optional[ResponseMap], global_response_map: Optional[ResponseMap]) -> Optional[str]:
+def get_accept_header(response_map: ty.Optional[ResponseMap]) -> ty.Optional[str]:
     all_mime_types = {
         mime
-        for rmap in [response_map, global_response_map]
-        if rmap
-        for mime_map in rmap.values()
+        for mime_map in response_map.values()
         for mime in mime_map.keys()
     }
     return find_mime(all_mime_types, MIME_JSON)
 
 
-def build_request(  # pylint: disable=too-many-arguments
+def build_request(
         operation: OperationModel,
-        actual_params: Mapping[str, Any],
-        request_body: Any,
-        response_map: Optional[ResponseMap],
-        global_response_map: Optional[ResponseMap],
+        actual_params: ty.Mapping[str, ty.Any],
         request_factory: RequestFactory,
 ) -> httpx.Request:
-    query_params: Optional[httpx.QueryParams]
-    cookies: Optional[httpx.Cookies]
-    path_params: Optional[Mapping[str, str]]
+    query_params, headers, cookies, path_params, request_body = operation.process_params(actual_params)
 
-    if actual_params:
-        query_params, headers, cookies, path_params = process_params(operation.params, actual_params)
-    else:
-        cookies = path_params = query_params = None
-        headers = httpx.Headers()
-
-    url = operation.path.format_map(path_params) if path_params else operation.path
+    url = operation.path.format_map(path_params)
 
     if request_body is not None:
-        headers[CONTENT_TYPE] = MIME_JSON
+        if not operation.request_body:
+            raise ValueError('Unexpected request body')
+        content_type, serializer = find_request_body_serializer(operation.request_body, request_body)
+        headers[CONTENT_TYPE] = content_type
+        content = serializer(request_body)
+    else:
+        content = None
 
-    if (accept := get_accept_header(response_map, global_response_map)) is not None:
+    if (accept := get_accept_header(operation.response_map)) is not None:
         headers[ACCEPT] = accept
-
-    content = (
-        request_body.json(by_alias=True, exclude_unset=True, exclude_defaults=True)
-        if request_body is not None
-        else None
-    )
 
     return request_factory(
         operation.method,
@@ -65,16 +53,17 @@ def build_request(  # pylint: disable=too-many-arguments
     )
 
 
-def get_path(path_format: str, param_model: pydantic.BaseModel) -> str:
-    path_params = {
-        param_name: param_to_str(param_model.__dict__[param_name])
-        for param_name in param_model.model_fields
-        if param_model.model_fields[param_name].json_schema_extra['in_'] is ParamLocation.path
-    } if param_model else {}
-    return path_format.format(**path_params)
+def find_request_body_serializer(
+        model: ty.Optional[RequestBodyModel],
+        obj: ty.Any,
+) -> ty.Tuple[str, Serializer]:
 
+    # find the serializer by type
+    obj_type = type(obj)
 
-def param_to_str(value: Any) -> str:
-    if isinstance(value, enum.Enum):
-        return value.value
-    return str(value)
+    for content_type, ser_info in model.serializers.items():
+        type_, serializer = ser_info
+        if type_ == obj_type:
+            return content_type, serializer
+
+    raise TypeError(f'Unknown serializer for {type(obj)}')

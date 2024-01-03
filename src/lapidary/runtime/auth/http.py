@@ -1,19 +1,7 @@
-from dataclasses import dataclass
 from typing import Optional
 
-import httpx
-
 from .api_key import ApiKeyAuth
-from .. import openapi
 from ..model.params import ParamLocation
-
-
-@dataclass(frozen=True)
-class HTTP:
-    token: str
-
-    def create(self, model: openapi.HTTPSecurityScheme) -> httpx.Auth:
-        return HTTPAuth(model.scheme, self.token, model.bearerFormat)
 
 
 class HTTPAuth(ApiKeyAuth):

@@ -1,62 +1,137 @@
-from collections.abc import Iterator, Mapping
-from dataclasses import dataclass
-import typing as ty
+from collections.abc import Iterator
+import dataclasses as dc
+import inspect
 
-from .params import Param, get_param_model
-from .plugins import PagingPlugin
-from .refs import ResolverFunc
-from .response_map import ResponseMap, get_response_map
-from ..module_path import ModulePath
-from ..names import get_ops_module
-from ..openapi import PluginModel, get_operations, model as openapi
+import httpx
+import typing_extensions as ty
+
+from .params import FullParam, Param, ParamLocation, ProcessedParams, serialize_param
+from .request import RequestBody, RequestBodyModel
+from .response_map import ResponseMap, Responses
+from ..absent import ABSENT
 
 
-@dataclass(frozen=True)
+@dc.dataclass(frozen=True)
+class InputData:
+    query: httpx.QueryParams
+    headers: httpx.Headers
+    cookies: httpx.Cookies
+    path: ty.Mapping[str, str]
+    request_body: ty.Any
+
+
+@dc.dataclass(frozen=True)
 class OperationModel:
     method: str
     path: str
-    params: list[Param]
+    params: ty.Mapping[str, FullParam]
+    request_body: ty.Optional[RequestBodyModel]
     response_map: ResponseMap
-    paging: ty.Optional[PagingPlugin]
+
+    def process_params(self, actual_params: ty.Mapping[str, ty.Any]) -> ProcessedParams:
+        containers: ty.Mapping[ParamLocation, ty.List[ty.Any]] = {
+            ParamLocation.cookie: [],
+            ParamLocation.header: [],
+            ParamLocation.query: [],
+            ParamLocation.path: [],
+        }
+        request_body: ty.Any = None
+
+        for param_name, value in actual_params.items():
+            if self.request_body and param_name == self.request_body.param_name:
+                request_body = value
+                continue
+
+            if isinstance(value, httpx.Auth):
+                continue
+
+            formal_param = self.params.get(param_name)
+            if not formal_param:
+                raise KeyError(param_name)
+
+            if value is ABSENT:
+                continue
+
+            placement = formal_param.location
+
+            value = [(formal_param.alias, value) for value in serialize_param(value, formal_param.style, formal_param.explode)]
+            containers[placement].extend(value)
+
+        return ProcessedParams(
+            query=httpx.QueryParams(containers[ParamLocation.query]),
+            headers=httpx.Headers(containers[ParamLocation.header]),
+            cookies=httpx.Cookies(containers[ParamLocation.cookie]),
+            path={item[0]: item[1] for item in containers[ParamLocation.path]},
+            request_body=request_body,
+        )
 
 
-def _resolve_name(name: str) -> ty.Any:
-    from pkgutil import resolve_name
+@dc.dataclass
+class Operation:
+    method: str
+    path: str
 
-    return resolve_name(name)
+
+def parse_params(sig: inspect.Signature) -> Iterator[ty.Union[FullParam, RequestBodyModel]]:
+    for name, param in sig.parameters.items():
+        anno = param.annotation
+
+        if anno == ty.Self or (type(anno) is type and issubclass(anno, httpx.Auth)):
+            continue
+
+        if param.annotation == inspect.Parameter.empty:
+            raise TypeError(f"Parameter '{name} is missing annotation'")
+
+        param_annos = [a for a in anno.__metadata__ if isinstance(a, (Param, RequestBody))]
+        if len(param_annos) != 1:
+            raise ValueError(f'{param.name}: expected exactly one annotation of type RequestBody, ')
+
+        param_anno = param_annos.pop()
+
+        if isinstance(param_anno, RequestBody):
+            yield RequestBodyModel(
+                name,
+                param_anno.content
+            )
+        else:
+            yield FullParam(
+                name=param.name,
+                alias=param_anno.alias or param.name,
+                location=param_anno.location,
+                type=param.annotation,
+                style=param_anno.get_style(),
+                explode=param_anno.get_explode(),
+            )
 
 
-def get_operation(
-        operation: openapi.Operation, method: str, url_path: str, parent_module: ModulePath, resolver: ResolverFunc
+def get_response_map(return_anno: ty.Union[ty.Annotated, inspect.Signature.empty]) -> ResponseMap:
+    annos = [anno for anno in return_anno.__metadata__ if isinstance(anno, Responses)]
+    if len(annos) != 1:
+        raise TypeError('Operation function must have exactly one Responses annotation')
+
+    return annos.pop().responses
+
+
+class LapidaryOperation(ty.Callable):
+    lapidary_operation: Operation
+    lapidary_operation_model: ty.Optional[OperationModel]
+
+
+def get_operation_model(
+        fn: LapidaryOperation,
 ) -> OperationModel:
-    assert operation.operationId
-
-    module = parent_module / operation.operationId
-    response_map = get_response_map(operation.responses, module / "responses", resolver)
+    base_model: Operation = fn.lapidary_operation
+    sig = inspect.signature(ty.cast(ty.Callable, fn))
+    params = list(parse_params(sig))
+    request_body_ = [param for param in params if isinstance(param, RequestBodyModel)]
+    if len(request_body_) > 1:
+        raise ValueError()
+    request_body = request_body_.pop() if request_body_ else None
 
     return OperationModel(
-        method=method,
-        path=url_path,
-        params=[
-            get_param_model(param, operation, module, resolver)
-            for param in operation.parameters
-        ] if operation.parameters else [],
-        response_map=response_map,
-        paging=instantiate_plugin(operation.paging) if operation.paging else None,
+        method=base_model.method,
+        path=base_model.path,
+        params={param.name: param for param in params if isinstance(param, (FullParam, httpx.Auth))},
+        request_body=request_body,
+        response_map=get_response_map(sig.return_annotation),
     )
-
-
-def get_operation_functions(
-        openapi_model: openapi.OpenApiModel, module: ModulePath, resolver: ResolverFunc
-) -> Mapping[str, OperationModel]:
-    return {
-        ty.cast(str, op.operationId): get_operation(op, method, url_path, get_ops_module(module), resolver)
-        for url_path, path_item in openapi_model.paths.items()
-        if isinstance(path_item, openapi.PathItem)
-        for method, op in ty.cast(Iterator[tuple[str, openapi.Operation]], get_operations(path_item, True))
-    }
-
-
-def instantiate_plugin(model: PluginModel) -> PagingPlugin:
-    type_ = _resolve_name(model.factory)
-    return type_()

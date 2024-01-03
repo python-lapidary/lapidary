@@ -13,19 +13,14 @@ repository = "https://github.com/python-lapidary/lapidary"
 python = "^3.9"
 httpx = {extras = ["http2"], version = "^0.25.0"}
 httpx-auth = "^0.18.0"
-importlib-resources = { version = "^5.10.2", python = "<3.10" }
-inflection = "^0.5.1"
-platformdirs = "^4.1.0"
 pydantic = {extras = ["email"], version = "^2.5.2"}
 python-mimeparse = "^1.6.0"
-pyyaml = "^6.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.0.1"
 pylint = "^2.16.2"
 pytest = "^7.1"
 starlette = "^0.23.1"
-types-pyyaml = "^6.0.12.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

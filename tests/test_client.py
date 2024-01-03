@@ -1,12 +1,32 @@
+import typing
 from typing import List
+import typing_extensions
 import unittest
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
-from lapidary.runtime import ClientBase
-from lapidary.runtime.model import ClientModel, OperationModel, ReturnTypeInfo
+from lapidary.runtime import ClientBase, GET
+from lapidary.runtime.model import ReturnTypeInfo
+from lapidary.runtime.model.response_map import Responses
+
+import logging
+
+logger = logging.getLogger(__name__)
+logging.getLogger('lapidary').setLevel(logging.DEBUG)
+
+
+class Client(ClientBase):
+    @GET('/strings')
+    async def get_strings(self: typing_extensions.Self) -> typing.Annotated[
+        List[str], Responses({
+            '200': {
+                'application/json': ReturnTypeInfo(List[str])
+            }
+        })
+    ]:
+        ...
 
 
 class TestClient(unittest.IsolatedAsyncioTestCase):
@@ -18,26 +38,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             Route('/strings', handler),
         ])
 
-        model = ClientModel(
-            response_map={},
-            base_url='http://example.com/',
-            default_auth=None,
-            methods=dict(
-                get_strings=OperationModel(
-                    'GET',
-                    '/strings',
-                    [],
-                    {
-                        '200': {
-                            'application/json': ReturnTypeInfo(List[str], False)
-                        }
-                    },
-                    None,
-                )
-            ),
-        )
-
-        client = ClientBase(_model=model, _app=app)
+        client = Client('http://example.com', _app=app)
         response = await client.get_strings()
         self.assertIsInstance(response, list)
         self.assertEqual(['a', 'b', 'c'], response)
