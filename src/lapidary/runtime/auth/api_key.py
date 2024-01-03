@@ -19,8 +19,7 @@ class ApiKeyAuth(httpx.Auth):
         elif self.placement is ParamLocation.query:
             request.url.params[self.name] = value
         elif self.placement is ParamLocation.cookie:
-            # TODO
-            raise NotImplementedError(ParamLocation.cookie)
+            request.headers.update({'Cookie': f'{self.name}={value}'})
         else:
             raise ValueError(self.placement)
         yield request
