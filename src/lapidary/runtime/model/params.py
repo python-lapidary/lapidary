@@ -5,7 +5,8 @@ from enum import Enum, unique
 import uuid
 
 import httpx
-import typing_extensions as ty
+
+from ..compat import typing as ty
 
 
 class ParamLocation(enum.Enum):

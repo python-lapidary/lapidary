@@ -1,7 +1,6 @@
 import functools as ft
-from typing import Callable
-import typing as ty
 
+from .compat import typing as ty
 from .model.op import LapidaryOperation, Operation
 
 if ty.TYPE_CHECKING:
@@ -11,8 +10,8 @@ if ty.TYPE_CHECKING:
 def _operation(
         method: str,
         path: str,
-) -> Callable:
-    def wrapper(fn: Callable):
+) -> ty.Callable:
+    def wrapper(fn: ty.Callable):
         fn.lapidary_operation = Operation(method, path)
         fn.lapidary_operation_model = None
 

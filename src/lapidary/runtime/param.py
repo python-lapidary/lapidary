@@ -1,14 +1,14 @@
 import functools as ft
-import typing
 
+from .compat import typing as ty
 from .model.params import Param, ParamLocation, ParamStyle
 
 
 def _mk_param(
         location: ParamLocation,
-        name: typing.Optional[str] = None,
-        style: typing.Optional[ParamStyle] = None,
-        explode: typing.Optional[bool] = None,
+        name: ty.Optional[str] = None,
+        style: ty.Optional[ParamStyle] = None,
+        explode: ty.Optional[bool] = None,
 ) -> Param:
     return Param(
         alias=name,

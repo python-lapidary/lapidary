@@ -3,12 +3,12 @@ import dataclasses as dc
 import inspect
 
 import httpx
-import typing_extensions as ty
 
 from .params import FullParam, Param, ParamLocation, ProcessedParams, serialize_param
 from .request import RequestBody, RequestBodyModel
 from .response_map import ResponseMap, Responses
 from ..absent import ABSENT
+from ..compat import typing as ty
 
 
 @dc.dataclass(frozen=True)

@@ -1,7 +1,7 @@
 import pydantic
-import typing_extensions as ty
 
 from lapidary.runtime import ClientBase, GET, PUT, ParamStyle, Path
+from lapidary.runtime.compat import typing as ty
 from lapidary.runtime.model import ReturnTypeInfo
 from lapidary.runtime.model.request import RequestBody
 from lapidary.runtime.model.response_map import Responses

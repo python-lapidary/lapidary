@@ -1,7 +1,6 @@
 import dataclasses as dc
-import typing as ty
-import typing_extensions as ty
 
+from ..compat import typing as ty
 from lapidary.runtime.types_ import Serializer
 
 

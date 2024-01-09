@@ -4,9 +4,9 @@ from functools import partial
 import logging
 
 import httpx
-import typing_extensions as ty
 
 from .model import ResponseMap
+from .compat import typing as ty
 from .model.op import LapidaryOperation, get_operation_model
 from .request import RequestFactory, build_request
 from .response import handle_response

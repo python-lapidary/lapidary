@@ -1,7 +1,6 @@
-import typing as ty
-
 import httpx
 
+from .compat import typing as ty
 from .http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from .mime import find_mime
 from .model import ResponseMap

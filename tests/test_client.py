@@ -1,6 +1,4 @@
-import typing
-from typing import List
-import typing_extensions
+import logging
 import unittest
 
 from starlette.applications import Starlette
@@ -9,6 +7,7 @@ from starlette.routing import Route
 
 from lapidary.runtime import ClientBase, GET
 from lapidary.runtime.model import ReturnTypeInfo
+from lapidary.runtime.compat import typing as ty
 from lapidary.runtime.model.response_map import Responses
 
 import logging
@@ -21,8 +20,11 @@ class Client(ClientBase):
     @GET('/strings')
     async def get_strings(self: typing_extensions.Self) -> typing.Annotated[
         List[str], Responses({
+    async def get_strings(self: ty.Self) -> ty.Annotated[
+        ty.List[str],
+        Responses({
             '200': {
-                'application/json': ReturnTypeInfo(List[str])
+                'application/json': ty.List[str]
             }
         })
     ]:

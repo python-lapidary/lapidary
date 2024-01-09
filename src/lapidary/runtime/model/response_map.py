@@ -1,5 +1,6 @@
 import dataclasses as dc
-import typing as ty
+
+from ..compat import typing as ty
 
 T = ty.TypeVar('T')
 MimeType = str
