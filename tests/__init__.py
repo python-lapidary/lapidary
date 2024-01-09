@@ -1,3 +1,5 @@
+# pylint: disable=unused-argument
+
 import pydantic
 
 from lapidary.runtime import ClientBase, GET, PUT, ParamStyle, Path

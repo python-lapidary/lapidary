@@ -31,6 +31,9 @@ class RequestFactory(ty.Protocol):
 
 
 def get_accept_header(response_map: ty.Optional[ResponseMap]) -> ty.Optional[str]:
+    if not response_map:
+        return None
+
     all_mime_types = {
         mime
         for mime_map in response_map.values()
@@ -75,14 +78,13 @@ def find_request_body_serializer(
         obj: ty.Any,
 ) -> ty.Tuple[str, Serializer]:
     # find the serializer by type
-    obj_type = type(obj)
+    if model:
+        for content_type, typ in model.serializers.items():
+            if typ == type(obj):
+                async def serialize(model):
+                    for item in serialize_param(model, ParamStyle.simple, explode_list=False):
+                        yield item.encode()
 
-    for content_type, typ in model.serializers.items():
-        if typ == obj_type:
-            async def serialize(model):
-                for item in serialize_param(model, ParamStyle.simple, explode_list=False):
-                    yield item.encode()
-            return content_type, serialize
-            # return content_type, lambda model: serialize_param(model, ParamStyle.simple, explode_list=False)
+                return content_type, serialize
 
     raise TypeError(f'Unknown serializer for {type(obj)}')

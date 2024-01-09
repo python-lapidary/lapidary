@@ -1,3 +1,4 @@
+import abc
 from collections.abc import Iterator
 import dataclasses as dc
 import inspect
@@ -105,7 +106,7 @@ def parse_params(sig: inspect.Signature) -> Iterator[ty.Union[FullParam, Request
     for name, param in sig.parameters.items():
         anno = param.annotation
 
-        if anno == ty.Self or (type(anno) is type and issubclass(anno, httpx.Auth)):
+        if anno == ty.Self or (isinstance(anno, type) and issubclass(anno, httpx.Auth)):
             continue
 
         if param.annotation == inspect.Parameter.empty:
@@ -133,24 +134,29 @@ def parse_params(sig: inspect.Signature) -> Iterator[ty.Union[FullParam, Request
             )
 
 
-def get_response_map(return_anno: ty.Union[ty.Annotated, inspect.Signature.empty]) -> ResponseMap:
-    annos = [anno for anno in return_anno.__metadata__ if isinstance(anno, Responses)]
+def get_response_map(return_anno: type) -> ResponseMap:  # type: ignore[valid-type]
+    if return_anno is inspect.Signature.empty:
+        raise TypeError('Operation function must have exactly one Responses annotation')
+    annos = [anno for anno in return_anno.__metadata__ if isinstance(anno, Responses)]  # type: ignore[attr-defined]
     if len(annos) != 1:
         raise TypeError('Operation function must have exactly one Responses annotation')
 
     return annos.pop().responses
 
 
-class LapidaryOperation(ty.Callable):
+class LapidaryOperation(abc.ABC):
     lapidary_operation: Operation
     lapidary_operation_model: ty.Optional[OperationModel]
+
+    def __call__(self, *args, **kwargs) -> ty.Any:
+        pass
 
 
 def get_operation_model(
         fn: LapidaryOperation,
 ) -> OperationModel:
     base_model: Operation = fn.lapidary_operation
-    sig = inspect.signature(ty.cast(ty.Callable, fn))
+    sig = inspect.signature(fn)
     params = list(parse_params(sig))
     request_body_ = [param for param in params if isinstance(param, RequestBodyModel)]
     if len(request_body_) > 1:

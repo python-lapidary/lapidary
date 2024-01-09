@@ -52,8 +52,8 @@ class FullParam:
 
     location: ParamLocation
 
-    style: ty.Optional[ParamStyle]
-    explode: ty.Optional[bool]
+    style: ParamStyle
+    explode: bool
 
     name: str
     type: ty.Type

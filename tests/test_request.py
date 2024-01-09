@@ -64,7 +64,13 @@ class BuildRequestTestCase(unittest.TestCase):
     def test_request_param_list_simple(self):
         request_factory = Mock()
         build_request(
-            operation=OperationModel('GET', 'path', {'q_a': FullParam('a', ParamLocation.query, ParamStyle.form, False, 'q_a', List[str])}, None, {}),
+            operation=OperationModel(
+                'GET',
+                'path',
+                {'q_a': FullParam('a', ParamLocation.query, ParamStyle.form, False, 'q_a', List[str])},
+                None,
+                {},
+            ),
             actual_params=dict(q_a=['hello', 'world']),
             request_factory=request_factory,
         )
@@ -81,7 +87,13 @@ class BuildRequestTestCase(unittest.TestCase):
     def test_request_param_list_exploded(self):
         request_factory = Mock()
         build_request(
-            operation=OperationModel('GET', 'path', {'q_a': FullParam('a', ParamLocation.query, ParamStyle.form, True, 'q_a', List[str])}, None, {}),
+            operation=OperationModel(
+                'GET',
+                'path',
+                {'q_a': FullParam('a', ParamLocation.query, ParamStyle.form, True, 'q_a', List[str])},
+                None,
+                {},
+            ),
             actual_params=dict(q_a=['hello', 'world']),
             request_factory=request_factory
         )

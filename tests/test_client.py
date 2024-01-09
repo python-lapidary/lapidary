@@ -1,3 +1,4 @@
+import inspect
 import logging
 import unittest
 
@@ -9,6 +10,7 @@ from starlette.routing import Route
 
 from lapidary.runtime import APIKeyAuth, ClientBase, GET, POST
 from lapidary.runtime.compat import typing as ty
+from lapidary.runtime.model.op import get_response_map
 from lapidary.runtime.model.response_map import Responses
 
 logger = logging.getLogger(__name__)
@@ -76,3 +78,13 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         client = Client(base_url='http://example.com', app=app)
         response = await client.login()
         self.assertEqual(dict(api_key='Token token', header_name='Authorization'), response.__dict__)
+
+
+class TestClientSync(unittest.TestCase):
+    def test_missing_return_anno(self):
+        async def operation():
+            pass
+
+        sig = inspect.signature(operation)
+        with self.assertRaises(TypeError):
+            get_response_map(sig.return_annotation)

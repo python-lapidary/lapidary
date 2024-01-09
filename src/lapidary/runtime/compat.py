@@ -1,4 +1,8 @@
-try:
+__all__ = ['typing']
+
+import sys
+
+if sys.version_info < (3, 12):
     import typing_extensions as typing
-except ImportError:
+else:
     import typing

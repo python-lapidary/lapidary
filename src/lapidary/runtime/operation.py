@@ -12,12 +12,13 @@ def _operation(
         path: str,
 ) -> ty.Callable:
     def wrapper(fn: ty.Callable):
-        fn.lapidary_operation = Operation(method, path)
-        fn.lapidary_operation_model = None
+        fn_ = ty.cast(LapidaryOperation, fn)
+        fn_.lapidary_operation = Operation(method, path)
+        fn_.lapidary_operation_model = None
 
         @ft.wraps(fn)
         async def operation(self: 'ClientBase', **kwargs) -> ty.Any:
-            return await self._request(
+            return await self._request(  # pylint: disable=protected-access
                 ty.cast(LapidaryOperation, fn),
                 kwargs,
             )
