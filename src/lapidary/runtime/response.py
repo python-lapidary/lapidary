@@ -7,44 +7,13 @@ import pydantic
 from .compat import typing as ty
 from .http_consts import CONTENT_TYPE
 from .mime import find_mime
-from .model import ResponseMap
-from .model.response_map import ReturnTypeInfo
+from .model.response_map import ResponseMap
 
 logger = logging.getLogger(__name__)
-
-
-
-def handle_response(
-        response_map: ResponseMap,
-        response: httpx.Response,
-) -> Any:
-    response.read()
-
-    type_info = find_type(response, response_map)
-
-    if type_info is None:
-        response.raise_for_status()
-        return response.content
-
-    try:
-        obj: Any = parse_model(response, type_info.type)
-    except pydantic.ValidationError as error:
-        raise ValueError(response.content) from error
-
-    if isinstance(obj, Exception):
-        raise obj
-    elif type_info.iterator:
-        return aiter2(obj)
-    else:
-        return obj
 
 T = ty.TypeVar('T')
 P = ty.TypeVar('P')
 
-async def aiter2(values: Iterable[T]) -> AsyncIterator[T]:
-    """Turn Iterable to AsyncIterator (AsyncGenerator really)."""
-    for value in values:
-        yield value
 
 def parse_model(response: httpx.Response, typ: ty.Type[T]) -> T:
     if inspect.isclass(typ):

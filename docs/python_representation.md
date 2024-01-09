@@ -64,7 +64,7 @@ TBD
 
 ## Auth
 
-TBD
+See [Auth](auth.md).
 
 ## Servers
 

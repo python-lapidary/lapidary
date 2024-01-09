@@ -5,6 +5,7 @@ from enum import Enum, unique
 import uuid
 
 import httpx
+import pydantic
 
 from ..compat import typing as ty
 
@@ -107,6 +108,8 @@ def serialize_param(value, style: ParamStyle, explode_list: bool) -> ty.Iterator
             yield from values
         else:
             yield ','.join(values)
+    elif isinstance(value, (pydantic.BaseModel, pydantic.RootModel)):
+        yield value.model_dump_json()
 
     else:
         raise NotImplementedError(value)

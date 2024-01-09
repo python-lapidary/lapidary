@@ -2,7 +2,6 @@ import pydantic
 
 from lapidary.runtime import ClientBase, GET, PUT, ParamStyle, Path
 from lapidary.runtime.compat import typing as ty
-from lapidary.runtime.model import ReturnTypeInfo
 from lapidary.runtime.model.request import RequestBody
 from lapidary.runtime.model.response_map import Responses
 
@@ -25,7 +24,7 @@ class MyClient(ClientBase):
             id_p: ty.Annotated[int, Path('id', ParamStyle.simple)],
     ) -> ty.Annotated[Cat, Responses({
         'default': {
-            'application/json': ReturnTypeInfo(Cat)
+            'application/json': Cat
         }
     })]:
         ...
@@ -37,7 +36,7 @@ class MyClient(ClientBase):
             body: ty.Annotated[Cat, RequestBody({'application/json': (Cat, lambda model: model.model_dump_json())})],
     ) -> ty.Annotated[Cat, Responses({
         'default': {
-            'application/json': ReturnTypeInfo(Cat)
+            'application/json': Cat
         }
     })]:
         ...

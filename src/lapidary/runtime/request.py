@@ -3,13 +3,31 @@ import httpx
 from .compat import typing as ty
 from .http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from .mime import find_mime
-from .model import ResponseMap
 from .model.op import OperationModel
+from .model.params import serialize_param
 from .model.request import RequestBodyModel
+from .model.response_map import ResponseMap
+from .param import ParamStyle
 from .types_ import Serializer
 
-# accepts parameters of httpx.Client.build_request
-RequestFactory = ty.Callable[..., httpx.Request]
+
+class RequestFactory(ty.Protocol):
+    def __call__(
+            self,
+            method: str,
+            url: str,
+            *,
+            content: ty.Optional[httpx._types.RequestContent] = None,
+            data: ty.Optional[httpx._types.RequestData] = None,
+            files: ty.Optional[httpx._types.RequestFiles] = None,
+            json: ty.Optional[ty.Any] = None,
+            params: ty.Optional[httpx._types.QueryParamTypes] = None,
+            headers: ty.Optional[httpx._types.HeaderTypes] = None,
+            cookies: ty.Optional[httpx._types.CookieTypes] = None,
+            timeout: ty.Union[httpx._types.TimeoutTypes, httpx._client.UseClientDefault] = httpx.USE_CLIENT_DEFAULT,
+            extensions: ty.Optional[httpx._types.RequestExtensions] = None,
+    ) -> httpx.Request:
+        pass
 
 
 def get_accept_header(response_map: ty.Optional[ResponseMap]) -> ty.Optional[str]:
@@ -56,13 +74,15 @@ def find_request_body_serializer(
         model: ty.Optional[RequestBodyModel],
         obj: ty.Any,
 ) -> ty.Tuple[str, Serializer]:
-
     # find the serializer by type
     obj_type = type(obj)
 
-    for content_type, ser_info in model.serializers.items():
-        type_, serializer = ser_info
-        if type_ == obj_type:
-            return content_type, serializer
+    for content_type, typ in model.serializers.items():
+        if typ == obj_type:
+            async def serialize(model):
+                for item in serialize_param(model, ParamStyle.simple, explode_list=False):
+                    yield item.encode()
+            return content_type, serialize
+            # return content_type, lambda model: serialize_param(model, ParamStyle.simple, explode_list=False)
 
     raise TypeError(f'Unknown serializer for {type(obj)}')

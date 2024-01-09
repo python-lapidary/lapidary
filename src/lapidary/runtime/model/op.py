@@ -47,7 +47,7 @@ class OperationModel:
 
             formal_param = self.params.get(param_name)
             if not formal_param:
-                raise KeyError(param_name)
+                raise TypeError(f'Operation {self.method} {self.path} got an unexpected argument {param_name}')
 
             if value is ABSENT:
                 continue
@@ -64,6 +64,35 @@ class OperationModel:
             path={item[0]: item[1] for item in containers[ParamLocation.path]},
             request_body=request_body,
         )
+
+    def handle_response(self, response: httpx.Response) -> ty.Any:
+        """
+        Possible special cases:
+        Exception
+        Auth
+        """
+
+        from ..response import find_type, parse_model
+
+        response.read()
+
+        typ = find_type(response, self.response_map)
+
+        if typ is None:
+            response.raise_for_status()
+            return response.content
+
+        obj: ty.Any = parse_model(response, typ)
+
+        if '__metadata__' in dir(typ):
+            for anno in typ.__metadata__:
+                if callable(anno):
+                    obj = anno(obj)
+
+        if isinstance(obj, Exception):
+            raise obj
+        else:
+            return obj
 
 
 @dc.dataclass
