@@ -35,7 +35,7 @@ class MyClient(ClientBase):
     async def put_cat(
             self: ty.Self,
             *,
-            body: ty.Annotated[Cat, RequestBody({'application/json': (Cat, lambda model: model.model_dump_json())})],
+            body: ty.Annotated[Cat, RequestBody({'application/json': Cat})],
     ) -> ty.Annotated[Cat, Responses({
         'default': {
             'application/json': Cat
