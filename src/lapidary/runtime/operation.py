@@ -28,10 +28,15 @@ def _operation(
     return wrapper
 
 
-GET = ft.partial(_operation, 'GET')
-PUT = ft.partial(_operation, 'PUT')
-POST = ft.partial(_operation, 'POST')
-DELETE = ft.partial(_operation, 'DELETE')
-HEAD = ft.partial(_operation, 'HEAD')
-PATCH = ft.partial(_operation, 'PATCH')
-TRACE = ft.partial(_operation, 'TRACE')
+class MethodProto(ty.Protocol):
+    def __call__(self, path: str) -> ty.Callable:
+        pass
+
+
+GET: MethodProto = ft.partial(_operation, 'GET')
+PUT: MethodProto = ft.partial(_operation, 'PUT')
+POST: MethodProto = ft.partial(_operation, 'POST')
+DELETE: MethodProto = ft.partial(_operation, 'DELETE')
+HEAD: MethodProto = ft.partial(_operation, 'HEAD')
+PATCH: MethodProto = ft.partial(_operation, 'PATCH')
+TRACE: MethodProto = ft.partial(_operation, 'TRACE')

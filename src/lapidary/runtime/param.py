@@ -18,7 +18,18 @@ def _mk_param(
     )
 
 
-Cookie = ft.partial(_mk_param, ParamLocation.cookie)
-Header = ft.partial(_mk_param, ParamLocation.header)
-Path = ft.partial(_mk_param, ParamLocation.path)
-Query = ft.partial(_mk_param, ParamLocation.query)
+class ParamProto(ty.Protocol):
+    def __call__(
+            self,
+            location: ParamLocation,
+            name: ty.Optional[str] = None,
+            style: ty.Optional[ParamStyle] = None,
+            explode: ty.Optional[bool] = None,
+    ) -> Param:
+        pass
+
+
+Cookie: ParamProto = ft.partial(_mk_param, ParamLocation.cookie)
+Header: ParamProto = ft.partial(_mk_param, ParamLocation.header)
+Path: ParamProto = ft.partial(_mk_param, ParamLocation.path)
+Query: ParamProto = ft.partial(_mk_param, ParamLocation.query)
