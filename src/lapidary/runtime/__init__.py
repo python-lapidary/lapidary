@@ -1,6 +1,7 @@
 from .absent import ABSENT, Absent
 from .auth import APIKeyAuth
 from .client_base import ClientBase
+from .model.op import Operation
 from .model.params import ParamLocation, ParamStyle
 from .model.request import RequestBody
 from .model.response_map import Responses
