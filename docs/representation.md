@@ -1,20 +1,20 @@
-# Python code representation of OpenAPI document
+# Python representation of a remote Web API
 
 The goal of python representation is to allow python code to fully replace OpanAPI document, allow Lapidary library to prepare a HTTP request and parse the response, in a way compatible with the
-server describe by that OpenAPI document.
+server described by that representation.
 
-The python representation must be fully sufficient, must not require the original document to function, and usage must execute a valid exchange with a server.
+The python representation is fully self-sufficient, and doesn't require an OpenAPI document at runtime.
 
 ## Client
 
 A client to a remote service may be represented as a collection of functions, each representing an operation, and a collection of data classes, each representing a schema.
 The functions could be module-level or grouped in one or more classes, optionally forming an object hierarchy.
 
-Lapidary implements a single class approach, but supporting all three styles at later stage should be simple.
+Lapidary currently implements a single class approach.
 
 ## Paths and Operations
 
-OpenAPI paths can be explained as a mapping of HTTP method and path to an Operation declaration.
+OpenAPI `paths` object can be explained as a mapping of HTTP method and path to an Operation declaration.
 
 OpenAPI Operation specifies the request body, parameters and responses, so it's the closest thing to a python function.
 
@@ -24,7 +24,7 @@ OpenAPI Operation specifies the request body, parameters and responses, so it's 
 
 Each of cookie, header, path and query parameters have their own namespace, so they can't be directly mapped to names of parameters of a python function.
 
-The possible work-arounds are:
+The possible workarounds are:
 
 - grouping parameters in mappings, named tuples or objects,
 - name mangling,
@@ -34,13 +34,14 @@ Lapidary uses annotations, which declares parameter location and may be used to 
 
 ```python
 from typing import Annotated, Self
-from lapidary.runtime import Cookie, ClientBase
+from lapidary.runtime import Cookie, ClientBase, Header
 
 class Client(ClientBase):
     async def operation(
         self: Self,
         *,
         param1_c: Annotated[str, Cookie('param1')],
+        param1_h: Annotated[str, Header('param1')],
     ):
         pass
 ```
