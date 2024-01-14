@@ -1,45 +1,84 @@
+import dataclasses as dc
+import http
 import inspect
-import logging
 import unittest
 
+import fastapi
 import httpx
 import pydantic
-from starlette.applications import Starlette
-from starlette.responses import JSONResponse
-from starlette.routing import Route
 
-from lapidary.runtime import APIKeyAuth, ClientBase, GET, POST
+from lapidary.runtime import APIKeyAuth, ClientBase, GET, Header, POST, RequestBody, Responses
 from lapidary.runtime.compat import typing as ty
+from lapidary.runtime.http_consts import MIME_JSON
 from lapidary.runtime.model.op import get_response_map
-from lapidary.runtime.model.response_map import Responses
 
-logger = logging.getLogger(__name__)
-logging.getLogger('lapidary').setLevel(logging.DEBUG)
+
+# model (common to both client and server)
+
+class AuthRequest(pydantic.BaseModel):
+    login: str
+    password: str
 
 
 class AuthResponse(pydantic.BaseModel):
     api_key: str
 
 
+@dc.dataclass
+class ServerError(Exception):
+    msg: str
+
+
+# FastAPI server
+
+app = fastapi.FastAPI(debug=True)
+
+
+@app.get('/strings')
+async def get_strings() -> list[str]:
+    return ['a', 'b', 'c']
+
+
+@app.post('/login')
+async def login(body: AuthRequest) -> AuthResponse:
+    assert body.login == 'login'
+    assert body.password == 'passwd'
+
+    return AuthResponse(api_key='token')
+
+
+@app.get('/err', status_code=http.HTTPStatus.IM_A_TEAPOT)
+async def err() -> ServerError:
+    return ServerError("I'm actually a samovar")
+
+
+# Client
+
 class Client(ClientBase):
     @GET('/strings')
-    async def get_strings(self: ty.Self) -> ty.Annotated[
+    async def get_strings(
+            self: ty.Self,
+            accept: ty.Annotated[str, Header()] = MIME_JSON,
+    ) -> ty.Annotated[
         ty.List[str],
         Responses({
             '200': {
-                'application/json': ty.List[str]
+                MIME_JSON: ty.List[str]
             }
         })
     ]:
         pass
 
     @POST('/login')
-    async def login(self: ty.Self,
-                    ) -> ty.Annotated[
+    async def login(
+            self: ty.Self,
+            *,
+            body: ty.Annotated[AuthRequest, RequestBody({MIME_JSON: AuthRequest})],
+    ) -> ty.Annotated[
         httpx.Auth,
         Responses({
             '200': {
-                'application/json': ty.Annotated[
+                MIME_JSON: ty.Annotated[
                     AuthResponse,
                     APIKeyAuth(
                         'header',
@@ -48,36 +87,38 @@ class Client(ClientBase):
                     ),
                 ]
             }
-        })
+        }),
     ]:
         pass
 
+    @GET('/err')
+    async def err(self: ty.Self) -> ty.Annotated[ServerError, Responses({
+        str(http.HTTPStatus.IM_A_TEAPOT): {MIME_JSON: ServerError}
+    })]:
+        pass
+
+
+client = Client(base_url='http://example.com', app=app)
+
+
+# tests
 
 class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_request(self):
-        async def handler(_):
-            return JSONResponse(['a', 'b', 'c'])
-
-        app = Starlette(debug=True, routes=[
-            Route('/strings', handler),
-        ])
-
-        client = Client(base_url='http://example.com', app=app)
         response = await client.get_strings()
         self.assertIsInstance(response, list)
         self.assertEqual(['a', 'b', 'c'], response)
 
     async def test_response_auth(self):
-        async def handler(_):
-            return JSONResponse({'api_key': 'token'})
-
-        app = Starlette(debug=True, routes=[
-            Route('/login', handler, methods=['POST']),
-        ])
-
-        client = Client(base_url='http://example.com', app=app)
-        response = await client.login()
+        response = await client.login(body=AuthRequest(login='login', password='passwd'))
         self.assertEqual(dict(api_key='Token token', header_name='Authorization'), response.__dict__)
+
+    async def test_error(self):
+        try:
+            await client.err()
+            assert False, 'Expected ServerError'
+        except ServerError as e:
+            self.assertEqual(e.msg, "I'm actually a samovar")
 
 
 class TestClientSync(unittest.TestCase):
