@@ -1,5 +1,6 @@
 import abc
 from collections.abc import Mapping
+from importlib.metadata import version
 import logging
 
 import httpx
@@ -11,16 +12,22 @@ from .request import RequestFactory, build_request
 
 logger = logging.getLogger(__name__)
 
+lapidary_ua = f'lapidary/{version("lapidary")}'
+
 
 class ClientBase(abc.ABC):
     def __init__(
             self,
-            **kwargs,
+            user_agent: str = lapidary_ua,
+            **httpx_kwargs,
     ):
-        if 'base_url' not in kwargs:
+        if 'base_url' not in httpx_kwargs:
             raise ValueError('Missing base_url.')
 
-        self._client = httpx.AsyncClient(**kwargs)
+        headers = httpx.Headers(httpx_kwargs.pop('headers', None))
+        headers = _mk_headers(headers, user_agent)
+
+        self._client = httpx.AsyncClient(**httpx_kwargs, headers=headers)
 
     async def __aenter__(self):
         await self._client.__aenter__()
@@ -50,3 +57,15 @@ class ClientBase(abc.ABC):
 
         response = await self._client.send(request, auth=get_auth(actual_params))
         return operation.handle_response(response)
+
+
+def _mk_headers(
+        headers: httpx.Headers,
+        ua: str,
+) -> httpx.Headers:
+    if 'User-Agent' not in headers:
+        if 'lapidary' not in ua:
+            ua = f'{ua}; {lapidary_ua}'
+        headers['User-Agent'] = ua
+
+    return headers
