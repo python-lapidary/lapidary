@@ -17,10 +17,8 @@ P = ty.TypeVar('P')
 
 def parse_model(response: httpx.Response, typ: ty.Type[T]) -> T:
     if inspect.isclass(typ):
-        if issubclass(typ, Exception):
-            return typ(response.json())  # type: ignore[return-value]
-        elif issubclass(typ, pydantic.BaseModel):
-            typ.model_validate_json(response.content)
+        if issubclass(typ, pydantic.BaseModel):
+            return typ.model_validate_json(response.content)
 
     return pydantic.TypeAdapter(typ).validate_json(response.content)
 
