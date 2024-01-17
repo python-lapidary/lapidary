@@ -39,7 +39,7 @@ cats_app = fastapi.FastAPI(debug=True)
 
 
 @cats_app.get('/cats')
-async def cat_list() -> list[Cat]:
+async def cat_list() -> ty.List[Cat]:
     return [Cat(id=1, name="Tom")]
 
 
@@ -81,7 +81,7 @@ class CatClient(ClientBase):
             self: ty.Self,
     ) -> ty.Annotated[Cat, Responses({
         'default': {
-            'application/json': list[Cat]
+            'application/json': ty.List[Cat]
         },
     })]:
         pass
