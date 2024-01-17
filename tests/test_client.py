@@ -7,7 +7,7 @@ import httpx_auth
 import pydantic
 from starlette.responses import JSONResponse
 
-from lapidary.runtime import APIKeyAuth, ClientBase, GET, POST, PUT, ParamStyle, Path, RequestBody, Responses
+from lapidary.runtime import APIKeyAuth, ClientBase, get, post, put, ParamStyle, Path, RequestBody, Responses
 from lapidary.runtime.compat import typing as ty
 from lapidary.runtime.http_consts import MIME_JSON
 
@@ -39,7 +39,7 @@ cats_app = fastapi.FastAPI(debug=True)
 
 
 @cats_app.get('/cats')
-async def get_cat() -> list[Cat]:
+async def cat_list() -> list[Cat]:
     return [Cat(id=1, name="Tom")]
 
 
@@ -54,7 +54,7 @@ async def get_cat() -> list[Cat]:
 async def get_cat(cat_id: int) -> JSONResponse:
     if cat_id != 1:
         return JSONResponse(pydantic.TypeAdapter(ServerError).dump_python(ServerError('Cat not found')), 404)
-    return JSONResponse(Cat(id=1, name="Tom"), 200)
+    return JSONResponse(Cat(id=1, name="Tom").model_dump(), 200)
 
 
 @cats_app.post('/login')
@@ -76,7 +76,7 @@ class CatClient(ClientBase):
             follow_redirects=False,
         )
 
-    @GET('/cats')
+    @get('/cats')
     async def cat_list(
             self: ty.Self,
     ) -> ty.Annotated[Cat, Responses({
@@ -86,13 +86,13 @@ class CatClient(ClientBase):
     })]:
         pass
 
-    @GET('/cat/{id}')
+    @get('/cat/{id}')
     async def cat_get(
             self: ty.Self,
             *,
-            id: ty.Annotated[int, Path(style=ParamStyle.simple)],
+            id: ty.Annotated[int, Path(style=ParamStyle.simple)],  # pylint: disable=redefined-builtin
     ) -> ty.Annotated[Cat, Responses({
-        'default': {
+        '2XX': {
             'application/json': Cat
         },
         '4XX': {
@@ -101,7 +101,7 @@ class CatClient(ClientBase):
     })]:
         pass
 
-    @PUT('/cat')
+    @put('/cat')
     async def cat_update(
             self: ty.Self,
             *,
@@ -113,7 +113,7 @@ class CatClient(ClientBase):
     })]:
         pass
 
-    @POST('/login')
+    @post('/login')
     async def login(
             self: ty.Self,
             *,
@@ -146,6 +146,10 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         response = await client.cat_list()
         self.assertIsInstance(response, list)
         self.assertEqual([Cat(id=1, name='Tom')], response)
+
+        cat = await client.cat_get(id=1)
+        self.assertIsInstance(cat, Cat)
+        self.assertEqual(Cat(id=1, name='Tom'), cat)
 
     async def test_response_auth(self):
         response = await client.login(body=AuthRequest(login='login', password='passwd'))

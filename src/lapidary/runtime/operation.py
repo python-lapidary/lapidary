@@ -33,10 +33,10 @@ class MethodProto(ty.Protocol):
         pass
 
 
-GET: MethodProto = ft.partial(_operation, 'GET')
-PUT: MethodProto = ft.partial(_operation, 'PUT')
-POST: MethodProto = ft.partial(_operation, 'POST')
-DELETE: MethodProto = ft.partial(_operation, 'DELETE')
-HEAD: MethodProto = ft.partial(_operation, 'HEAD')
-PATCH: MethodProto = ft.partial(_operation, 'PATCH')
-TRACE: MethodProto = ft.partial(_operation, 'TRACE')
+get: MethodProto = ft.partial(_operation, 'GET')
+put: MethodProto = ft.partial(_operation, 'PUT')
+post: MethodProto = ft.partial(_operation, 'POST')
+delete: MethodProto = ft.partial(_operation, 'DELETE')
+head: MethodProto = ft.partial(_operation, 'HEAD')
+patch: MethodProto = ft.partial(_operation, 'PATCH')
+trace: MethodProto = ft.partial(_operation, 'TRACE')

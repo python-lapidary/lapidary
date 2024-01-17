@@ -13,7 +13,7 @@ The decorator accepts path as the only parameter.
 Note: in the examples below all functions are actually methods, with the encapsulating class omitted.
 
 ```python
-@GET('/cats')  # method and path
+@get('/cats')  # method and path
 async def list_cats(...):
     pass
 ```
@@ -35,7 +35,7 @@ Query parameters are appended to the URL after '?' character, e.g. `https://exam
 Query parameters are declared using `Query()` annotation:
 
 ```python
-@GET('/cats')
+@get('/cats')
 async def list_cats(
         self: Self,
         color: Annotated[str, Query()],
@@ -56,7 +56,7 @@ will results in making a GET request to `https://example.com/cats?color=black`
 Path parameters are variables in the requests path: `http://example.com/cat/{cat_id}`.
 
 ```python
-@GET('/cat/{cat_id}')
+@get('/cat/{cat_id}')
 async def get_cat(
         self: Self,
         cat_id: Annotated[str, Path()],
@@ -77,7 +77,7 @@ will result in making a GET request to 'https://example.com/cat/1'.
 Header parameter will simply add a HTTP header to the request.
 
 ```python
-@GET('/cats')
+@get('/cats')
 async def list_cats(
         self: Self,
         accept: Annotated[str, Header('Accept')],
@@ -100,7 +100,7 @@ Note: all of Cookie, Header, Param and Query annotations accept name, style and 
 Cookie parameter will add a `name=value` to the `Cookie` header of the request.
 
 ```python
-@GET('/cats')
+@get('/cats')
 async def list_cats(
         self: Self,
         cookie_key: Annotated[str, Cookie('key')],
@@ -142,7 +142,7 @@ and optionally allows converting the response body to an instance of `httpx.Auth
 class.
 
 ```python
-@GET('/cat')
+@get('/cat')
 async def list_cats(
         self: Self,
         cat: Annotated[Cat, RequestBody({

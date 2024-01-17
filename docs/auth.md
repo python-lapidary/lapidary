@@ -15,7 +15,7 @@ A function that handles such an endpoint can declare that it returns an Auth obj
 ```python
 import pydantic
 import typing_extensions as ty
-from lapidary.runtime import POST, ClientBase, RequestBody, APIKeyAuth, Responses
+from lapidary.runtime import post, ClientBase, RequestBody, APIKeyAuth, Responses
 from httpx import Auth
 
 
@@ -28,7 +28,7 @@ class LoginResponse(pydantic.BaseModel):
 
 
 class Client(ClientBase):
-    @POST('/login')
+    @post('/login')
     def login(
             self: ty.Self,
             *,
@@ -85,11 +85,11 @@ Auth object returned by the login operation declared in the above example can be
 ```python
 from typing import Annotated, Self
 from httpx import Auth
-from lapidary.runtime import ClientBase, GET, POST
+from lapidary.runtime import ClientBase, get, post
 
 
 class Client(ClientBase):
-    @POST('/login')
+    @post('/login')
     def login(
             self: Self,
             body: ...,
@@ -99,7 +99,7 @@ class Client(ClientBase):
     ]:
         """Authenticates with the "primary" security scheme"""
 
-    @GET('/private')
+    @get('/private')
     def private(
             self: Self,
             *,
