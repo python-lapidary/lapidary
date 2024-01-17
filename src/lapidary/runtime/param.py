@@ -21,7 +21,6 @@ def _mk_param(
 class ParamProto(ty.Protocol):
     def __call__(
             self,
-            location: ParamLocation,
             name: ty.Optional[str] = None,
             style: ty.Optional[ParamStyle] = None,
             explode: ty.Optional[bool] = None,
