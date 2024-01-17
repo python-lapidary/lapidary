@@ -7,6 +7,6 @@ Lapidary consists of a pair of packages:
 
 Both projects are coupled, in the sense that
 lapidary-render produces output compatible with Lapidary, and
-Lapidary supports the same features of OpenAPI Specification as lapidary-render.  
+Lapidary supports the same features of OpenAPI Specification as lapidary-render.
 
 See [this test](https://github.com/python-lapidary/lapidary/blob/develop/tests/test_client.py) for a small showcase.
