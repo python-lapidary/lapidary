@@ -18,8 +18,6 @@ async def list_cats(...):
     pass
 ```
 
-Other methods can be used with decorator `@Operation(method, path)`
-
 # Parameters
 
 Each parameter can either represent a single part of a HTTP request: header, cookie, query parameter, path parameter or body; or can be an instance of `httpx.Auth`.
