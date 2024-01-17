@@ -24,7 +24,7 @@ class BuildRequestAsyncTestCase(unittest.IsolatedAsyncioTestCase):
         request_factory = Mock()
         build_request(
             operation=OperationModel('GET', 'path', {}, RequestBodyModel('body', {'application/json': MyRequestBodyList}), {}),
-            actual_params={'body': MyRequestBodyList([MyRequestBodyModel(a='a')])},
+            actual_params={'body': MyRequestBodyList(root=[MyRequestBodyModel(a='a')])},
             request_factory=request_factory
         )
 

@@ -1,3 +1,5 @@
+# mypy: disable-error-code="empty-body"
+
 import dataclasses as dc
 import unittest
 
