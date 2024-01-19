@@ -7,6 +7,18 @@ license = "MIT"
 readme = "Readme.md"
 packages = [{ include = "lapidary", from = "src" }]
 repository = "https://github.com/python-lapidary/lapidary"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Internet",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
 
 
 [tool.poetry.dependencies]
