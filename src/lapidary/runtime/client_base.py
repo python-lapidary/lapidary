@@ -12,20 +12,21 @@ from .request import RequestFactory, build_request
 
 logger = logging.getLogger(__name__)
 
-lapidary_ua = f'lapidary/{version("lapidary")}'
+USER_AGENT = f'lapidary/{version("lapidary")}'
 
 
 class ClientBase(abc.ABC):
     def __init__(
             self,
-            user_agent: str = lapidary_ua,
+            user_agent: ty.Optional[str] = USER_AGENT,
             **httpx_kwargs,
     ):
         if 'base_url' not in httpx_kwargs:
             raise ValueError('Missing base_url.')
+        headers = httpx.Headers(httpx_kwargs.pop('headers', None)) or httpx.Headers()
+        if user_agent:
+            headers['User-Agent'] = user_agent
 
-        headers = httpx.Headers(httpx_kwargs.pop('headers', None))
-        headers = _mk_headers(headers, user_agent)
 
         self._client = httpx.AsyncClient(**httpx_kwargs, headers=headers)
 
@@ -57,15 +58,3 @@ class ClientBase(abc.ABC):
 
         response = await self._client.send(request, auth=get_auth(actual_params))
         return operation.handle_response(response)
-
-
-def _mk_headers(
-        headers: httpx.Headers,
-        ua: str,
-) -> httpx.Headers:
-    if 'User-Agent' not in headers:
-        if 'lapidary' not in ua:
-            ua = f'{ua}; {lapidary_ua}'
-        headers['User-Agent'] = ua
-
-    return headers
