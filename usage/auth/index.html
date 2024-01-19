@@ -10,19 +10,25 @@
       
       
       
+        <link rel="canonical" href="https://lapidary.dev/usage/auth/">
       
       
+        <link rel="prev" href="../operation/">
       
-      <link rel="icon" href="/logo.png">
+      
+        <link rel="next" href="../../openapi/">
+      
+      
+      <link rel="icon" href="../../logo.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.4">
     
     
       
-        <title>Lapidary</title>
+        <title>Authentication - Lapidary</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
       
       
 
@@ -41,9 +47,9 @@
       
     
     
-      <link rel="stylesheet" href="/assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -61,6 +67,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#authentication" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -73,9 +84,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="Lapidary" class="md-header__button md-logo" aria-label="Lapidary" data-md-component="logo">
+    <a href="../.." title="Lapidary" class="md-header__button md-logo" aria-label="Lapidary" data-md-component="logo">
       
-  <img src="/logo.svg" alt="logo">
+  <img src="../../logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -92,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Authentication
             
           </span>
         </div>
@@ -142,9 +153,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="Lapidary" class="md-nav__button md-logo" aria-label="Lapidary" data-md-component="logo">
+    <a href="../.." title="Lapidary" class="md-nav__button md-logo" aria-label="Lapidary" data-md-component="logo">
       
-  <img src="/logo.svg" alt="logo">
+  <img src="../../logo.svg" alt="logo">
 
     </a>
     Lapidary
@@ -171,7 +182,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -188,8 +199,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -198,12 +211,12 @@
       
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -217,7 +230,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Usage
@@ -231,7 +244,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/usage/client/" class="md-nav__link">
+      <a href="../client/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -252,7 +265,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/usage/operation/" class="md-nav__link">
+      <a href="../operation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -270,10 +283,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/usage/auth/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -282,6 +315,68 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basic-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic auth
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#login-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Login endpoints
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-auth-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using auth tokens
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using auth tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -341,7 +436,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/openapi/" class="md-nav__link">
+      <a href="../../openapi/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -362,7 +457,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/openapi/request_body/" class="md-nav__link">
+      <a href="../../openapi/request_body/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -400,6 +495,58 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basic-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic auth
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#login-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Login endpoints
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-auth-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using auth tokens
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using auth tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -411,8 +558,111 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+<h1 id="authentication">Authentication</h1>
+<p>OpenAPI allows declaring security schemes and security requirements of operations.</p>
+<p>Lapidary allows declaring methods that create or consume <code>httpx.Auth</code> objects.</p>
+<h2 id="basic-auth">Basic auth</h2>
+<p>TODO</p>
+<h2 id="login-endpoints">Login endpoints</h2>
+<p>A <code>/login/</code> or <code>/authenticate/</code> endpoint that returns the token is quite common with simpler authentication schemes like http or apiKey, yet their support is poor in OpenAPI. There's no way to connect
+such endpoint to a security scheme as in the case of OIDC.</p>
+<p>A function that handles such an endpoint can declare that it returns an Auth object, but it's not obvious to the user of python API which security scheme the method returns.</p>
+<pre><code class="language-python">import pydantic
+import typing_extensions as ty
+from lapidary.runtime import post, ClientBase, RequestBody, APIKeyAuth, Responses
+from httpx import Auth
+
+
+class LoginRequest(pydantic.BaseModel):
+    ...
+
+
+class LoginResponse(pydantic.BaseModel):
+    token: str
+
+
+class Client(ClientBase):
+    @post('/login')
+    def login(
+            self: ty.Self,
+            *,
+            body: ty.Annotated[LoginRequest, RequestBody({'application/json': LoginRequest})],
+    ) -&gt; ty.Annotated[
+        Auth,
+        Responses({
+            '200': {
+                'application/json': ty.Annotated[
+                    LoginResponse,
+                    APIKeyAuth(
+                        in_='header',
+                        name='Authorization',
+                        format='Token {body.token}'
+                    ),
+                ]
+            }
+        }),
+    ]:
+        &quot;&quot;&quot;Authenticates with the &quot;primary&quot; security scheme&quot;&quot;&quot;
+</code></pre>
+<p>The top return Annotated declares the returned type, the inner one declares the processing steps for the actual response.
+First the response is parsed as LoginResponse, then that object is passed to ApiKeyAuth which is a callable object.</p>
+<p>The result of the call, in this case an Auth object, is returned by the <code>login</code> function.</p>
+<p>The innermost Annotated is not necessary from the python syntax standpoint. It's done this way since it kind of matches the semantics of Annotated, but it could be replaced with a simple tuple or other type in the future.</p>
+<h2 id="using-auth-tokens">Using auth tokens</h2>
+<p>OpenApi allows operations to declare a collection of alternative groups of security requirements.</p>
+<p>The second most trivial example (the first being no security) is a single required security scheme.</p>
+<pre><code class="language-yaml">security:
+- primary: []
+</code></pre>
+<p>The name of the security scheme corresponds to a key in <code>components.securitySchemes</code> object.</p>
+<p>This can be represented as a simple parameter, named for example <code>primary_auth</code> and of type <code>httpx.Auth</code>.
+The parameter could be annotated as <code>Optional</code> if the security requirement is optional for the operation.</p>
+<p>In case of multiple alternative groups of security requirements, it gets harder to properly describe which schemes are required and in what combination.</p>
+<p>Lapidary takes all passed <code>httpx.Auth</code> parameters and passes them to <code>httpx.AsyncClient.send(..., auth=auth_params)</code>, leaving the responsibility to select the right ones to the user.</p>
+<p>If multiple <code>Auth</code> parameters are passed, they're wrapped in <code>lapidary.runtime.aauth.MultiAuth</code>, which is just reexported <code>_MultiAuth</code> from <code>https_auth</code> package.</p>
+<h4 id="example">Example</h4>
+<p>Auth object returned by the login operation declared in the above example can be used by another operation.</p>
+<pre><code class="language-python">from typing import Annotated, Self
+from httpx import Auth
+from lapidary.runtime import ClientBase, get, post
+
+
+class Client(ClientBase):
+    @post('/login')
+    def login(
+            self: Self,
+            body: ...,
+    ) -&gt; Annotated[
+        Auth,
+        ...
+    ]:
+        &quot;&quot;&quot;Authenticates with the &quot;primary&quot; security scheme&quot;&quot;&quot;
+
+    @get('/private')
+    def private(
+            self: Self,
+            *,
+            primary_auth: Auth,
+    ):
+        pass
+</code></pre>
+<p>In this example the method <code>client.private</code> can be called with the auth object returned by <code>client.login</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -450,10 +700,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/", "features": ["navigation.instant", "navigation.sections"], "search": "/assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.sections"], "search": "../../assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.7389ff0e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.7389ff0e.min.js"></script>
       
     
   </body>

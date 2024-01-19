@@ -10,12 +10,14 @@
       
       
       
+        <link rel="canonical" href="https://lapidary.dev/">
       
       
-        <link rel="next" href="auth/">
+      
+        <link rel="next" href="usage/client/">
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="logo.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.4">
     
     
@@ -82,8 +84,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="." title="Lapidary" class="md-header__button md-logo" aria-label="Lapidary" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <img src="logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -152,8 +153,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="." title="Lapidary" class="md-nav__button md-logo" aria-label="Lapidary" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <img src="logo.svg" alt="logo">
 
     </a>
     Lapidary
@@ -189,6 +189,17 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Lapidary
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         
   
@@ -199,6 +210,43 @@
 
       </a>
       
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -209,12 +257,52 @@
   
   
   
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="auth/" class="md-nav__link">
+      <a href="usage/client/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Authentication
+    Client class
   </span>
   
 
@@ -222,15 +310,16 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
   
     <li class="md-nav__item">
-      <a href="operation/" class="md-nav__link">
+      <a href="usage/operation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -242,23 +331,32 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
   
     <li class="md-nav__item">
-      <a href="representation/" class="md-nav__link">
+      <a href="usage/auth/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Python representation of a remote Web API
+    Authentication
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -269,16 +367,85 @@
   
   
   
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    OpenAPI
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAPI
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="request_body/" class="md-nav__link">
+      <a href="openapi/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Serializing request body
+    Representing OpenAPI
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="openapi/request_body/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Request body
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -303,6 +470,32 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -315,20 +508,73 @@
                 
                   
 
-  
-  
 
-
+<p><a href="https://github.com/python-lapidary/lapidary/actions/workflows/test.yaml"><img alt="test" src="https://github.com/python-lapidary/lapidary/actions/workflows/test.yaml/badge.svg" /></a></p>
 <h1 id="lapidary">Lapidary</h1>
-<p>Lapidary consists of a pair of packages:</p>
-<ul>
-<li>lapidary (this project), a library that helps you write Web API clients,</li>
-<li><a href="https://github.com/python-lapidary/lapidary-render/">lapidary-render</a>, a generator that consumes OpenAPI documents and produces API clients (that use Lapidary).</li>
-</ul>
-<p>Both projects are coupled, in the sense that
-lapidary-render produces output compatible with Lapidary, and
-Lapidary supports the same features of OpenAPI Specification as lapidary-render.</p>
-<p>See <a href="https://github.com/python-lapidary/lapidary/blob/develop/tests/test_client.py">this test</a> for a small showcase.</p>
+<p>Python DSL for writing Web API clients.</p>
+<p>It aims to support a reasonable subset of OpenAPI 3.x .</p>
+<p>Also check <a href="https://github.com/python-lapidary/lapidary-render/">lapidary-render</a>,
+a command line program that generates Lapidary client code from OpenAPI documents.</p>
+<h2 id="installation">Installation</h2>
+<pre><code class="language-console">pip install lapidary
+</code></pre>
+<p>or with Poetry</p>
+<pre><code class="language-console">poetry add lapidary
+</code></pre>
+<h2 id="usage">Usage</h2>
+<pre><code class="language-python">import dataclasses as dc
+from typing import Annotated, Self
+
+import pydantic
+
+from lapidary.runtime import ClientBase, ParamStyle, Path, Responses, get
+
+
+# Define models
+# Pydantic models are recommended, but classes cannot inherit from both BaseModel and Exception.
+
+@dc.dataclass
+class ServerError(Exception):
+    msg: str
+
+
+class Cat(pydantic.BaseModel):
+    id: int
+    name: str
+
+# Declare the client
+
+class CatClient(ClientBase):
+    def __init__(
+            self,
+            base_url = 'http://localhost:8080/api',
+    ):
+        super().__init__(base_url=base_url)
+
+    # Parameters are interpreted according to their annotation.
+    # Response is parsed according to the return type annotation.
+
+    @get('/cat/{id}')
+    async def cat_get(
+            self: Self,
+            *,
+            id: Annotated[int, Path(style=ParamStyle.simple)],
+    ) -&gt; Annotated[Cat, Responses({
+        '2XX': {
+            'application/json': Cat
+        },
+        '4XX': {
+            'application/json': ServerError
+        },
+    })]:
+        pass
+
+client = CatClient()
+cat = await client.cat_get(id=7)
+</code></pre>
+<p>See <a href="https://github.com/python-lapidary/lapidary/blob/develop/tests/test_client.py">this test file</a> for a working example.</p>
+<p><a href="https://lapidary.dev">Full documentation</a></p>
+<p>Also check the <a href="https://github.com/orgs/lapidary-library/repositories">library of clients</a>.</p>
 
 
 
@@ -379,7 +625,7 @@ Lapidary supports the same features of OpenAPI Specification as lapidary-render.
     </div>
     
     
-    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "navigation.sections"], "search": "assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="assets/javascripts/bundle.7389ff0e.min.js"></script>
