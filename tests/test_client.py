@@ -71,11 +71,14 @@ async def login(body: AuthRequest) -> AuthResponse:
 
 
 class CatClient(ClientBase):
-    def __init__(self, **httpx_args):
-        super().__init__(
+    def __init__(
+            self,
             base_url='http://localhost',
             **httpx_args,
-            follow_redirects=False,
+    ):
+        super().__init__(
+            base_url=base_url,
+            **httpx_args,
         )
 
     @get('/cats')

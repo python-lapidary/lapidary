@@ -2,10 +2,13 @@
 
 OpenAPI allows declaring security schemes and security requirements of operations.
 
-Lapidary allows to declare python methods that create or consume `https.Auth` objects.
+Lapidary allows declaring methods that create or consume `httpx.Auth` objects.
 
-## Generating auth tokens
+## Basic auth
 
+TODO
+
+## Login endpoints
 
 A `/login/` or `/authenticate/` endpoint that returns the token is quite common with simpler authentication schemes like http or apiKey, yet their support is poor in OpenAPI. There's no way to connect
 such endpoint to a security scheme as in the case of OIDC.

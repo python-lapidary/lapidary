@@ -1,4 +1,4 @@
-# Python representation of a remote Web API
+# Representing OpenAPI
 
 The goal of python representation is to allow python code to fully replace OpanAPI document, allow Lapidary library to prepare a HTTP request and parse the response, in a way compatible with the
 server described by that representation.
@@ -64,12 +64,12 @@ See [Request body](request_body.md)
 
 ### Responses
 
-TBD
+TODO
 
 ## Auth
 
-See [Auth](auth.md).
+See [Auth](../usage//auth.md).
 
 ## Servers
 
-TBD
+TODO
