@@ -42,3 +42,4 @@ theme:
 markdown_extensions:
 - admonition
 - tables
+- pymdownx.tasklist

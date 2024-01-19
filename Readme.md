@@ -2,12 +2,16 @@
 
 # Lapidary
 
-Python DSL for writing Web API clients.
-
-It aims to support a reasonable subset of OpenAPI 3.x .
+Python DSL for Web API clients.
 
 Also check [lapidary-render](https://github.com/python-lapidary/lapidary-render/),
 a command line program that generates Lapidary client code from OpenAPI documents.
+
+## Features
+
+- [x] Write Web API clients declaratively
+- [x] Use pydantic models for JSON data
+- [ ] Compatibility with OpenAPI 3.0 and 3.1
 
 ## Installation
 
