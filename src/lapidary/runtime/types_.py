@@ -3,5 +3,6 @@ import httpx
 from .compat import typing as ty
 
 Serializer: ty.TypeAlias = ty.Callable[[ty.Any], ty.Union[str, bytes]]
-RequestContent: ty.TypeAlias = ty.Union[str, bytes, ty.Iterable[bytes], ty.AsyncIterable[bytes]]
-PageFlowGenT = ty.Generator[httpx.Request, httpx.Response, None]
+
+# pylint: disable=protected-access
+ParamValue: ty.TypeAlias = ty.Union[httpx._types.PrimitiveData, ty.Sequence[httpx._types.PrimitiveData]]

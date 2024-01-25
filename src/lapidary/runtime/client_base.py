@@ -5,10 +5,9 @@ import logging
 
 import httpx
 
-from .auth import get_auth
 from .compat import typing as ty
-from .model.op import LapidaryOperation, get_operation_model
-from .request import RequestFactory, build_request
+from .model.op import OperationModel, get_operation_model
+from .request import build_request
 
 logger = logging.getLogger(__name__)
 
@@ -18,17 +17,17 @@ USER_AGENT = f'lapidary/{version("lapidary")}'
 class ClientBase(abc.ABC):
     def __init__(
             self,
+            base_url: str,
             user_agent: ty.Optional[str] = USER_AGENT,
+            _http_client: ty.Optional[httpx.AsyncClient] = None,
             **httpx_kwargs,
     ):
-        if 'base_url' not in httpx_kwargs:
-            raise ValueError('Missing base_url.')
         headers = httpx.Headers(httpx_kwargs.pop('headers', None)) or httpx.Headers()
         if user_agent:
             headers['User-Agent'] = user_agent
 
-
-        self._client = httpx.AsyncClient(**httpx_kwargs, headers=headers)
+        self._client = _http_client or httpx.AsyncClient(base_url=base_url, headers=headers, **httpx_kwargs)
+        self._lapidary_operations: ty.MutableMapping[str, OperationModel] = {}
 
     async def __aenter__(self):
         await self._client.__aenter__()
@@ -39,22 +38,26 @@ class ClientBase(abc.ABC):
 
     async def _request(
             self,
-            fn: LapidaryOperation,
+            method: str,
+            path: str,
+            fn: ty.Callable[..., ty.Awaitable],
             actual_params: Mapping[str, ty.Any],
     ):
-        if not fn.lapidary_operation_model:
-            operation = get_operation_model(fn)
-            fn.lapidary_operation_model = operation
+        if fn.__name__ not in self._lapidary_operations:
+            operation = get_operation_model(method, path, fn)
+            self._lapidary_operations[fn.__name__] = operation
         else:
-            operation = fn.lapidary_operation_model
+            operation = self._lapidary_operations[fn.__name__]
 
-        request = build_request(
+        request, auth = build_request(
             operation,
             actual_params,
-            ty.cast(RequestFactory, self._client.build_request),
+            self._client.build_request,
         )
 
         logger.debug("%s %s %s", request.method, request.url, request.headers)
 
-        response = await self._client.send(request, auth=get_auth(actual_params))
+        response = await self._client.send(request, auth=auth)
+        await response.aread()
+
         return operation.handle_response(response)

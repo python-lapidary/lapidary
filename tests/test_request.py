@@ -1,108 +1,124 @@
-from typing import List
-import unittest
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import httpx
-from httpx import Cookies, Headers, QueryParams
 import pydantic
+import pytest
+import pytest_asyncio
+import typing_extensions as ty
 
-from lapidary.runtime import ParamLocation
-from lapidary.runtime.model.op import OperationModel
-from lapidary.runtime.model.params import FullParam, ParamStyle
-from lapidary.runtime.model.request import RequestBodyModel
-from lapidary.runtime.request import build_request
-
-
-class BuildRequestAsyncTestCase(unittest.IsolatedAsyncioTestCase):
-    async def test_build_request_from_list(self) -> None:
-        class MyRequestBodyModel(pydantic.BaseModel):
-            a: str
-
-        class MyRequestBodyList(pydantic.RootModel):
-            root: List[MyRequestBodyModel]
-
-        request_factory = Mock()
-        build_request(
-            operation=OperationModel('GET', 'path', {}, RequestBodyModel('body', {'application/json': MyRequestBodyList}), {}),
-            actual_params={'body': MyRequestBodyList(root=[MyRequestBodyModel(a='a')])},
-            request_factory=request_factory
-        )
-
-        call_args, call_kwargs = request_factory.call_args
-        call_kwargs['content'] = [item async for item in call_kwargs['content']]
-
-        assert call_args == (
-            'GET',
-            'path',
-        )
-        assert call_kwargs == {
-            'content': [b'[{"a":"a"}]'],
-            'params': httpx.QueryParams(),
-            'headers': httpx.Headers({'content-type': 'application/json'}),
-            'cookies': httpx.Cookies(),
-        }
+from lapidary.runtime import Query, RequestBody, Responses, get
+from lapidary.runtime.http_consts import CONTENT_TYPE
+from lapidary.runtime.model.params import ParamStyle
+from tests.client import ClientTestBase
 
 
-class BuildRequestTestCase(unittest.TestCase):
-    def test_build_request_none(self):
-        request_factory = Mock()
-        build_request(
-            operation=OperationModel('GET', 'path', {}, None, {}),
-            actual_params={},
-            request_factory=request_factory,
-        )
+class MyRequestBodyModel(pydantic.BaseModel):
+    a: str
 
-        request_factory.assert_called_with(
-            'GET',
-            'path',
-            content=None,
-            params=QueryParams(),
-            headers=Headers(),
-            cookies=Cookies(),
-        )
 
-    def test_request_param_list_simple(self):
-        request_factory = Mock()
-        build_request(
-            operation=OperationModel(
-                'GET',
-                'path',
-                {'q_a': FullParam('a', ParamLocation.query, ParamStyle.form, False, 'q_a', List[str])},
-                None,
-                {},
-            ),
-            actual_params=dict(q_a=['hello', 'world']),
-            request_factory=request_factory,
-        )
+class MyRequestBodyList(pydantic.RootModel):
+    root: ty.List[MyRequestBodyModel]
 
-        request_factory.assert_called_with(
-            'GET',
-            'path',
-            content=None,
-            params=QueryParams(a='hello,world'),
-            headers=Headers(),
-            cookies=Cookies(),
-        )
 
-    def test_request_param_list_exploded(self):
-        request_factory = Mock()
-        build_request(
-            operation=OperationModel(
-                'GET',
-                'path',
-                {'q_a': FullParam('a', ParamLocation.query, ParamStyle.form, True, 'q_a', List[str])},
-                None,
-                {},
-            ),
-            actual_params=dict(q_a=['hello', 'world']),
-            request_factory=request_factory
-        )
+@pytest_asyncio.fixture(scope='function')
+async def mock_http_client():
+    client = httpx.AsyncClient(base_url='http://example.com')
+    client.build_request = Mock(wraps=client.build_request)
+    response = httpx.Response(543, request=httpx.Request('get', ''))
 
-        request_factory.assert_called_with(
-            'GET',
-            'path',
-            content=None,
-            params=QueryParams([('a', 'hello'), ('a', 'world')]),
-            headers=Headers(),
-            cookies=Cookies(),
-        )
+    client.send = AsyncMock(return_value=response)
+
+    yield client
+
+
+@pytest.mark.asyncio
+async def test_build_request_from_list(mock_http_client) -> None:
+    class Client(ClientTestBase):
+        @get('/body_list')
+        async def body_list(
+                self: ty.Self,
+                body: ty.Annotated[MyRequestBodyList, RequestBody({'application/json': MyRequestBodyList})]
+        ) -> ty.Annotated[None, Responses({})]:
+            pass
+
+    async with Client(client=mock_http_client) as client:
+        await client.body_list(body=MyRequestBodyList(root=[MyRequestBodyModel(a='a')]))
+
+    mock_http_client.build_request.assert_called_with(
+        'GET',
+        '/body_list',
+        content='[{"a":"a"}]',
+        params=httpx.QueryParams(),
+        headers=httpx.Headers({
+            CONTENT_TYPE: 'application/json',
+        }),
+        cookies=httpx.Cookies(),
+    )
+
+
+@pytest.mark.asyncio
+async def test_request_param_list_simple(mock_http_client):
+    class Client(ClientTestBase):
+        @get('/param_list_simple')
+        async def param_list_simple(
+                self: ty.Self,
+                q_a: ty.Annotated[ty.List[str], Query('a', style=ParamStyle.simple)]
+        ) -> ty.Annotated[None, Responses({})]:
+            pass
+
+    async with Client(client=mock_http_client) as client:
+        await client.param_list_simple(q_a=['hello', 'world'])
+
+    mock_http_client.build_request.assert_called_with(
+        'GET',
+        '/param_list_simple',
+        content=None,
+        params=httpx.QueryParams(a='hello,world'),
+        headers=httpx.Headers(),
+        cookies=httpx.Cookies(),
+    )
+
+
+@pytest.mark.asyncio
+async def test_build_request_none(mock_http_client):
+    class Client(ClientTestBase):
+        @get('/request_none')
+        async def request_none(
+                self: ty.Self,
+        ) -> ty.Annotated[None, Responses({})]:
+            pass
+
+    async with Client(client=mock_http_client) as client:
+        await client.request_none()
+
+    mock_http_client.build_request.assert_called_with(
+        'GET',
+        '/request_none',
+        content=None,
+        params=httpx.QueryParams(),
+        headers=httpx.Headers(),
+        cookies=httpx.Cookies(),
+    )
+
+
+@pytest.mark.asyncio
+async def test_request_param_list_exploded(mock_http_client):
+    class Client(ClientTestBase):
+        @get('/param_list_exploded')
+        async def param_list_exploded(
+                self: ty.Self,
+                q_a: ty.Annotated[ty.List[str], Query('a', style=ParamStyle.simple, explode=True)]
+        ) -> ty.Annotated[None, Responses({})]:
+            pass
+
+    async with Client(client=mock_http_client) as client:
+        await client.param_list_exploded(q_a=['hello', 'world'])
+
+    mock_http_client.build_request.assert_called_with(
+        'GET',
+        '/param_list_exploded',
+        content=None,
+        params=httpx.QueryParams([('a', 'hello'), ('a', 'world')]),
+        headers=httpx.Headers(),
+        cookies=httpx.Cookies(),
+    )

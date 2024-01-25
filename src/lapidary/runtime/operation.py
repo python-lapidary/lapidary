@@ -1,7 +1,6 @@
 import functools as ft
 
 from .compat import typing as ty
-from .model.op import LapidaryOperation, Operation
 
 if ty.TYPE_CHECKING:
     from .client_base import ClientBase
@@ -12,14 +11,12 @@ def _operation(
         path: str,
 ) -> ty.Callable:
     def wrapper(fn: ty.Callable):
-        fn_ = ty.cast(LapidaryOperation, fn)
-        fn_.lapidary_operation = Operation(method, path)
-        fn_.lapidary_operation_model = None
-
         @ft.wraps(fn)
         async def operation(self: 'ClientBase', **kwargs) -> ty.Any:
             return await self._request(  # pylint: disable=protected-access
-                ty.cast(LapidaryOperation, fn),
+                method,
+                path,
+                fn,
                 kwargs,
             )
 

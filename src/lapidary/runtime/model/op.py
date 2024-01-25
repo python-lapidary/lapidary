@@ -1,70 +1,34 @@
-import abc
-from collections.abc import Iterator
 import dataclasses as dc
 import inspect
 
 import httpx
 
-from .params import FullParam, Param, ParamLocation, ProcessedParams, serialize_param
-from .request import RequestBody, RequestBodyModel
+from .params import RequestPart, parse_params, find_annotations
 from .response_map import ResponseMap, Responses
-from ..absent import ABSENT
 from ..compat import typing as ty
+from ..response import find_type, parse_model
 
-
-@dc.dataclass(frozen=True)
-class InputData:
-    query: httpx.QueryParams
-    headers: httpx.Headers
-    cookies: httpx.Cookies
-    path: ty.Mapping[str, str]
-    request_body: ty.Any
+if ty.TYPE_CHECKING:
+    from .request import RequestBuilder
 
 
 @dc.dataclass(frozen=True)
 class OperationModel:
     method: str
     path: str
-    params: ty.Mapping[str, FullParam]
-    request_body: ty.Optional[RequestBodyModel]
+    params: ty.Mapping[str, RequestPart]
     response_map: ResponseMap
 
-    def process_params(self, actual_params: ty.Mapping[str, ty.Any]) -> ProcessedParams:
-        containers: ty.Mapping[ParamLocation, ty.List[ty.Any]] = {
-            ParamLocation.cookie: [],
-            ParamLocation.header: [],
-            ParamLocation.query: [],
-            ParamLocation.path: [],
-        }
-        request_body: ty.Any = None
-
-        for param_name, value in actual_params.items():
-            if self.request_body and param_name == self.request_body.param_name:
-                request_body = value
+    def process_params(
+            self,
+            actual_params: ty.Mapping[str, ty.Any],
+            request: 'RequestBuilder',
+    ) -> None:
+        for param_name, param_handler in self.params.items():
+            if param_name not in actual_params:
                 continue
 
-            if isinstance(value, httpx.Auth):
-                continue
-
-            formal_param = self.params.get(param_name)
-            if not formal_param:
-                raise TypeError(f'Operation {self.method} {self.path} got an unexpected argument {param_name}')
-
-            if value is ABSENT:
-                continue
-
-            placement = formal_param.location
-
-            value = [(formal_param.alias, value) for value in serialize_param(value, formal_param.style, formal_param.explode)]
-            containers[placement].extend(value)
-
-        return ProcessedParams(
-            query=httpx.QueryParams(containers[ParamLocation.query]),
-            headers=httpx.Headers(containers[ParamLocation.header]),
-            cookies=httpx.Cookies(containers[ParamLocation.cookie]),
-            path={item[0]: item[1] for item in containers[ParamLocation.path]},
-            request_body=request_body,
-        )
+            param_handler.apply(request, actual_params[param_name])
 
     def handle_response(self, response: httpx.Response) -> ty.Any:
         """
@@ -73,15 +37,10 @@ class OperationModel:
         Auth
         """
 
-        from ..response import find_type, parse_model
-
-        response.read()
-
         typ = find_type(response, self.response_map)
 
         if typ is None:
-            response.raise_for_status()
-            return response.content
+            return None
 
         obj: ty.Any = parse_model(response, typ)
 
@@ -96,77 +55,23 @@ class OperationModel:
             return obj
 
 
-@dc.dataclass
-class Operation:
-    method: str
-    path: str
-
-
-def parse_params(sig: inspect.Signature) -> Iterator[ty.Union[FullParam, RequestBodyModel]]:
-    for name, param in sig.parameters.items():
-        anno = param.annotation
-
-        if anno == ty.Self or (isinstance(anno, type) and issubclass(anno, httpx.Auth)):
-            continue
-
-        if param.annotation == inspect.Parameter.empty:
-            raise TypeError(f"Parameter '{name} is missing annotation'")
-
-        param_annos = [a for a in anno.__metadata__ if isinstance(a, (Param, RequestBody))]
-        if len(param_annos) != 1:
-            raise ValueError(f'{param.name}: expected exactly one annotation of type RequestBody, ')
-
-        param_anno = param_annos.pop()
-
-        if isinstance(param_anno, RequestBody):
-            yield RequestBodyModel(
-                name,
-                param_anno.content
-            )
-        else:
-            yield FullParam(
-                name=param.name,
-                alias=param_anno.alias or param.name,
-                location=param_anno.location,
-                type=param.annotation,
-                style=param_anno.get_style(),
-                explode=param_anno.get_explode(),
-            )
-
-
-def get_response_map(return_anno: type) -> ResponseMap:  # type: ignore[valid-type]
-    if return_anno is inspect.Signature.empty:
-        raise TypeError('Operation function must have exactly one Responses annotation')
-    annos = [anno for anno in return_anno.__metadata__ if isinstance(anno, Responses)]  # type: ignore[attr-defined]
+def get_response_map(return_anno: type) -> ResponseMap:
+    annos = find_annotations(return_anno, Responses)
     if len(annos) != 1:
         raise TypeError('Operation function must have exactly one Responses annotation')
 
-    return annos.pop().responses
-
-
-class LapidaryOperation(abc.ABC):
-    lapidary_operation: Operation
-    lapidary_operation_model: ty.Optional[OperationModel]
-
-    def __call__(self, *args, **kwargs) -> ty.Any:
-        pass
+    return annos[0].responses
 
 
 def get_operation_model(
-        fn: LapidaryOperation,
+        method: str,
+        path: str,
+        fn: ty.Callable,
 ) -> OperationModel:
-    base_model: Operation = fn.lapidary_operation
     sig = inspect.signature(fn)
-    params = list(parse_params(sig))
-    request_body_ = [param for param in params if isinstance(param, RequestBodyModel)]
-    if len(request_body_) > 1:
-        raise ValueError()
-    request_body = request_body_.pop() if request_body_ else None
-
     return OperationModel(
-        method=base_model.method,
-        path=base_model.path,
-        params={param.name: param for param in params if isinstance(param, (FullParam, httpx.Auth))},
-        request_body=request_body,
+        method=method,
+        path=path,
+        params=parse_params(sig),
         response_map=get_response_map(sig.return_annotation),
     )

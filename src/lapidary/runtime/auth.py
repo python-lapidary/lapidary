@@ -40,14 +40,3 @@ class APIKeyAuth(AuthFactory):
     def __call__(self, body: object) -> httpx.Auth:
         typ = api_key_in[self.in_]
         return typ(self.format.format(body=body), self.name)  # type: ignore[misc]
-
-
-def get_auth(params: ty.Mapping[str, ty.Any]) -> ty.Optional[httpx.Auth]:
-    auth_params = [value for value in params.values() if isinstance(value, httpx.Auth)]
-    auth_num = len(auth_params)
-    if auth_num == 0:
-        return None
-    elif auth_num == 1:
-        return auth_params[0]
-    else:
-        return MultiAuth(*auth_params)
