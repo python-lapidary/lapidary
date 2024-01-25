@@ -12,7 +12,7 @@ if ty.TYPE_CHECKING:
     from .request import RequestBuilder
 
 
-@dc.dataclass(frozen=True)
+@dc.dataclass
 class OperationModel:
     method: str
     path: str

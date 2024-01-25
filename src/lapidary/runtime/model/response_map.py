@@ -10,6 +10,6 @@ MimeMap = ty.Mapping[MimeType, ty.Type]
 ResponseMap = ty.Mapping[ResponseCode, MimeMap]
 
 
-@dc.dataclass(frozen=True)
+@dc.dataclass
 class Responses:
     responses: ResponseMap

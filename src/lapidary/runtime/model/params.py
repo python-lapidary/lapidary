@@ -41,8 +41,8 @@ class ParamStyle(Enum):
     deepObject = 'deepObject'
 
 
-@dc.dataclass(frozen=True)
-class Param( RequestPartHandler,abc.ABC,):
+@dc.dataclass
+class Param(RequestPartHandler, abc.ABC):
     alias: ty.Optional[str] = dc.field(default=None)
 
     style: ParamStyle = dc.field(default=ParamStyle.simple)
@@ -118,7 +118,7 @@ class AuthHandler(RequestPartHandler):
         builder.auth = value
 
 
-@dc.dataclass(frozen=True)
+@dc.dataclass
 class RequestPart:
     request_part: RequestPartHandler
     name: str
@@ -129,7 +129,7 @@ class RequestPart:
             self.request_part.apply(builder, self.name, self.type, value)
 
 
-@dc.dataclass(frozen=True)
+@dc.dataclass
 class RequestBody(RequestPartHandler):
     content: ty.Mapping[str, ty.Type]
 

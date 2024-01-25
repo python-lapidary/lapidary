@@ -8,7 +8,7 @@ if ty.TYPE_CHECKING:
     from .model.request import RequestBuilder
 
 
-@dc.dataclass(frozen=True)
+@dc.dataclass
 class Cookie(Param):
     style: ParamStyle = ParamStyle.form
 
@@ -16,7 +16,7 @@ class Cookie(Param):
         builder.cookies[name] = value
 
 
-@dc.dataclass(frozen=True)
+@dc.dataclass
 class Header(Param):
     style: ParamStyle = ParamStyle.simple
 
@@ -24,7 +24,7 @@ class Header(Param):
         builder.headers[name] = str(value)
 
 
-@dc.dataclass(frozen=True)
+@dc.dataclass
 class Path(Param):
     style: ParamStyle = ParamStyle.simple
 
@@ -32,7 +32,7 @@ class Path(Param):
         builder.path_params[name] = value
 
 
-@dc.dataclass(frozen=True)
+@dc.dataclass
 class Query(Param):
     style: ParamStyle = dc.field(default=ParamStyle.form)
 
