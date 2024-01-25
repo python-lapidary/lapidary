@@ -38,8 +38,13 @@ theme:
   - navigation.sections
   plugins:
   - privacy
-
+  custom_dir: theme
 markdown_extensions:
 - admonition
 - tables
 - pymdownx.tasklist
+
+extra:
+  analytics:
+    provider: goatcounter
+    code: lapidary
