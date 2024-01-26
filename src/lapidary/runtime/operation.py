@@ -1,18 +1,18 @@
 import functools as ft
 
-from .compat import typing as ty
+import typing_extensions as typing
 
-if ty.TYPE_CHECKING:
+if typing.TYPE_CHECKING:
     from .client_base import ClientBase
 
 
 def _operation(
         method: str,
         path: str,
-) -> ty.Callable:
-    def wrapper(fn: ty.Callable):
+) -> typing.Callable:
+    def wrapper(fn: typing.Callable):
         @ft.wraps(fn)
-        async def operation(self: 'ClientBase', **kwargs) -> ty.Any:
+        async def operation(self: 'ClientBase', **kwargs) -> typing.Any:
             return await self._request(  # pylint: disable=protected-access
                 method,
                 path,
@@ -25,8 +25,8 @@ def _operation(
     return wrapper
 
 
-class MethodProto(ty.Protocol):
-    def __call__(self, path: str) -> ty.Callable:
+class MethodProto(typing.Protocol):
+    def __call__(self, path: str) -> typing.Callable:
         pass
 
 

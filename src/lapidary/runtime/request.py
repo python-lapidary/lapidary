@@ -1,6 +1,7 @@
 import httpx
 
-from .compat import typing as ty
+import typing_extensions as typing
+
 from .http_consts import ACCEPT, MIME_JSON
 from .mime import find_mime
 from .model.response_map import ResponseMap
@@ -8,7 +9,7 @@ from .model.op import OperationModel
 from .model.request import RequestFactory, RequestBuilder
 
 
-def get_accept_header(response_map: ty.Optional[ResponseMap]) -> ty.Optional[str]:
+def get_accept_header(response_map: typing.Optional[ResponseMap]) -> typing.Optional[str]:
     if not response_map:
         return None
 
@@ -22,9 +23,9 @@ def get_accept_header(response_map: ty.Optional[ResponseMap]) -> ty.Optional[str
 
 def build_request(
         operation: 'OperationModel',
-        actual_params: ty.Mapping[str, ty.Any],
+        actual_params: typing.Mapping[str, typing.Any],
         request_factory: 'RequestFactory',
-) -> tuple[httpx.Request, ty.Optional[httpx.Auth]]:
+) -> tuple[httpx.Request, typing.Optional[httpx.Auth]]:
     builder = RequestBuilder(
         request_factory,
         operation.method,

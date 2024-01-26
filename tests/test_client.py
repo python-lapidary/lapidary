@@ -8,9 +8,9 @@ import httpx
 import httpx_auth
 import pydantic
 from starlette.responses import JSONResponse
+import typing_extensions as typing
 
 from lapidary.runtime import APIKeyAuth, ClientBase, get, post, put, ParamStyle, Path, RequestBody, Responses
-from lapidary.runtime.compat import typing as ty
 from lapidary.runtime.http_consts import MIME_JSON
 
 
@@ -41,7 +41,7 @@ cats_app = fastapi.FastAPI(debug=True)
 
 
 @cats_app.get('/cats')
-async def cat_list() -> ty.List[Cat]:
+async def cat_list() -> typing.List[Cat]:
     return [Cat(id=1, name="Tom")]
 
 
@@ -83,20 +83,20 @@ class CatClient(ClientBase):
 
     @get('/cats')
     async def cat_list(
-            self: ty.Self,
-    ) -> ty.Annotated[Cat, Responses({
+            self: typing.Self,
+    ) -> typing.Annotated[Cat, Responses({
         'default': {
-            'application/json': ty.List[Cat]
+            'application/json': typing.List[Cat]
         },
     })]:
         pass
 
     @get('/cat/{id}')
     async def cat_get(
-            self: ty.Self,
+            self: typing.Self,
             *,
-            id: ty.Annotated[int, Path(style=ParamStyle.simple)],  # pylint: disable=redefined-builtin
-    ) -> ty.Annotated[Cat, Responses({
+            id: typing.Annotated[int, Path(style=ParamStyle.simple)],  # pylint: disable=redefined-builtin
+    ) -> typing.Annotated[Cat, Responses({
         '2XX': {
             'application/json': Cat
         },
@@ -108,10 +108,10 @@ class CatClient(ClientBase):
 
     @put('/cat')
     async def cat_update(
-            self: ty.Self,
+            self: typing.Self,
             *,
-            body: ty.Annotated[Cat, RequestBody({'application/json': Cat})],
-    ) -> ty.Annotated[Cat, Responses({
+            body: typing.Annotated[Cat, RequestBody({'application/json': Cat})],
+    ) -> typing.Annotated[Cat, Responses({
         'default': {
             'application/json': Cat
         }
@@ -120,14 +120,14 @@ class CatClient(ClientBase):
 
     @post('/login')
     async def login(
-            self: ty.Self,
+            self: typing.Self,
             *,
-            body: ty.Annotated[AuthRequest, RequestBody({MIME_JSON: AuthRequest})],
-    ) -> ty.Annotated[
+            body: typing.Annotated[AuthRequest, RequestBody({MIME_JSON: AuthRequest})],
+    ) -> typing.Annotated[
         httpx.Auth,
         Responses({
             '200': {
-                MIME_JSON: ty.Annotated[
+                MIME_JSON: typing.Annotated[
                     AuthResponse,
                     APIKeyAuth(
                         'header',

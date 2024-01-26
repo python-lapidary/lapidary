@@ -1,10 +1,11 @@
 import dataclasses as dc
-import typing as ty
+
+import typing_extensions as typing
 
 import httpx
 
 
-class RequestFactory(ty.Protocol):
+class RequestFactory(typing.Protocol):
     """Protocol for httpx.BaseClient.build_request()"""
 
     def __call__(  # pylint: disable=too-many-arguments
@@ -12,15 +13,15 @@ class RequestFactory(ty.Protocol):
             method: str,
             url: str,
             *,
-            content: ty.Optional[httpx._types.RequestContent] = None,
-            # data: ty.Optional[httpx._types.RequestData] = None,
-            # files: ty.Optional[httpx._types.RequestFiles] = None,
-            # json: ty.Optional[ty.Any] = None,
-            params: ty.Optional[httpx._types.QueryParamTypes] = None,
-            headers: ty.Optional[httpx._types.HeaderTypes] = None,
-            cookies: ty.Optional[httpx._types.CookieTypes] = None,
-            # timeout: ty.Union[httpx._types.TimeoutTypes, httpx._client.UseClientDefault] = httpx.USE_CLIENT_DEFAULT,
-            # extensions: ty.Optional[httpx._types.RequestExtensions] = None,
+            content: typing.Optional[httpx._types.RequestContent] = None,
+            # data: typing.Optional[httpx._types.RequestData] = None,
+            # files: typing.Optional[httpx._types.RequestFiles] = None,
+            # json: typing.Optional[typing.Any] = None,
+            params: typing.Optional[httpx._types.QueryParamTypes] = None,
+            headers: typing.Optional[httpx._types.HeaderTypes] = None,
+            cookies: typing.Optional[httpx._types.CookieTypes] = None,
+            # timeout: typing.Union[httpx._types.TimeoutTypes, httpx._client.UseClientDefault] = httpx.USE_CLIENT_DEFAULT,
+            # extensions: typing.Optional[httpx._types.RequestExtensions] = None,
     ) -> httpx.Request:
         pass
 
@@ -39,13 +40,13 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
 
     cookies: httpx.Cookies = dc.field(default_factory=httpx.Cookies)
     headers: httpx.Headers = dc.field(default_factory=httpx.Headers)
-    path_params: ty.MutableMapping[str, httpx._types.PrimitiveData] = dc.field(default_factory=dict)
-    query_params: ty.MutableMapping[str, str] = dc.field(default_factory=dict)
+    path_params: typing.MutableMapping[str, httpx._types.PrimitiveData] = dc.field(default_factory=dict)
+    query_params: typing.MutableMapping[str, str] = dc.field(default_factory=dict)
 
-    content: ty.Optional[httpx._types.RequestContent] = None
-    auth: ty.Optional[httpx.Auth] = None
+    content: typing.Optional[httpx._types.RequestContent] = None
+    auth: typing.Optional[httpx.Auth] = None
 
-    def __call__(self) -> tuple[httpx.Request, ty.Optional[httpx.Auth]]:
+    def __call__(self) -> tuple[httpx.Request, typing.Optional[httpx.Auth]]:
         return (
             self.request_factory(
                 self.method,

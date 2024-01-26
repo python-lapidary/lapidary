@@ -2,13 +2,13 @@ import dataclasses as dc
 import inspect
 
 import httpx
+import typing_extensions as typing
 
 from .params import RequestPart, parse_params, find_annotations
 from .response_map import ResponseMap, Responses
-from ..compat import typing as ty
 from ..response import find_type, parse_model
 
-if ty.TYPE_CHECKING:
+if typing.TYPE_CHECKING:
     from .request import RequestBuilder
 
 
@@ -16,12 +16,12 @@ if ty.TYPE_CHECKING:
 class OperationModel:
     method: str
     path: str
-    params: ty.Mapping[str, RequestPart]
+    params: typing.Mapping[str, RequestPart]
     response_map: ResponseMap
 
     def process_params(
             self,
-            actual_params: ty.Mapping[str, ty.Any],
+            actual_params: typing.Mapping[str, typing.Any],
             request: 'RequestBuilder',
     ) -> None:
         for param_name, param_handler in self.params.items():
@@ -30,7 +30,7 @@ class OperationModel:
 
             param_handler.apply(request, actual_params[param_name])
 
-    def handle_response(self, response: httpx.Response) -> ty.Any:
+    def handle_response(self, response: httpx.Response) -> typing.Any:
         """
         Possible special cases:
         Exception
@@ -42,7 +42,7 @@ class OperationModel:
         if typ is None:
             return None
 
-        obj: ty.Any = parse_model(response, typ)
+        obj: typing.Any = parse_model(response, typ)
 
         if '__metadata__' in dir(typ):
             for anno in typ.__metadata__:
@@ -66,7 +66,7 @@ def get_response_map(return_anno: type) -> ResponseMap:
 def get_operation_model(
         method: str,
         path: str,
-        fn: ty.Callable,
+        fn: typing.Callable,
 ) -> OperationModel:
     sig = inspect.signature(fn)
     return OperationModel(

@@ -1,13 +1,13 @@
 import dataclasses as dc
 
-from ..compat import typing as ty
+import typing_extensions as typing
 
-T = ty.TypeVar('T')
+T = typing.TypeVar('T')
 MimeType = str
 ResponseCode = str
 
-MimeMap = ty.Mapping[MimeType, ty.Type]
-ResponseMap = ty.Mapping[ResponseCode, MimeMap]
+MimeMap = typing.Mapping[MimeType, typing.Type]
+ResponseMap = typing.Mapping[ResponseCode, MimeMap]
 
 
 @dc.dataclass

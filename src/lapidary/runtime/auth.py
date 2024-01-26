@@ -9,11 +9,11 @@ import dataclasses as dc
 import httpx
 import httpx_auth
 from httpx_auth.authentication import _MultiAuth as MultiAuth
+import typing_extensions as typing
 
-from .compat import typing as ty
 from .model.api_key import CookieApiKey
 
-AuthType: ty.TypeAlias = ty.Callable[[str, str], httpx.Auth]
+AuthType: typing.TypeAlias = typing.Callable[[str, str], httpx.Auth]
 
 
 class AuthFactory(abc.ABC):
@@ -22,9 +22,9 @@ class AuthFactory(abc.ABC):
         pass
 
 
-APIKeyAuthLocation: ty.TypeAlias = ty.Literal['cookie', 'header', 'query']
+APIKeyAuthLocation: typing.TypeAlias = typing.Literal['cookie', 'header', 'query']
 
-api_key_in: ty.Mapping[APIKeyAuthLocation, AuthType] = {
+api_key_in: typing.Mapping[APIKeyAuthLocation, AuthType] = {
     'cookie': CookieApiKey,
     'header': httpx_auth.authentication.HeaderApiKey,
     'query': httpx_auth.authentication.QueryApiKey,

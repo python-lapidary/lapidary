@@ -1,10 +1,11 @@
 import dataclasses as dc
 
-from .compat import typing as ty
+import typing_extensions as typing
+
 from .model.params import Param, ParamStyle
 from .types_ import ParamValue
 
-if ty.TYPE_CHECKING:
+if typing.TYPE_CHECKING:
     from .model.request import RequestBuilder
 
 
@@ -12,7 +13,7 @@ if ty.TYPE_CHECKING:
 class Cookie(Param):
     style: ParamStyle = ParamStyle.form
 
-    def _apply(self, builder: 'RequestBuilder', name: str, value: ty.Any) -> None:
+    def _apply(self, builder: 'RequestBuilder', name: str, value: typing.Any) -> None:
         builder.cookies[name] = value
 
 
@@ -28,7 +29,7 @@ class Header(Param):
 class Path(Param):
     style: ParamStyle = ParamStyle.simple
 
-    def _apply(self, builder: 'RequestBuilder', name: str, value: ty.Any) -> None:
+    def _apply(self, builder: 'RequestBuilder', name: str, value: typing.Any) -> None:
         builder.path_params[name] = value
 
 
@@ -36,5 +37,5 @@ class Path(Param):
 class Query(Param):
     style: ParamStyle = dc.field(default=ParamStyle.form)
 
-    def _apply(self, builder: 'RequestBuilder', name: str, value: ty.Any) -> None:
+    def _apply(self, builder: 'RequestBuilder', name: str, value: typing.Any) -> None:
         builder.query_params[name] = value

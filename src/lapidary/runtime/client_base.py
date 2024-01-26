@@ -4,8 +4,8 @@ from importlib.metadata import version
 import logging
 
 import httpx
+import typing_extensions as typing
 
-from .compat import typing as ty
 from .model.op import OperationModel, get_operation_model
 from .request import build_request
 
@@ -18,8 +18,8 @@ class ClientBase(abc.ABC):
     def __init__(
             self,
             base_url: str,
-            user_agent: ty.Optional[str] = USER_AGENT,
-            _http_client: ty.Optional[httpx.AsyncClient] = None,
+            user_agent: typing.Optional[str] = USER_AGENT,
+            _http_client: typing.Optional[httpx.AsyncClient] = None,
             **httpx_kwargs,
     ):
         headers = httpx.Headers(httpx_kwargs.pop('headers', None)) or httpx.Headers()
@@ -27,7 +27,7 @@ class ClientBase(abc.ABC):
             headers['User-Agent'] = user_agent
 
         self._client = _http_client or httpx.AsyncClient(base_url=base_url, headers=headers, **httpx_kwargs)
-        self._lapidary_operations: ty.MutableMapping[str, OperationModel] = {}
+        self._lapidary_operations: typing.MutableMapping[str, OperationModel] = {}
 
     async def __aenter__(self):
         await self._client.__aenter__()
@@ -40,8 +40,8 @@ class ClientBase(abc.ABC):
             self,
             method: str,
             path: str,
-            fn: ty.Callable[..., ty.Awaitable],
-            actual_params: Mapping[str, ty.Any],
+            fn: typing.Callable[..., typing.Awaitable],
+            actual_params: Mapping[str, typing.Any],
     ):
         if fn.__name__ not in self._lapidary_operations:
             operation = get_operation_model(method, path, fn)

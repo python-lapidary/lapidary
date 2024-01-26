@@ -17,9 +17,10 @@ A function that handles such an endpoint can declare that it returns an Auth obj
 
 ```python
 import pydantic
-import typing_extensions as ty
-from lapidary.runtime import post, ClientBase, RequestBody, APIKeyAuth, Responses
 from httpx import Auth
+from typing_extensions import Annotated, Self
+
+from lapidary.runtime import post, ClientBase, RequestBody, APIKeyAuth, Responses
 
 
 class LoginRequest(pydantic.BaseModel):
@@ -33,14 +34,14 @@ class LoginResponse(pydantic.BaseModel):
 class Client(ClientBase):
     @post('/login')
     def login(
-            self: ty.Self,
+            self: Self,
             *,
-            body: ty.Annotated[LoginRequest, RequestBody({'application/json': LoginRequest})],
-    ) -> ty.Annotated[
+            body: Annotated[LoginRequest, RequestBody({'application/json': LoginRequest})],
+    ) -> Annotated[
         Auth,
         Responses({
             '200': {
-                'application/json': ty.Annotated[
+                'application/json': Annotated[
                     LoginResponse,
                     APIKeyAuth(
                         in_='header',
