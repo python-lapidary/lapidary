@@ -55,22 +55,18 @@ mypy_path = "src"
 namespace_packages = true
 python_version = "3.9"
 
-[tool.pylint]
-disable = [
-    "C0114", "C0115", "C0116", "C0415",
-    "R1735", "R1705", "R1720"
-]
-max-line-length = 140
+[tool.ruff]
+target-version = "py39"
+line-length = 140
 
-[tool.pylint.src]
-disable = [
-    "W0511", "W1514"
-]
+[tool.ruff.lint]
+#extend-select = ["E501", "E4", "E7", "E9", "F", "B", 'UP', 'D']
+select = ['F', 'E', 'W', 'C90', 'I', 'UP']
 
-[tool.pylint.tests]
-disable = [
-    "C0116", "C0103",
-    "E0401",
-    "R0801", "R0903",
-    "W0621"
-]
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["lapidary.runtime"]
+known-local-folder = ["src"]

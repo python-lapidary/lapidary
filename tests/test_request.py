@@ -36,8 +36,8 @@ async def test_build_request_from_list(mock_http_client) -> None:
     class Client(ClientTestBase):
         @get('/body_list')
         async def body_list(
-                self: typing.Self,
-                body: typing.Annotated[MyRequestBodyList, RequestBody({'application/json': MyRequestBodyList})]
+            self: typing.Self,
+            body: typing.Annotated[MyRequestBodyList, RequestBody({'application/json': MyRequestBodyList})],
         ) -> typing.Annotated[None, Responses({})]:
             pass
 
@@ -49,9 +49,11 @@ async def test_build_request_from_list(mock_http_client) -> None:
         '/body_list',
         content='[{"a":"a"}]',
         params=httpx.QueryParams(),
-        headers=httpx.Headers({
-            CONTENT_TYPE: 'application/json',
-        }),
+        headers=httpx.Headers(
+            {
+                CONTENT_TYPE: 'application/json',
+            }
+        ),
         cookies=httpx.Cookies(),
     )
 
@@ -61,8 +63,8 @@ async def test_request_param_list_simple(mock_http_client):
     class Client(ClientTestBase):
         @get('/param_list_simple')
         async def param_list_simple(
-                self: typing.Self,
-                q_a: typing.Annotated[typing.List[str], Query('a', style=ParamStyle.simple)]
+            self: typing.Self,
+            q_a: typing.Annotated[typing.List[str], Query('a', style=ParamStyle.simple)],
         ) -> typing.Annotated[None, Responses({})]:
             pass
 
@@ -84,7 +86,7 @@ async def test_build_request_none(mock_http_client):
     class Client(ClientTestBase):
         @get('/request_none')
         async def request_none(
-                self: typing.Self,
+            self: typing.Self,
         ) -> typing.Annotated[None, Responses({})]:
             pass
 
@@ -106,8 +108,8 @@ async def test_request_param_list_exploded(mock_http_client):
     class Client(ClientTestBase):
         @get('/param_list_exploded')
         async def param_list_exploded(
-                self: typing.Self,
-                q_a: typing.Annotated[typing.List[str], Query('a', style=ParamStyle.simple, explode=True)]
+            self: typing.Self,
+            q_a: typing.Annotated[typing.List[str], Query('a', style=ParamStyle.simple, explode=True)],
         ) -> typing.Annotated[None, Responses({})]:
             pass
 

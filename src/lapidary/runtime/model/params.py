@@ -75,15 +75,9 @@ def serialize_param(value, style: ParamStyle, explode_list: bool) -> ParamValue:
     elif isinstance(value, typing.Iterable):
         if explode_list:
             # httpx explodes lists, so just pass it thru
-            return [
-                serialize_singleton(val)
-                for val in value
-            ]
+            return [serialize_singleton(val) for val in value]
         else:
-            return ','.join([
-                serialize_singleton_as_str(val)
-                for val in value
-            ])
+            return ','.join([serialize_singleton_as_str(val) for val in value])
     else:
         return serialize_singleton(value)
 
@@ -91,9 +85,7 @@ def serialize_param(value, style: ParamStyle, explode_list: bool) -> ParamValue:
 def serialize_singleton(value: typing.Any) -> httpx._types.PrimitiveData:
     if value is None or isinstance(value, (str, int, float, bool)):
         return value
-    elif isinstance(value, (
-            uuid.UUID,
-    )):
+    elif isinstance(value, (uuid.UUID,)):
         return str(value)
     elif isinstance(value, enum.Enum):
         return value.value
@@ -105,7 +97,15 @@ def serialize_singleton(value: typing.Any) -> httpx._types.PrimitiveData:
 def serialize_singleton_as_str(value: typing.Any) -> str:
     if isinstance(value, str):
         return value
-    elif isinstance(value, (int, float, bool, uuid.UUID,)):
+    elif isinstance(
+        value,
+        (
+            int,
+            float,
+            bool,
+            uuid.UUID,
+        ),
+    ):
         return str(value)
     elif isinstance(value, enum.Enum):
         return value.value
@@ -131,7 +131,7 @@ class RequestPart:
 
 @dc.dataclass
 class RequestBody(RequestPartHandler):
-    content: typing.Mapping[str, typing.Type]
+    content: typing.Mapping[str, type]
 
     def apply(self, builder: 'RequestBuilder', name: str, typ: type, value: typing.Any) -> None:
         content_type, serializer = self.find_request_body_serializer(value)
@@ -139,13 +139,14 @@ class RequestBody(RequestPartHandler):
         builder.content = serializer(value)
 
     def find_request_body_serializer(
-            self,
-            obj: typing.Any,
+        self,
+        obj: typing.Any,
     ) -> typing.Tuple[str, Serializer]:
         # find the serializer by type
 
         for content_type, typ in self.content.items():
             if typ == type(obj):
+
                 def serialize(model):
                     return serialize_param(model, ParamStyle.simple, explode_list=False)
 
@@ -190,7 +191,9 @@ T = typing.TypeVar('T')
 
 
 def find_annotations(
-        user_type: type, annotation_type: type[T], ) -> typing.Sequence[T]:
+    user_type: type,
+    annotation_type: type[T],
+) -> typing.Sequence[T]:
     if user_type is inspect.Signature.empty or '__metadata__' not in dir(user_type):
         return ()
     return [anno for anno in user_type.__metadata__ if isinstance(anno, annotation_type)]  # type: ignore[attr-defined]

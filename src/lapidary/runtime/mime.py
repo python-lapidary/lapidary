@@ -1,4 +1,5 @@
-from typing import Collection, Optional
+from collections.abc import Collection
+from typing import Optional
 
 from mimeparse import best_match  # type: ignore[import]
 

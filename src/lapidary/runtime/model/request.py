@@ -1,27 +1,26 @@
 import dataclasses as dc
 
-import typing_extensions as typing
-
 import httpx
+import typing_extensions as typing
 
 
 class RequestFactory(typing.Protocol):
     """Protocol for httpx.BaseClient.build_request()"""
 
     def __call__(  # pylint: disable=too-many-arguments
-            self,
-            method: str,
-            url: str,
-            *,
-            content: typing.Optional[httpx._types.RequestContent] = None,
-            # data: typing.Optional[httpx._types.RequestData] = None,
-            # files: typing.Optional[httpx._types.RequestFiles] = None,
-            # json: typing.Optional[typing.Any] = None,
-            params: typing.Optional[httpx._types.QueryParamTypes] = None,
-            headers: typing.Optional[httpx._types.HeaderTypes] = None,
-            cookies: typing.Optional[httpx._types.CookieTypes] = None,
-            # timeout: typing.Union[httpx._types.TimeoutTypes, httpx._client.UseClientDefault] = httpx.USE_CLIENT_DEFAULT,
-            # extensions: typing.Optional[httpx._types.RequestExtensions] = None,
+        self,
+        method: str,
+        url: str,
+        *,
+        content: typing.Optional[httpx._types.RequestContent] = None,
+        # data: typing.Optional[httpx._types.RequestData] = None,
+        # files: typing.Optional[httpx._types.RequestFiles] = None,
+        # json: typing.Optional[typing.Any] = None,
+        params: typing.Optional[httpx._types.QueryParamTypes] = None,
+        headers: typing.Optional[httpx._types.HeaderTypes] = None,
+        cookies: typing.Optional[httpx._types.CookieTypes] = None,
+        # timeout: typing.Union[httpx._types.TimeoutTypes, httpx._client.UseClientDefault] = httpx.USE_CLIENT_DEFAULT,
+        # extensions: typing.Optional[httpx._types.RequestExtensions] = None,
     ) -> httpx.Request:
         pass
 

@@ -8,8 +8,8 @@ import dataclasses as dc
 
 import httpx
 import httpx_auth
-from httpx_auth.authentication import _MultiAuth as MultiAuth
 import typing_extensions as typing
+from httpx_auth.authentication import _MultiAuth as MultiAuth
 
 from .model.api_key import CookieApiKey
 

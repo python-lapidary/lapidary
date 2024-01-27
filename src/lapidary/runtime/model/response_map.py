@@ -6,7 +6,7 @@ T = typing.TypeVar('T')
 MimeType = str
 ResponseCode = str
 
-MimeMap = typing.Mapping[MimeType, typing.Type]
+MimeMap = typing.Mapping[MimeType, type]
 ResponseMap = typing.Mapping[ResponseCode, MimeMap]
 
 

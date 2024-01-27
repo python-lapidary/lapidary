@@ -4,9 +4,9 @@ import inspect
 import httpx
 import typing_extensions as typing
 
-from .params import RequestPart, parse_params, find_annotations
-from .response_map import ResponseMap, Responses
 from ..response import find_type, parse_model
+from .params import RequestPart, find_annotations, parse_params
+from .response_map import ResponseMap, Responses
 
 if typing.TYPE_CHECKING:
     from .request import RequestBuilder
@@ -20,9 +20,9 @@ class OperationModel:
     response_map: ResponseMap
 
     def process_params(
-            self,
-            actual_params: typing.Mapping[str, typing.Any],
-            request: 'RequestBuilder',
+        self,
+        actual_params: typing.Mapping[str, typing.Any],
+        request: 'RequestBuilder',
     ) -> None:
         for param_name, param_handler in self.params.items():
             if param_name not in actual_params:
@@ -64,9 +64,9 @@ def get_response_map(return_anno: type) -> ResponseMap:
 
 
 def get_operation_model(
-        method: str,
-        path: str,
-        fn: typing.Callable,
+    method: str,
+    path: str,
+    fn: typing.Callable,
 ) -> OperationModel:
     sig = inspect.signature(fn)
     return OperationModel(

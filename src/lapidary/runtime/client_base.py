@@ -1,7 +1,7 @@
 import abc
+import logging
 from collections.abc import Mapping
 from importlib.metadata import version
-import logging
 
 import httpx
 import typing_extensions as typing
@@ -16,11 +16,11 @@ USER_AGENT = f'lapidary/{version("lapidary")}'
 
 class ClientBase(abc.ABC):
     def __init__(
-            self,
-            base_url: str,
-            user_agent: typing.Optional[str] = USER_AGENT,
-            _http_client: typing.Optional[httpx.AsyncClient] = None,
-            **httpx_kwargs,
+        self,
+        base_url: str,
+        user_agent: typing.Optional[str] = USER_AGENT,
+        _http_client: typing.Optional[httpx.AsyncClient] = None,
+        **httpx_kwargs,
     ):
         headers = httpx.Headers(httpx_kwargs.pop('headers', None)) or httpx.Headers()
         if user_agent:
@@ -37,11 +37,11 @@ class ClientBase(abc.ABC):
         await self._client.__aexit__(__exc_type, __exc_value, __traceback)
 
     async def _request(
-            self,
-            method: str,
-            path: str,
-            fn: typing.Callable[..., typing.Awaitable],
-            actual_params: Mapping[str, typing.Any],
+        self,
+        method: str,
+        path: str,
+        fn: typing.Callable[..., typing.Awaitable],
+        actual_params: Mapping[str, typing.Any],
     ):
         if fn.__name__ not in self._lapidary_operations:
             operation = get_operation_model(method, path, fn)
@@ -55,7 +55,7 @@ class ClientBase(abc.ABC):
             self._client.build_request,
         )
 
-        logger.debug("%s %s %s", request.method, request.url, request.headers)
+        logger.debug('%s %s %s', request.method, request.url, request.headers)
 
         response = await self._client.send(request, auth=auth)
         await response.aread()

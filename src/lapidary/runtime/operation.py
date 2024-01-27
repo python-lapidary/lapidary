@@ -7,8 +7,8 @@ if typing.TYPE_CHECKING:
 
 
 def _operation(
-        method: str,
-        path: str,
+    method: str,
+    path: str,
 ) -> typing.Callable:
     def wrapper(fn: typing.Callable):
         @ft.wraps(fn)

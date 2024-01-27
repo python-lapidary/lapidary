@@ -16,8 +16,8 @@ such endpoint to a security scheme as in the case of OIDC.
 A function that handles such an endpoint can declare that it returns an Auth object, but it's not obvious to the user of python API which security scheme the method returns.
 
 ```python
-import pydantic
 from httpx import Auth
+import pydantic
 from typing_extensions import Annotated, Self
 
 from lapidary.runtime import post, ClientBase, RequestBody, APIKeyAuth, Responses
@@ -87,8 +87,9 @@ If multiple `Auth` parameters are passed, they're wrapped in `lapidary.runtime.a
 Auth object returned by the login operation declared in the above example can be used by another operation.
 
 ```python
-from typing import Annotated, Self
 from httpx import Auth
+from typing import Annotated, Self
+
 from lapidary.runtime import ClientBase, get, post
 
 

@@ -1,5 +1,4 @@
 import httpx
-
 import typing_extensions as typing
 
 Serializer: typing.TypeAlias = typing.Callable[[typing.Any], typing.Union[str, bytes]]
