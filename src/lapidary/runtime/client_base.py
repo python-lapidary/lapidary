@@ -11,14 +11,14 @@ from .request import build_request
 
 logger = logging.getLogger(__name__)
 
-USER_AGENT = f'lapidary/{version("lapidary")}'
+USER_AGENT = f'lapidary.dev/{version("lapidary")}'
 
 
 class ClientBase(abc.ABC):
     def __init__(
         self,
         base_url: str,
-        user_agent: typing.Optional[str] = USER_AGENT,
+        user_agent: str = USER_AGENT,
         _http_client: typing.Optional[httpx.AsyncClient] = None,
         **httpx_kwargs,
     ):
