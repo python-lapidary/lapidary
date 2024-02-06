@@ -15,9 +15,6 @@ nav:
   - usage/client.md
   - usage/operation.md
   - usage/auth.md
-- OpenAPI:
-  - openapi/index.md
-  - openapi/request_body.md
 
 plugins:
 - mkdocstrings:
