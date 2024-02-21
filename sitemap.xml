@@ -2,32 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://lapidary.dev/</loc>
-         <lastmod>2024-01-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://lapidary.dev/openapi/</loc>
-         <lastmod>2024-01-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://lapidary.dev/openapi/request_body/</loc>
-         <lastmod>2024-01-27</lastmod>
+         <lastmod>2024-02-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://lapidary.dev/usage/auth/</loc>
-         <lastmod>2024-01-27</lastmod>
+         <lastmod>2024-02-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://lapidary.dev/usage/client/</loc>
-         <lastmod>2024-01-27</lastmod>
+         <lastmod>2024-02-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://lapidary.dev/usage/operation/</loc>
-         <lastmod>2024-01-27</lastmod>
+         <lastmod>2024-02-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
