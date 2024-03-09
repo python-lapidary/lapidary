@@ -23,13 +23,6 @@ class RequestPartHandler(abc.ABC):
         pass
 
 
-class ParamLocation(enum.Enum):
-    cookie = 'cookie'
-    header = 'header'
-    path = 'path'
-    query = 'query'
-
-
 @unique
 class ParamStyle(Enum):
     matrix = 'matrix'
