@@ -19,8 +19,8 @@ def get_accept_header(response_map: typing.Optional[ResponseMap]) -> typing.Opti
 def build_request(
     operation: 'OperationModel',
     actual_params: typing.Mapping[str, typing.Any],
-    request_factory: 'RequestFactory',
-) -> tuple[httpx.Request, typing.Optional[httpx.Auth]]:
+    request_factory: RequestFactory,
+) -> httpx.Request:
     builder = RequestBuilder(
         request_factory,
         operation.method,

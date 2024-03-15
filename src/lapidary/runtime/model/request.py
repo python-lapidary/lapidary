@@ -43,17 +43,16 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
     query_params: typing.MutableMapping[str, str] = dc.field(default_factory=dict)
 
     content: typing.Optional[httpx._types.RequestContent] = None
-    auth: typing.Optional[httpx.Auth] = None
 
-    def __call__(self) -> tuple[httpx.Request, typing.Optional[httpx.Auth]]:
-        return (
-            self.request_factory(
-                self.method,
-                self.path.format_map(self.path_params),
-                content=self.content,
-                params=httpx.QueryParams(self.query_params),
-                headers=self.headers,
-                cookies=self.cookies,
-            ),
-            self.auth,
+    def __call__(self) -> httpx.Request:
+        assert self.method
+        assert self.path
+
+        return self.request_factory(
+            self.method,
+            self.path.format_map(self.path_params),
+            content=self.content,
+            params=httpx.QueryParams(self.query_params),
+            headers=self.headers,
+            cookies=self.cookies,
         )

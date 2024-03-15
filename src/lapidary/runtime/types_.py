@@ -1,7 +1,6 @@
-import httpx
 import typing_extensions as typing
 
-Serializer: typing.TypeAlias = typing.Callable[[typing.Any], typing.Union[str, bytes]]
+from . import _httpx
 
-# pylint: disable=protected-access
-ParamValue: typing.TypeAlias = typing.Union[httpx._types.PrimitiveData, typing.Sequence[httpx._types.PrimitiveData]]
+Serializer: typing.TypeAlias = typing.Callable[[typing.Any], typing.Union[str, bytes]]
+ParamValue: typing.TypeAlias = typing.Union[_httpx.PrimitiveData, typing.Sequence[_httpx.PrimitiveData]]

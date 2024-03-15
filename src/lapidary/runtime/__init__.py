@@ -3,9 +3,11 @@ __all__ = (
     'Absent',
     'APIKeyAuth',
     'ClientBase',
+    'NamedAuth',
     'ParamStyle',
     'RequestBody',
     'Responses',
+    'SecurityRequirements',
     'delete',
     'get',
     'head',
@@ -18,8 +20,9 @@ __all__ = (
     'Path',
     'Query',
 )
+
 from .absent import ABSENT, Absent
-from .auth import APIKeyAuth
+from .auth import APIKeyAuth, NamedAuth, SecurityRequirements
 from .client_base import ClientBase
 from .model.params import ParamStyle, RequestBody
 from .model.response_map import Responses

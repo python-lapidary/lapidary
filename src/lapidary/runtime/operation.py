@@ -1,6 +1,10 @@
 import functools as ft
+from collections.abc import Iterable
+from typing import Optional
 
 import typing_extensions as typing
+
+from . import SecurityRequirements
 
 if typing.TYPE_CHECKING:
     from .client_base import ClientBase
@@ -9,6 +13,7 @@ if typing.TYPE_CHECKING:
 def _operation(
     method: str,
     path: str,
+    security: typing.Optional[SecurityRequirements] = None,
 ) -> typing.Callable:
     def wrapper(fn: typing.Callable):
         @ft.wraps(fn)
@@ -17,6 +22,7 @@ def _operation(
                 method,
                 path,
                 fn,
+                security,
                 kwargs,
             )
 
@@ -26,7 +32,7 @@ def _operation(
 
 
 class MethodProto(typing.Protocol):
-    def __call__(self, path: str) -> typing.Callable:
+    def __call__(self, path: str, security: Optional[Iterable[SecurityRequirements]] = None) -> typing.Callable:
         pass
 
 
