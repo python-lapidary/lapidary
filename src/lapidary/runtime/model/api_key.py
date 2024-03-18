@@ -1,5 +1,5 @@
 import httpx
-import httpx_auth.authentication as authx
+import httpx_auth as authx
 import typing_extensions as typing
 
 

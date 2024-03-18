@@ -147,7 +147,7 @@ class CatClient(ClientBase):
 
 # tests
 
-client = CatClient(app=cats_app)
+client = CatClient(transport=httpx.ASGITransport(app=cats_app))
 
 
 class TestClient(unittest.IsolatedAsyncioTestCase):

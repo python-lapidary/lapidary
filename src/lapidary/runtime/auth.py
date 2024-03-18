@@ -35,8 +35,8 @@ APIKeyAuthLocation: typing.TypeAlias = typing.Literal['cookie', 'header', 'query
 
 api_key_in: typing.Mapping[APIKeyAuthLocation, type[httpx.Auth]] = {
     'cookie': CookieApiKey,
-    'header': httpx_auth.authentication.HeaderApiKey,
-    'query': httpx_auth.authentication.QueryApiKey,
+    'header': httpx_auth.HeaderApiKey,
+    'query': httpx_auth.QueryApiKey,
 }
 
 
