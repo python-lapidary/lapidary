@@ -1,6 +1,4 @@
 __all__ = (
-    'ABSENT',
-    'Absent',
     'APIKeyAuth',
     'ClientBase',
     'ModelBase',
@@ -22,7 +20,6 @@ __all__ = (
     'Query',
 )
 
-from .absent import ABSENT, Absent
 from .auth import APIKeyAuth, NamedAuth, SecurityRequirements
 from .client_base import ClientBase
 from .model import ModelBase

@@ -9,7 +9,6 @@ import httpx
 import pydantic
 import typing_extensions as typing
 
-from ..absent import ABSENT
 from ..http_consts import CONTENT_TYPE
 from ..types_ import ParamValue, Serializer
 
@@ -118,7 +117,7 @@ class RequestPart:
     type: type
 
     def apply(self, builder: 'RequestBuilder', value: typing.Any) -> None:
-        if value is not ABSENT:
+        if value is not None:
             self.request_part.apply(builder, self.name, self.type, value)
 
 
