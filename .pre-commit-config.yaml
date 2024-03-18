@@ -15,11 +15,3 @@ repos:
   - id: ruff-format
     args:
     - --check
-- repo: local
-  hooks:
-  - id: mypy
-    name: mypy
-    language: system
-    types: [ python ]
-    entry: poetry run mypy --explicit-package-bases -p lapidary
-    pass_filenames: false
