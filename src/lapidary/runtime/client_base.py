@@ -107,11 +107,13 @@ class ClientBase(abc.ABC):
     def _mk_auth(self, security: Iterable[SecurityRequirements]) -> httpx.Auth:
         security = list(security)
         assert security
+        last_error: Optional[Exception] = None
         for requirements in security:
             try:
                 auth = _build_auth(self._auth, requirements)
                 break
-            except ValueError as last_error:  # noqa
+            except ValueError as ve:
+                last_error = ve
                 continue
         else:
             # due to assert and break above, we never enter here, unless ValueError was raised
@@ -124,7 +126,7 @@ def _build_auth(schemes: Mapping[str, httpx.Auth], requirements: SecurityRequire
     for scheme, scopes in requirements.items():
         auth_flow = schemes.get(scheme)
         if not auth_flow:
-            raise ValueError('Not authenticated', auth_flow)
+            raise ValueError('Not authenticated', scheme)
         if scopes and 'scope' in dir(auth_flow) and auth_flow.scope != scopes:
             raise ValueError('scope', auth_flow, scopes)
         auth_flows.append(auth_flow)
