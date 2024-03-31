@@ -54,7 +54,7 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
             self.method,
             self.path.format_map(self.path_params),
             content=self.content,
-            params=httpx.QueryParams(self.query_params),
+            params=httpx.QueryParams(tuple(self.query_params)),
             headers=self.headers,
             cookies=self.cookies,
         )

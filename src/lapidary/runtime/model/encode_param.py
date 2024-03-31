@@ -9,14 +9,14 @@ from typing import Optional, Union, cast
 
 from typing_extensions import TypeAlias
 
-from .._httpx import PrimitiveData
 from ..pycompat import UNION_TYPES
 
 logger = logging.getLogger(__name__)
 
 Atomic: TypeAlias = Union[str, int, float, bool]
 ObjectType: TypeAlias = Mapping[str, Optional[Atomic]]
-Encoder: TypeAlias = Callable[[str, Union[Atomic, Iterable[Atomic], ObjectType]], Union[str, Iterable[str]]]
+ValueType: TypeAlias = Union[Atomic, Iterable[Atomic], ObjectType]
+Encoder: TypeAlias = Callable[[str, ValueType], Union[str, Iterable[str]]]
 
 
 @unique
@@ -36,8 +36,10 @@ def encode(
     typ: type,
     style: ParamStyle,
     explode: bool,
-) -> str:
-    return get_encode_fn(typ, style, explode)(name, value)
+) -> Union[str, Iterable[str]]:
+    encoder = get_encode_fn(typ, style, explode)
+    assert encoder
+    return encoder(name, value)
 
 
 def get_encode_fn(typ: type, style: ParamStyle, explode: bool) -> Optional[Encoder]:
@@ -49,7 +51,7 @@ def get_encode_fn(typ: type, style: ParamStyle, explode: bool) -> Optional[Encod
         if len(encoders) == 1:
             return next(iter(encoders.values()))
         else:
-            return encode_union(encoders)
+            return encode_union(encoders)  # type: ignore[arg-type]
 
     if origin is type(None):
         return None
@@ -63,17 +65,19 @@ def get_encode_fn(typ: type, style: ParamStyle, explode: bool) -> Optional[Encod
         raise NotImplementedError(typ)
 
     fn_name = f'encode_{encode_type}_{style.value}{"_explode" if explode else ""}'
-    encode_fn = cast(Encoder, globals().get(fn_name, None))
+    encode_fn = cast(Optional[Encoder], globals().get(fn_name, None))
     if not encode_fn:
         raise TypeError('Unable to encode', typ, style, explode)
     return encode_fn
 
 
 def encode_union(encoders: Mapping[type, Encoder]) -> Encoder:
-    def encode_(name: str, value: ObjectType) -> str:
+    def encode_(name: str, value: ValueType) -> Union[str, Iterable[str]]:
         for formal_typ, encoder in encoders.items():
             if isinstance(value, formal_typ):
                 return encoder(name, value)
+        else:
+            raise TypeError(type(value))
 
     return encode_
 
@@ -99,17 +103,17 @@ encode_array_simple_explode = encode_array_simple
 
 
 def encode_object_simple(_name: str, value: ObjectType) -> str:
-    return ','.join(value)
+    return ','.join(encode_atomic_simple(_name, cast(Atomic, item)) for pair in value.items() for item in pair if pair[1] is not None)
 
 
-def encode_object_simple_explode(_name: str, value: ObjectType) -> str:
-    return ','.join(v for item in value.items() for v in item)
+def encode_object_simple_explode(name: str, value: ObjectType) -> str:
+    return ','.join(f'{key}={encode_atomic_simple(name, value)}' for key, value in value.items() if value is not None)
 
 
 # matrix
 
 
-def encode_atomic_matrix(name: str, value: PrimitiveData) -> str:
+def encode_atomic_matrix(name: str, value: Atomic) -> str:
     return f';{name}={encode_atomic_simple(name, value)}'
 
 
@@ -117,7 +121,7 @@ encode_atomic_matrix_explode = encode_atomic_matrix
 
 
 def encode_array_matrix(name: str, value: Iterable[Atomic]) -> str:
-    return f';{name}={",".join(value)}'
+    return f';{name}={",".join(encode_atomic_simple(name, item) for item in value)}'
 
 
 def encode_array_matrix_explode(name: str, value: Iterable[Atomic]) -> str:
@@ -150,4 +154,4 @@ encode_object_form = encode_object_simple
 
 
 def encode_object_form_explode(_name: str, value: ObjectType) -> str:
-    return '&'.join(encode_atomic_form(key, item) for key, item in value.items())
+    return '&'.join(encode_atomic_form(key, item) for key, item in value.items() if item)

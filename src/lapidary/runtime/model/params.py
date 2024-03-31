@@ -34,7 +34,7 @@ class Param(RequestPartHandler, ParameterAnnotation, abc.ABC):
     alias: typing.Optional[str]
     explode: typing.Optional[bool]
 
-    def __init__(self, alias: Optional[str], /, *, style: ParamStyle, explode: bool) -> None:
+    def __init__(self, alias: Optional[str], /, *, style: ParamStyle, explode: Optional[bool]) -> None:
         self.alias = alias
         self.style = style
         self.explode = explode
@@ -67,7 +67,7 @@ class Param(RequestPartHandler, ParameterAnnotation, abc.ABC):
 @dc.dataclass
 class RequestBody(RequestPartHandler, ParameterAnnotation):
     name: str = dc.field(init=False)
-    content: typing.Optional[typing.Mapping[str, type]] = None
+    content: typing.Mapping[str, type]
     _serializer: pydantic.TypeAdapter = dc.field(init=False)
 
     def supply_formal(self, name: str, typ: type) -> None:
