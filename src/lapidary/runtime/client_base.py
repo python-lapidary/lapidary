@@ -2,12 +2,13 @@ import abc
 import logging
 from collections.abc import Awaitable, Callable, Iterable, Mapping, MutableMapping
 from importlib.metadata import version
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import httpx
 
 from .auth import AuthType, MultiAuth, NamedAuth, SecurityRequirements
 from .model.op import OperationModel, get_operation_model
+from .model.request import RequestFactory
 from .request import build_request
 
 logger = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ class ClientBase(abc.ABC):
         request = build_request(
             operation,
             actual_params,
-            self._client.build_request,
+            cast(RequestFactory, self._client.build_request),
         )
 
         logger.debug('%s %s %s', request.method, request.url, request.headers)
@@ -116,7 +117,8 @@ class ClientBase(abc.ABC):
                 last_error = ve
                 continue
         else:
-            # due to assert and break above, we never enter here, unless ValueError was raised
+            assert last_error
+            # due to asserts and break above, we never enter here, unless ValueError was raised
             raise last_error  # noqa
         return auth
 
