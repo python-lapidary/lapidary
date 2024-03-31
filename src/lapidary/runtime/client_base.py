@@ -25,6 +25,9 @@ class ClientBase(abc.ABC):
         _http_client: Optional[httpx.AsyncClient] = None,
         **httpx_kwargs,
     ):
+        if httpx_kwargs and _http_client:
+            raise TypeError(f'Extra keyword arguments not accepted when passing _http_client: {", ".join(httpx_kwargs.keys())}')
+
         headers = httpx.Headers(httpx_kwargs.pop('headers', None)) or httpx.Headers()
         if user_agent:
             headers['User-Agent'] = user_agent
