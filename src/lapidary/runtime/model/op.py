@@ -5,7 +5,7 @@ import httpx
 import typing_extensions as typing
 
 from ..response import find_type, parse_model
-from .params import RequestPart, find_annotations, parse_params
+from .params import ParameterAnnotation, RequestPartHandler, find_annotations, process_params
 from .response_map import ResponseMap, Responses
 
 if typing.TYPE_CHECKING:
@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
 class OperationModel:
     method: str
     path: str
-    params: typing.Mapping[str, RequestPart]
+    params: typing.Mapping[str, ParameterAnnotation]
     response_map: ResponseMap
 
     def process_params(
@@ -24,11 +24,12 @@ class OperationModel:
         actual_params: typing.Mapping[str, typing.Any],
         request: 'RequestBuilder',
     ) -> None:
-        for param_name, param_handler in self.params.items():
-            if param_name not in actual_params:
-                continue
-
-            param_handler.apply(request, actual_params[param_name])
+        for param_name, value in actual_params.items():
+            param_handler = self.params[param_name]
+            if isinstance(param_handler, RequestPartHandler):
+                param_handler.apply(request, actual_params[param_name])
+            else:
+                raise TypeError(param_name, type(value))
 
     def handle_response(self, response: httpx.Response) -> typing.Any:
         """
@@ -72,6 +73,6 @@ def get_operation_model(
     return OperationModel(
         method=method,
         path=path,
-        params=parse_params(sig),
+        params=process_params(sig),
         response_map=get_response_map(sig.return_annotation),
     )

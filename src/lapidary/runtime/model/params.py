@@ -1,182 +1,112 @@
 import abc
 import dataclasses as dc
-import enum
 import inspect
-import uuid
-from enum import Enum, unique
+from typing import Optional
 
-import httpx
 import pydantic
 import typing_extensions as typing
 
-from ..http_consts import CONTENT_TYPE
-from ..types_ import ParamValue, Serializer
+from ..http_consts import CONTENT_TYPE, MIME_JSON
+from ..types_ import ParamValue
+from .encode_param import Encoder, ParamStyle, get_encode_fn
 
 if typing.TYPE_CHECKING:
     from .request import RequestBuilder
 
 
-class RequestPartHandler(abc.ABC):
+class ParameterAnnotation(abc.ABC):
     @abc.abstractmethod
-    def apply(self, builder: 'RequestBuilder', name: str, typ: type, value: typing.Any) -> None:
+    def supply_formal(self, name: str, typ: type) -> None:
         pass
 
 
-@unique
-class ParamStyle(Enum):
-    matrix = 'matrix'
-    label = 'label'
-    form = 'form'
-    simple = 'simple'
-    spaceDelimited = 'spaceDelimited'
-    pipeDelimited = 'pipeDelimited'
-    deepObject = 'deepObject'
+class RequestPartHandler(abc.ABC):
+    @abc.abstractmethod
+    def apply(self, builder: 'RequestBuilder', value: typing.Any) -> None:
+        pass
 
 
-@dc.dataclass
-class Param(RequestPartHandler, abc.ABC):
-    alias: typing.Optional[str] = dc.field(default=None)
+class Param(RequestPartHandler, ParameterAnnotation, abc.ABC):
+    name: str
+    encoder: typing.Optional[Encoder]
 
-    style: ParamStyle = dc.field(default=ParamStyle.simple)
-    explode: typing.Optional[bool] = dc.field(default=None)
+    style: ParamStyle
+    alias: typing.Optional[str]
+    explode: typing.Optional[bool]
+
+    def __init__(self, alias: Optional[str], /, *, style: ParamStyle, explode: bool) -> None:
+        self.alias = alias
+        self.style = style
+        self.explode = explode
+
+    def supply_formal(self, name: str, typ: type) -> None:
+        self.name = name
+        self.encoder = get_encode_fn(typ, self.style, self._get_explode())
+        assert self.encoder
 
     def _get_explode(self) -> bool:
         return self.explode or self.style == ParamStyle.form
 
     @abc.abstractmethod
-    def _apply(self, builder: 'RequestBuilder', name: str, value: ParamValue):
+    def _apply(self, builder: 'RequestBuilder', value: ParamValue):
         pass
 
-    def apply(self, builder: 'RequestBuilder', name: str, typ: type, value: typing.Any) -> None:
+    def apply(self, builder: 'RequestBuilder', value: typing.Any) -> None:
         if not value:
             return
 
-        value = serialize_param(value, self.style, self._get_explode())
-        self._apply(builder, self.alias or name, value)
+        assert self.encoder
+        value = self.encoder(self.name, value)
+        self._apply(builder, value)
 
-
-#  pylint: disable=unused-argument
-def serialize_param(value, style: ParamStyle, explode_list: bool) -> ParamValue:
-    # TODO handle style
-    if value is None:
-        return None
-    if isinstance(value, str):
-        return value
-    elif isinstance(value, (pydantic.BaseModel, pydantic.RootModel)):
-        return value.model_dump_json()
-    elif isinstance(value, typing.Iterable):
-        if explode_list:
-            # httpx explodes lists, so just pass it thru
-            return [serialize_singleton(val) for val in value]
-        else:
-            return ','.join([serialize_singleton_as_str(val) for val in value])
-    else:
-        return serialize_singleton(value)
-
-
-def serialize_singleton(value: typing.Any) -> httpx._types.PrimitiveData:
-    if value is None or isinstance(value, (str, int, float, bool)):
-        return value
-    elif isinstance(value, (uuid.UUID,)):
-        return str(value)
-    elif isinstance(value, enum.Enum):
-        return value.value
-
-    else:
-        raise TypeError(type(value))
-
-
-def serialize_singleton_as_str(value: typing.Any) -> str:
-    if isinstance(value, str):
-        return value
-    elif isinstance(
-        value,
-        (
-            int,
-            float,
-            bool,
-            uuid.UUID,
-        ),
-    ):
-        return str(value)
-    elif isinstance(value, enum.Enum):
-        return value.value
-    else:
-        raise TypeError(type(value))
-
-
-class AuthHandler(RequestPartHandler):
-    def apply(self, builder: 'RequestBuilder', name: str, typ: type, value: typing.Any) -> None:
-        builder.auth = value
+    @property
+    def http_name(self) -> str:
+        return self.alias or self.name
 
 
 @dc.dataclass
-class RequestPart:
-    request_part: RequestPartHandler
-    name: str
-    type: type
+class RequestBody(RequestPartHandler, ParameterAnnotation):
+    name: str = dc.field(init=False)
+    content: typing.Optional[typing.Mapping[str, type]] = None
+    _serializer: pydantic.TypeAdapter = dc.field(init=False)
+
+    def supply_formal(self, name: str, typ: type) -> None:
+        self.name = name
+        self._serializer = pydantic.TypeAdapter(typ)
 
     def apply(self, builder: 'RequestBuilder', value: typing.Any) -> None:
-        if value is not None:
-            self.request_part.apply(builder, self.name, self.type, value)
-
-
-@dc.dataclass
-class RequestBody(RequestPartHandler):
-    content: typing.Mapping[str, type]
-
-    def apply(self, builder: 'RequestBuilder', name: str, typ: type, value: typing.Any) -> None:
-        content_type, serializer = self.find_request_body_serializer(value)
+        content_type = self.find_content_type(value)
         builder.headers[CONTENT_TYPE] = content_type
-        builder.content = serializer(value)
 
-    def find_request_body_serializer(
-        self,
-        obj: typing.Any,
-    ) -> typing.Tuple[str, Serializer]:
-        # find the serializer by type
+        plain_content_type = content_type[: content_type.index(';')] if ';' in content_type else content_type
+        if plain_content_type == MIME_JSON:
+            builder.content = self._serializer.dump_json(value, by_alias=True, exclude_defaults=True)
+        else:
+            raise NotImplementedError(content_type)
 
+    def find_content_type(self, value: typing.Any) -> str:
         for content_type, typ in self.content.items():
-            if typ == type(obj):
+            origin_type = typing.get_origin(typ) or typ
+            if isinstance(value, origin_type):
+                return content_type
 
-                def serialize(model):
-                    return serialize_param(model, ParamStyle.simple, explode_list=False)
-
-                return content_type, serialize
-
-        raise TypeError(f'Unknown serializer for {type(obj)}')
+        raise ValueError('Could not determine content type')
 
 
-def parse_params(sig: inspect.Signature) -> typing.Mapping[str, RequestPart]:
-    result = {}
-    for param in sig.parameters.values():
-        name_part = parse_param(param)
-        if name_part:
-            key, value = name_part
-            result[key] = value
-    return result
+def process_params(sig: inspect.Signature) -> typing.Mapping[str, ParameterAnnotation]:
+    return dict(process_param(param) for param in sig.parameters.values() if param.annotation not in (typing.Self, None))
 
 
-def parse_param(param: inspect.Parameter) -> typing.Optional[typing.Tuple[str, RequestPart]]:
-    typ = typing.cast(type, param.annotation)
+def process_param(param: inspect.Parameter) -> typing.Tuple[str, ParameterAnnotation]:
     name = param.name
+    typ = param.annotation
 
-    if typ == typing.Self:
-        return None
-
-    if isinstance(typ, type) and issubclass(typ, httpx.Auth):
-        return name, RequestPart(AuthHandler(), name, typ)
-
-    return name, RequestPart(get_handler(name, typ), name, typ)
-
-
-def get_handler(param_name: str, typ: type) -> RequestPartHandler:
-    annos = find_annotations(typ, RequestPartHandler)  # type: ignore[type-abstract]
-
-    if len(annos) != 1:
-        raise ValueError(f'{param_name}: expected exactly one Lapidary annotation.')
-
-    return annos[0]
+    annotations = find_annotations(typ, ParameterAnnotation)  # type: ignore[type-abstract]
+    if len(annotations) != 1:
+        raise ValueError(f'{name}: expected exactly one Lapidary annotation.', typ)
+    annotation = annotations[0]
+    annotation.supply_formal(name, typ.__origin__)
+    return name, annotation
 
 
 T = typing.TypeVar('T')

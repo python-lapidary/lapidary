@@ -6,9 +6,8 @@ import pytest
 import pytest_asyncio
 import typing_extensions as typing
 
-from lapidary.runtime import Query, RequestBody, Responses, get
+from lapidary.runtime import ParamStyle, Query, RequestBody, Responses, get
 from lapidary.runtime.http_consts import CONTENT_TYPE
-from lapidary.runtime.model.params import ParamStyle
 from tests.client import ClientTestBase
 
 
@@ -47,7 +46,7 @@ async def test_build_request_from_list(mock_http_client) -> None:
     mock_http_client.build_request.assert_called_with(
         'GET',
         '/body_list',
-        content='[{"a":"a"}]',
+        content=b'[{"a":"a"}]',
         params=httpx.QueryParams(),
         headers=httpx.Headers(
             {
@@ -120,7 +119,7 @@ async def test_request_param_list_exploded(mock_http_client):
         'GET',
         '/param_list_exploded',
         content=None,
-        params=httpx.QueryParams([('a', 'hello'), ('a', 'world')]),
+        params=httpx.QueryParams(a='hello,world'),
         headers=httpx.Headers(),
         cookies=httpx.Cookies(),
     )
