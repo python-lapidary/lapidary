@@ -127,7 +127,5 @@ def _build_auth(schemes: Mapping[str, httpx.Auth], requirements: SecurityRequire
         auth_flow = schemes.get(scheme)
         if not auth_flow:
             raise ValueError('Not authenticated', scheme)
-        if scopes and 'scope' in dir(auth_flow) and auth_flow.scope != scopes:
-            raise ValueError('scope', auth_flow, scopes)
         auth_flows.append(auth_flow)
     return MultiAuth(*auth_flows)

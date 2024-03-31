@@ -13,7 +13,7 @@ if typing.TYPE_CHECKING:
 def _operation(
     method: str,
     path: str,
-    security: typing.Optional[SecurityRequirements] = None,
+    security: typing.Optional[Iterable[SecurityRequirements]] = None,
 ) -> typing.Callable:
     def wrapper(fn: typing.Callable):
         @ft.wraps(fn)

@@ -33,7 +33,7 @@ class AuthFactory(abc.ABC):
 
 APIKeyAuthLocation: typing.TypeAlias = typing.Literal['cookie', 'header', 'query']
 
-api_key_in: typing.Mapping[APIKeyAuthLocation, type[httpx.Auth]] = {
+api_key_in: typing.Mapping[APIKeyAuthLocation, typing.Callable[[str, str], httpx.Auth]] = {
     'cookie': CookieApiKey,
     'header': httpx_auth.HeaderApiKey,
     'query': httpx_auth.QueryApiKey,
