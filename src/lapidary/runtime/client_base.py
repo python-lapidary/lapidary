@@ -6,10 +6,11 @@ from typing import Any, Optional, cast
 
 import httpx
 
-from .auth import AuthType, MultiAuth, NamedAuth, SecurityRequirements
+from ._httpx import AuthType
 from .model.op import OperationModel, get_operation_model
 from .model.request import RequestFactory
 from .request import build_request
+from .types_ import MultiAuth, NamedAuth, SecurityRequirements
 
 logger = logging.getLogger(__name__)
 

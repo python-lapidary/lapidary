@@ -6,8 +6,8 @@ from typing import Optional
 import pydantic
 import typing_extensions as typing
 
+from .._httpx import ParamValue
 from ..http_consts import CONTENT_TYPE, MIME_JSON
-from ..types_ import ParamValue
 from .encode_param import Encoder, ParamStyle, get_encode_fn
 
 if typing.TYPE_CHECKING:

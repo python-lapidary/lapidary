@@ -4,7 +4,7 @@ from typing import Optional
 
 import typing_extensions as typing
 
-from . import SecurityRequirements
+from .types_ import SecurityRequirements
 
 if typing.TYPE_CHECKING:
     from .client_base import ClientBase

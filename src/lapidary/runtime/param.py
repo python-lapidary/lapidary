@@ -3,9 +3,9 @@ from typing import Optional
 
 import typing_extensions as typing
 
+from ._httpx import ParamValue
 from .model.encode_param import ParamStyle
 from .model.params import Param
-from .types_ import ParamValue
 
 if typing.TYPE_CHECKING:
     from .model.request import RequestBuilder
