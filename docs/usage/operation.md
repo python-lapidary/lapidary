@@ -1,13 +1,13 @@
-Methods decorated with one of `@get`, `@post`, `@put`, etc. become operation methods, calling them will make a HTTP exchange.
-Lapidary supports the same HTTP methods as OpenAPI 3.x, i.e. methods listed in RFC 9110 except CONNECT.
-
-Other methods are ignored.
+Methods decorated with one of @get, @post, @put, etc. are transformed into operation methods. Invoking these methods
+initiates an HTTP request-response cycle. Lapidary is designed to be compatible with the HTTP methods defined in OpenAPI
+3.x, which include all methods defined in RFC 9110, with the exception of CONNECT. Methods in your client that aren't
+decorated with these operation decorators are simply ignored.
 
 !!! note methods
 
-    Python methods and HTTP methods are completely different things.
+    Python methods and HTTP methods represent two distinct concepts.
 
-    In this documentation, a `method` (in programming context) always means a python method (`def`), while HTTP methods (GET, POST, ...) are always referred to as `HTTP methods`.
+    Throughout this documentation, the term `method` in a programming context always refers to a Python method (defined with `def`), whereas `HTTP methods` (GET, POST, etc.) are specified as such.
 
 ```python
 from lapidary.runtime import ClientBase, get
@@ -22,7 +22,7 @@ class CatClient(ClientBase):
 
 !!! note
 
-    In the examples below, methods are written as functions, omitting the encapsulating class.
+    In the examples below, methods are depicted as standalone functions, with the encapsulating class structure omitted.
 
 ```python
 @get('/cats')  # method and path
@@ -32,15 +32,18 @@ async def list_cats(...):
 
 ## Parameters
 
-Each parameter can represent a single part of a HTTP request: header, cookie cookie, query or path parameter, body, or auth flow (`httpx.Auth`).
+Parameters within Lapidary are designed to represent different components of an HTTP request, including headers,
+cookies, query parameters, path parameters, and the body of the request.
 
-Every parameter must be annotated, including `self`. `*args` and `**kwargs` are not supported.
+It's essential that every parameter, including self, is annotated to define its role and type explicitly. Note that *
+args and **kwargs are not supported in this structure to maintain clarity and specificity in request definition.
 
 ### Query parameters
 
-Query parameters are appended to the URL after '?' character, e.g. `https://example.com/path?param=value`.
+Query parameters are elements added to the URL following the '?' character, serving to modify or refine the request. An
+example format is https://example.com/path?param=value.
 
-Query parameters are declared using `Query()` annotation:
+To declare a query parameter in Lapidary, use the Query() annotation:
 
 ```python
 @get('/cats')
@@ -51,17 +54,24 @@ async def list_cats(
     pass
 ```
 
-Calling this method as
+Calling a method like this:
 
 ```python
 client.list_cats(color='black')
 ```
 
-will results in making a GET request to `https://example.com/cats?color=black`
+results in a GET request being sent to the following URL: https://example.com/cats?color=black.
+
+This illustrates how arguments passed to the method are directly mapped to query parameters in the URL, forming a
+complete HTTP request based on the method's decoration and the parameters' annotations.
 
 ### Path parameters
 
-Path parameters are variables in the requests path: `http://example.com/cat/{cat_id}`.
+Path parameters are variables embedded within the path of a request URL, such as http://example.com/cat/{cat_id}. These
+parameters are essential for accessing specific resources or performing operations on them.
+
+To define a path parameter in Lapidary, you use the path variable inside the decorator URL path and annotate the method
+parameter with Path(). Here is an example of how to define and use a path parameter:
 
 ```python
 @get('/cat/{cat_id}')
@@ -72,42 +82,50 @@ async def get_cat(
     pass
 ```
 
-Calling this method as
+When you call this method like so:
 
 ```python
 client.get_cat(cat_id=1)
 ```
 
-will result in making a GET request to 'https://example.com/cat/1'.
+it constructs and sends a GET request to https://example.com/cat/1. This demonstrates the method's ability to
+dynamically incorporate the provided argument (cat_id=1) into the request URL as a path parameter.
 
 ## Headers
 
 ### Non-cookie headers
 
-Header parameter will simply add a HTTP header to the request.
+Header parameters are utilized to add HTTP headers to a request. These can be defined using the Header() annotation in a
+method declaration, specifying the header name and the expected value type.
+
+Example:
 
 ```python
 @get('/cats')
 async def list_cats(
         self: Self,
-        accept: Annotated[str, Header('Accept')],
+    version: Annotated[str, Header('version')],
 ):
     pass
 ```
 
-Calling this method as
+Invoking this method with:
 
 ```python
-client.list_cats(accept='application/json')
+client.list_cats(version='2')
 ```
 
-will result in making a GET request with added header `Accept: application/json`.
+results in the execution of a GET request that includes the header `version: 2`.
 
-Note: all of Cookie, Header, Param and Query annotations accept name, style and explode parameters, as defined by OpenAPI.
+Note: The Cookie, Header, Param, and Query annotations all accept parameters such as name, style, and explode as defined
+by OpenAPI.
 
 ### Cookie headers
 
-Cookie parameter will add a `name=value` to the `Cookie` header of the request.
+To add a cookie to the request, you use the Cookie parameter. This adds a name=value pair to the Cookie header of the
+HTTP request.
+
+Example:
 
 ```python
 @get('/cats')
@@ -124,11 +142,14 @@ Calling this method as
 client.list_cats(cookie_key='value')
 ```
 
-will result in making a GET request with added header `Cookie: key=value`.
+will send a GET request that includes the header Cookie: key=value.
 
 ## Request body
 
-A Parameter annotated with `RequestBody` will be serialized as the HTTP requests body. At most one parameter can be a request body.
+To mark a parameter for serialization into the HTTP body, annotate it with RequestBody. Each method can include only one
+such parameter.
+
+Example:
 
 ```python
 @POST('/cat')
@@ -141,19 +162,30 @@ async def add_cat(
     pass
 ```
 
-The type (here `Cat`) must be either a supported scalar value (str, int, float, date, datetime, or UUID) or a Pydantic model.
+The parameter type, such as Cat in this example, should be a basic scalar (e.g., str, int, float, date, datetime, UUID)
+or a Pydantic model, to facilitate proper serialization.
 
-Calling this method will result in making a HTTP request with header `Content-Type: application/json` and the `cat` object serialized with Pydantics `BaseModel.model_dump_json()` as the request body.
+Invoking this method constructs a POST request with Content-Type: application/json header. The cat object is serialized
+to JSON using Pydantic's BaseModel.model_dump_json() and included in the body of the request.
 
 ## Return type
 
-The `Responses` annotation maps `status code` template and `Content-Type` response header to a type.
+The Responses annotation plays a crucial role in mapping HTTP status codes and Content-Type headers to specific return
+types. This mechanism allows developers to define how responses are parsed and returned with high precision.
 
-Note that the return type or types are mentioned in two places:
+The return type is specified in two essential places:
 
-The first time in the top Annotated, it declares the return type of the method. It can be a Union type if the operation returns differently structured response bodies.
+1. At the method signature level - The declared return type here should reflect the expected successful response
+   structure. It can be a single type or a Union of types, accommodating various potential non-error response bodies.
 
-The second time is inside of responses. It tells Lapidary what type to use to process the response body when the response has a matching HTTP status code and content type.
+2. Within the Responses annotation - This details the specific type or types to be used for parsing the response body,
+   contingent upon the response's HTTP status code and content type matching those specified.
+
+!!! Note
+
+    The type hint in the method's annotation must match the response types specified within the Responses() annotation, excluding exception types. For details on how to handle exception types, see the next section.
+
+Example:
 
 ```python
 @get('/cat')
@@ -173,45 +205,23 @@ async def list_cats(
     pass
 ```
 
-The `dict` passed to `Responses` says that when response status code is one of 200s, and Content-Type is 'application/json', the response body is to be parsed as `list` of `Cat` objects.
+In this setup, the Responses dictionary specifies that for responses with a 2XX status code and a Content-Type of
+application/json, the response body will be parsed as a list of Cat objects. This explicit declaration ensures that the
+method's return type is tightly coupled with the anticipated successful response structure, providing clarity and type
+safety for API interactions.
 
-### Response body post-processing
+### Handling error responses
 
-You can annotate the type inside `Responses` with additional pos-processors.
-
-Lapidary accepts a list of `callable`s and calls them in a sequence, passing the result of the previous callable to the next one.
-
-Operation methods can accept one or more auth parameters.
-
-```python
-    Responses({
-    '2XX': {
-        'application/json': Annotated[
-            ResponseParseType,
-            post_process1,
-            post_process2,
-        ],
-    },
-})
-```
-
-In this example, the request body is parsed as `ResponseParseType`,
-that object is passed to `post_process1` function,
-it's result is then passed to `post+process2`,
-and that result is returned by the operation method.
-
-For the best developer experience, make sure that whatever the last post-processor callable returns, it matches the type in the return type annotation.
-
-An example application of post-processing is returning `Auth` flow objects from [login methods](auth.md#login-endpoints).
-
-### Raising exceptions
-
-If the matched response body type is an `Exception`, it will be raised instead of being returned.
+Lapidary allows you to map specific responses to exceptions. This feature is commonly used for error responses, like
+those with non-2XX status codes, but it's not limited to them. Any response specified in the Responses annotation can be
+set to raise an exception if it meets the defined conditions. This gives developers the flexibility to either raise
+exceptions for particular responses or handle them in the standard flow, based on what's needed for the application.
 
 ```python
 from dataclasses import dataclass
 
 
+@dataclass
 class ErrorModel(Exception):
     error_code: int
     error_message: str
@@ -234,10 +244,8 @@ async def list_cats(
 
 !!! note
 
-    When writing model type for the exception response, you can't use`pydantic.BaseModel`, since it's incompatible with `Exception` for multiple inheritance.
-
-    Instead write a plain class or a `dataclass`.
+    When creating a response model to be raised as an exception, it cannot derive from both pydantic.BaseModel and Exception due to inheritance conflicts. Opt for a straightforward class or a dataclass.
 
 !!! note
 
-    Just like when writing normal python functions, there's no need to add exception types to the return type annotation.
+    Exception types mapped to responses in the Responses annotation should not be included in the method's return type hint. They are exclusively declared within the Responses framework for appropriate processing.

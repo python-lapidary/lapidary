@@ -1,18 +1,24 @@
 # Client class
 
-Lapidary client is represented by a single class that holds all operation methods and encapsulates a `httpx.AsyncClient` instance.
+The core of the Lapidary API client is a single class that contains all the methods for API operations. This class is
+built around an `httpx.AsyncClient` instance to manage HTTP requests and responses.
+
+Example usage:
 
 ```python
-import lapidary.runtime
+from lapidary.runtime import *
 
 
-class CatClient(lapidary.runtime.ClientBase):
+class CatClient(ClientBase):
     ...
 ```
 
 # `__init__()` method
 
-Implementing `__init__()` is optional, and provides means to pass arguments, like `base_url`, to `httpx.AsyncClient.__init__`.
+Implementing the `__init__()` method is optional but useful for specifying default values for settings like
+the `base_url` of the API.
+
+Example implementation:
 
 ```python
 import lapidary.runtime
@@ -21,11 +27,12 @@ import lapidary.runtime
 class CatClient(lapidary.runtime.ClientBase):
     def __init__(
             self,
-            base_url='https://example.com/api'
+            base_url='https://example.com/api',
+            **kwargs
     ):
         super().__init__(
             base_url=base_url,
+            **kwargs
         )
-
     ...
 ```

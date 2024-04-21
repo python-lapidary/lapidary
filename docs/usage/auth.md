@@ -1,116 +1,101 @@
 # Authentication
 
-OpenAPI allows declaring security schemes and security requirements of operations.
+## Model
 
-Lapidary allows declaring methods that create or consume `httpx.Auth` objects.
+Lapidary allows API client authors to declare security requirements using maps that specify acceptable security schemes
+per request. OAuth2 schemes require specifying scopes, while other schemes use an empty list.
 
-## Basic auth
-
-TODO
-
-## Login endpoints
-
-A `/login/` or `/authenticate/` endpoint that returns the token is quite common with simpler authentication schemes like http or apiKey, yet their support is poor in OpenAPI. There's no way to connect
-such endpoint to a security scheme as in the case of OIDC.
-
-A function that handles such an endpoint can declare that it returns an Auth object, but it's not obvious to the user of python API which security scheme the method returns.
+For example, a call might require authentication with either two specific schemes together (auth1 and auth2) or another
+pair (auth3 and auth4):
 
 ```python
-from httpx import Auth
-import pydantic
-from typing_extensions import Annotated, Self
-
-from lapidary.runtime import post, ClientBase, RequestBody, APIKeyAuth, Responses
-
-
-class LoginRequest(pydantic.BaseModel):
-    ...
-
-
-class LoginResponse(pydantic.BaseModel):
-    token: str
-
-
-class Client(ClientBase):
-    @post('/login')
-    def login(
-            self: Self,
-            *,
-            body: Annotated[LoginRequest, RequestBody({'application/json': LoginRequest})],
-    ) -> Annotated[
-        Auth,
-        Responses({
-            '200': {
-                'application/json': Annotated[
-                    LoginResponse,
-                    APIKeyAuth(
-                        in_='header',
-                        name='Authorization',
-                        format='Token {body.token}'
-                    ),
-                ]
-            }
-        }),
-    ]:
-        """Authenticates with the "primary" security scheme"""
+security = [
+    {
+        'auth1': ['scope1'],
+        'auth2': ['scope1', 'scope2'],
+    },
+    {
+        'auth3': ['scope3'],
+        'auth4': [],
+    },
+]
 ```
 
-The top return Annotated declares the returned type, the inner one declares the processing steps for the actual response.
-First the response is parsed as LoginResponse, then that object is passed to ApiKeyAuth which is a callable object.
-
-The result of the call, in this case an Auth object, is returned by the `login` function.
-
-The innermost Annotated is not necessary from the python syntax standpoint. It's done this way since it kind of matches the semantics of Annotated, but it could be replaced with a simple tuple or other type in the future.
-
-## Using auth tokens
-
-OpenApi allows operations to declare a collection of alternative groups of security requirements.
-
-The second most trivial example (the first being no security) is a single required security scheme.
-```yaml
-security:
-- primary: []
-```
-The name of the security scheme corresponds to a key in `components.securitySchemes` object.
-
-This can be represented as a simple parameter, named for example `primary_auth` and of type `httpx.Auth`.
-The parameter could be annotated as `Optional` if the security requirement is optional for the operation.
-
-In case of multiple alternative groups of security requirements, it gets harder to properly describe which schemes are required and in what combination.
-
-Lapidary takes all passed `httpx.Auth` parameters and passes them to `httpx.AsyncClient.send(..., auth=auth_params)`, leaving the responsibility to select the right ones to the user.
-
-If multiple `Auth` parameters are passed, they're wrapped in `lapidary.runtime.aauth.MultiAuth`, which is just reexported `_MultiAuth` from `https_auth` package.
-
-#### Example
-
-Auth object returned by the login operation declared in the above example can be used by another operation.
+Lapidary also supports optional authentication, allowing for certain operations, such as a login endpoint, to forego the
+global security requirements specified for the API:
 
 ```python
-from httpx import Auth
-from typing import Annotated, Self
+security = [
+    {'auth': []},
+    {},  # unauthenticated calls allowed
+]
+```
 
-from lapidary.runtime import ClientBase, get, post
+You can also use this method to disable global security requirement for a particular operation (e.g. login endpoint).
+
+## Usage
+
+Lapidary handles security schemes through httpx.Auth instances, wrapped in `NamedAuth` tuple.
+You can define security requirements globally in the client `__init__()` or at the operation level with decorators, where
+operation-level declarations override global settings.
+
+Lapidary validates security requirements at runtime, ensuring that any method call is accompanied by the necessary
+authentication, as specified by its security requirements. This process involves matching the provided authentication
+against the declared requirements before proceeding with the request. To meet these requirements, the user must have
+previously configured the necessary Auth instances using lapidary_authenticate.
+
+```python
+from lapidary.runtime import *
+from lapidary.runtime.auth import HeaderApiKey
+from typing import Self, Annotated
 
 
-class Client(ClientBase):
-    @post('/login')
-    def login(
-            self: Self,
-            body: ...,
-    ) -> Annotated[
-        Auth,
-        ...
-    ]:
-        """Authenticates with the "primary" security scheme"""
+class MyClient(ClientBase):
+    def __init__(self):
+        super().__init__(
+            base_url=...,
+            security=[{'apiKeyAuth': []}],
+        )
 
-    @get('/private')
-    def private(
-            self: Self,
-            *,
-            primary_auth: Auth,
-    ):
+    @get('/api/operation', security=[{'admin_only': []}])
+    async def my_op(self: Self) -> ...:
         pass
+
+    @post('/api/login', security=())
+    async def login(
+        self: Self,
+        user: Annotated[str, ...],
+        password: Annotated[str, ...],
+    ) -> ...:
+        pass
+
+# User code
+async def main():
+    client = MyClient()
+
+    token = await client.login().token
+    client.lapidary_authenticate(apiKeyAuth=HeaderApiKey(token))
+    await client.my_op()
+
+    # optionally
+    client.lapidary_deauthenticate('apiKeyAuth')
 ```
 
-In this example the method `client.private` can be called with the auth object returned by `client.login`.
+`lapidary_authenticate` also accepts tuples of Auth instances with names, so this is possible:
+
+```python
+def admin_auth(api_key: str) -> NamedAuth:
+    return 'admin_only', HeaderApiKey(api_key)
+
+
+client.lapidary_authencticate(admin_auth('my token'))
+```
+
+## De-registering Auth instances
+
+To remove an auth instance, thereby allowing for unauthenticated calls or the use of alternative security schemes,
+lapidary_deauthenticate is used:
+
+```python
+client.lapidary_deauthenticate('apiKeyAuth')
+```

@@ -5,7 +5,7 @@
 Python DSL for Web API clients.
 
 Also check [lapidary-render](https://github.com/python-lapidary/lapidary-render/),
-a command line program that generates Lapidary client code from OpenAPI documents.
+a command line program that generates Lapidary clients from OpenAPI.
 
 ## Features
 
@@ -20,30 +20,24 @@ pip install lapidary
 ```
 
 or with Poetry
+
 ```console
 poetry add lapidary
 ```
 
 ## Usage
 
+With Lapidary, you define an API client by creating a class that mirrors the API structure, akin to OpenAPI but through
+decorated and annotated Python methods. Calling these method handles making HTTP requests and transforming the responses
+back into Python objects.
+
 ```python
-import dataclasses as dc
 from typing import Annotated, Self
-
-import pydantic
-
-from lapidary.runtime import ClientBase, ParamStyle, Path, Responses, get
-
+from lapidary.runtime import *
 
 # Define models
-# Pydantic models are recommended, but classes cannot inherit from both BaseModel and Exception.
 
-@dc.dataclass
-class ServerError(Exception):
-    msg: str
-
-
-class Cat(pydantic.BaseModel):
+class Cat(ModelBase):
     id: int
     name: str
 
@@ -51,34 +45,32 @@ class Cat(pydantic.BaseModel):
 
 class CatClient(ClientBase):
     def __init__(
-            self,
-            base_url = 'http://localhost:8080/api',
+        self,
+        base_url='http://localhost:8080/api',
     ):
         super().__init__(base_url=base_url)
 
-    # Parameters are interpreted according to their annotation.
-    # Response is parsed according to the return type annotation.
-
     @get('/cat/{id}')
     async def cat_get(
-            self: Self,
-            *,
-            id: Annotated[int, Path(style=ParamStyle.simple)],
+        self: Self,
+        *,
+        id: Annotated[int, Path(style=ParamStyle.simple)],
     ) -> Annotated[Cat, Responses({
         '2XX': {
             'application/json': Cat
         },
-        '4XX': {
-            'application/json': ServerError
-        },
     })]:
         pass
 
-client = CatClient()
-cat = await client.cat_get(id=7)
+# User code
+
+async def main():
+    client = CatClient()
+    cat = await client.cat_get(id=7)
 ```
 
-See [this test file](https://github.com/python-lapidary/lapidary/blob/develop/tests/test_client.py) for a working example.
+See [this test file](https://github.com/python-lapidary/lapidary/blob/develop/tests/test_client.py) for a working
+example.
 
 [Full documentation](https://lapidary.dev)
 
