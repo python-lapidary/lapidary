@@ -45,11 +45,6 @@ class OperationModel:
 
         obj: typing.Any = parse_model(response, typ)
 
-        if '__metadata__' in dir(typ):
-            for anno in typ.__metadata__:  # type: ignore[attr-defined]
-                if callable(anno):
-                    obj = anno(obj)
-
         if isinstance(obj, Exception):
             raise obj
         else:
