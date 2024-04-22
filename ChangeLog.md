@@ -8,15 +8,16 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 ## [0.9.0]
 ### Added
 - Added a default user-agent header.
+- Added support for security scheme combinations.
 
 ### Changed
 - Changed the programming paradigm from dynamic with scaffolding to declarative via annotations.
-- Changed authentication model to NamedAuth and factory functions.
+- Changed authentication model to NamedAuth.
 - Updated required python version to 3.9, following httpx-auth
 
 ### Removed
 - Removed support for invalid HTTP status codes patterns, like 20X ([OAS3.1 4.8.16.2](https://spec.openapis.org/oas/v3.1.0#patterned-fields-0)).
-- Removed Absent class.
+- Removed Absent class #50.
 
 ## [0.8.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.8.0) - 2023-01-02
 ### Added
