@@ -63,6 +63,11 @@ class Param(RequestPartHandler, ParameterAnnotation, abc.ABC):
     def http_name(self) -> str:
         return self.alias or self.name
 
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            raise NotImplementedError
+        return self.__dict__ == other.__dict__
+
 
 @dc.dataclass
 class RequestBody(RequestPartHandler, ParameterAnnotation):

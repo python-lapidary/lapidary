@@ -5,12 +5,11 @@ import unittest
 
 import fastapi
 import httpx
-import httpx_auth
 import pydantic
 import typing_extensions as typing
 from starlette.responses import JSONResponse
 
-from lapidary.runtime import APIKeyAuth, ClientBase, NamedAuth, ParamStyle, Path, RequestBody, Responses, get, post, put
+from lapidary.runtime import ClientBase, ParamStyle, Path, RequestBody, Responses, get, post, put
 from lapidary.runtime.http_consts import MIME_JSON
 
 # model (common to both client and server)
@@ -130,14 +129,11 @@ class CatClient(ClientBase):
         *,
         body: typing.Annotated[AuthRequest, RequestBody({MIME_JSON: AuthRequest})],
     ) -> typing.Annotated[
-        NamedAuth,
+        AuthResponse,
         Responses(
             {
                 '200': {
-                    MIME_JSON: typing.Annotated[
-                        AuthResponse,
-                        APIKeyAuth('api_key', 'header', 'Authorization', 'Token {body.api_key}'),
-                    ]
+                    MIME_JSON: AuthResponse,
                 }
             }
         ),
@@ -163,12 +159,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_response_auth(self):
         response = await client.login(body=AuthRequest(login='login', password='passwd'))
 
-        expected = 'api_key', httpx_auth.HeaderApiKey("Token you're in", 'Authorization')
-        self.assertEqual(expected[0], response[0])
-        self.assertDictEqual(
-            expected[1].__dict__,
-            response[1].__dict__,
-        )
+        self.assertEqual("you're in", response.api_key)
 
     async def test_error(self):
         try:
