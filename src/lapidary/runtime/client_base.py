@@ -2,7 +2,7 @@ import abc
 import logging
 from collections.abc import Awaitable, Callable, Iterable, Mapping, MutableMapping
 from importlib.metadata import version
-from typing import Any, Optional, cast
+from typing import Any, Optional, Self, cast
 
 import httpx
 
@@ -39,7 +39,7 @@ class ClientBase(abc.ABC):
         self._auth: MutableMapping[str, httpx.Auth] = {}
         self._auth_cache: MutableMapping[str, httpx.Auth] = {}
 
-    async def __aenter__(self):
+    async def __aenter__(self: Self) -> Self:
         await self._client.__aenter__()
         return self
 
