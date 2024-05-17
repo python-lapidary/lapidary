@@ -2,9 +2,10 @@ import abc
 import logging
 from collections.abc import Awaitable, Callable, Iterable, Mapping, MutableMapping
 from importlib.metadata import version
-from typing import Any, Optional, Self, cast
+from typing import Any, Optional, cast
 
 import httpx
+from typing_extensions import Self
 
 from ._httpx import AuthType
 from .model.op import OperationModel, get_operation_model
