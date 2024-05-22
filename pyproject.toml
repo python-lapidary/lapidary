@@ -26,7 +26,6 @@ python = "^3.9"
 httpx = {extras = ["http2"], version = "^0.27"}
 httpx-auth = "^0.22"
 pydantic = {extras = ["email"], version = "^2.5.2"}
-pytest-asyncio = "^0.23.3"
 python-mimeparse = "^1.6.0"
 typing-extensions = { python = "<3.12", version = "^4.9.0" }
 
@@ -35,6 +34,7 @@ fastapi = "^0.109.0"
 mypy = "^1.0.1"
 pylint = "^3.0.3"
 pytest = "^7.1"
+pytest-asyncio = "^0.23.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
