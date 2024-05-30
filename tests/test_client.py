@@ -1,9 +1,9 @@
 import dataclasses as dc
-import unittest
 
 import fastapi
 import httpx
 import pydantic
+import pytest
 import typing_extensions as typing
 from starlette.responses import JSONResponse
 
@@ -144,24 +144,28 @@ class CatClient(ClientBase):
 client = CatClient(transport=httpx.ASGITransport(app=cats_app))
 
 
-class TestClient(unittest.IsolatedAsyncioTestCase):
-    async def test_request(self):
-        response = await client.cat_list()
-        self.assertIsInstance(response, list)
-        self.assertEqual([Cat(id=1, name='Tom')], response)
+@pytest.mark.asyncio
+async def test_request():
+    response = await client.cat_list()
+    assert isinstance(response, list)
+    assert response == [Cat(id=1, name='Tom')]
 
-        cat = await client.cat_get(id=1)
-        self.assertIsInstance(cat, Cat)
-        self.assertEqual(Cat(id=1, name='Tom'), cat)
+    cat = await client.cat_get(id=1)
+    assert isinstance(cat, Cat)
+    assert cat == Cat(id=1, name='Tom')
 
-    async def test_response_auth(self):
-        response = await client.login(body=AuthRequest(login='login', password='passwd'))
 
-        self.assertEqual("you're in", response.api_key)
+@pytest.mark.asyncio
+async def test_response_auth():
+    response = await client.login(body=AuthRequest(login='login', password='passwd'))
 
-    async def test_error(self):
-        try:
-            await client.cat_get(id=7)
-            assert False, 'Expected ServerError'
-        except ServerError as e:
-            self.assertEqual(e.msg, 'Cat not found')
+    assert response.api_key == "you're in"
+
+
+@pytest.mark.asyncio
+async def test_error():
+    try:
+        await client.cat_get(id=7)
+        assert False, 'Expected ServerError'
+    except ServerError as e:
+        assert e.msg == 'Cat not found'
