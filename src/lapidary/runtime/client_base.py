@@ -8,8 +8,9 @@ import httpx
 from typing_extensions import Self
 
 from ._httpx import AuthType
-from .model.op import OperationModel, get_operation_model
+from .model.op import OperationModel
 from .model.request import RequestFactory
+from .operation import get_operation_model
 from .request import build_request
 from .types_ import MultiAuth, NamedAuth, SecurityRequirements
 

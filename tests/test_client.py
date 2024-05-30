@@ -7,19 +7,7 @@ import pytest
 import typing_extensions as typing
 from starlette.responses import JSONResponse
 
-from lapidary.runtime import (
-    ClientBase,
-    ParamStyle,
-    Path,
-    RequestBody,
-    ResponseBody,
-    ResponseEnvelope,
-    ResponseHeader,
-    Responses,
-    get,
-    post,
-    put,
-)
+from lapidary.runtime import ClientBase, Header, ParamStyle, Path, RequestBody, ResponseBody, ResponseEnvelope, Responses, get, post, put
 from lapidary.runtime.http_consts import MIME_JSON
 
 # model (common to both client and server)
@@ -85,7 +73,7 @@ async def login(body: AuthRequest) -> AuthResponse:
 
 class CatListResponse(ResponseEnvelope):
     body: typing.Annotated[typing.List[Cat], ResponseBody()]
-    count: typing.Annotated[int, ResponseHeader('X-Count')]
+    count: typing.Annotated[int, Header('X-Count')]
 
 
 class CatClient(ClientBase):

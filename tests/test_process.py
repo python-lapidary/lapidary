@@ -5,7 +5,8 @@ import pytest
 from typing_extensions import Self
 
 from lapidary.runtime import ClientBase, Query, Responses
-from lapidary.runtime.model.op import OperationModel, get_operation_model
+from lapidary.runtime.model.op import OperationModel
+from lapidary.runtime.operation import get_operation_model
 
 
 def test_optional_param():

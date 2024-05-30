@@ -5,7 +5,8 @@ import typing_extensions as typing
 
 from .http_consts import CONTENT_TYPE
 from .mime import find_mime
-from .model.response import ResponseEnvelope, ResponseMap
+from .model.annotations import ResponseMap
+from .model.response import ResponseEnvelope
 
 logger = logging.getLogger(__name__)
 
