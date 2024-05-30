@@ -1,5 +1,5 @@
 import sys
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Union
 
 import pytest
 from typing_extensions import Self
@@ -13,6 +13,20 @@ def test_optional_param():
         async def operation(
             self: Self,
             param: Annotated[Optional[str], Query()],
+        ) -> Annotated[None, Responses({})]:
+            pass
+
+    op = get_operation_model('GET', '/op', Client.operation)
+    expected_anno = Query()
+    expected_anno.supply_formal('param', Optional[str])
+    assert op == OperationModel('GET', '/op', {'param': expected_anno}, {})
+
+
+def test_union_param():
+    class Client(ClientBase):
+        async def operation(
+            self: Self,
+            param: Annotated[Union[str, None], Query()],
         ) -> Annotated[None, Responses({})]:
             pass
 

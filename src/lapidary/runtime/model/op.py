@@ -1,12 +1,15 @@
 import dataclasses as dc
 import inspect
+from collections.abc import Sequence
+from typing import Union
 
 import httpx
+import pydantic.fields
 import typing_extensions as typing
 
-from ..response import find_type, parse_model
+from ..response import find_type
 from .params import ParameterAnnotation, RequestPartHandler, find_annotations, process_params
-from .response_map import ResponseMap, Responses
+from .response import DefaultEnvelope, PropertyAnnotation, ResponseEnvelope, ResponseMap, ResponsePartHandler, Responses
 
 if typing.TYPE_CHECKING:
     from .request import RequestBuilder
@@ -43,20 +46,43 @@ class OperationModel:
         if typ is None:
             return None
 
-        obj: typing.Any = parse_model(response, typ)
+        fields = {}
+        for field_name, field_info in typ.model_fields.items():
+            field_info: pydantic.fields.FieldInfo
+            handlers: Sequence[Union[ResponsePartHandler, type[ResponsePartHandler]]] = [
+                anno
+                for anno in field_info.metadata
+                if isinstance(anno, ResponsePartHandler) or (inspect.isclass(anno) and issubclass(anno, ResponsePartHandler))
+            ]
+            assert len(handlers) == 1
+            handler = handlers[0]
+            if inspect.isclass(handler):
+                handler = handler()
+            if isinstance(handler, PropertyAnnotation):
+                handler.supply_formal(field_name, field_info.annotation)
+            handler.apply(fields, response)
+        obj = typ.parse_obj(fields)
+        # obj: typing.Any = parse_model(response, typ)
 
-        if isinstance(obj, Exception):
-            raise obj
+        if isinstance(obj, DefaultEnvelope):
+            if isinstance(obj.body, Exception):
+                raise obj.body
+            return obj.body
         else:
             return obj
 
 
 def get_response_map(return_anno: type) -> ResponseMap:
-    annos = find_annotations(return_anno, Responses)
+    annos: typing.Sequence[Responses] = find_annotations(return_anno, Responses)
     if len(annos) != 1:
         raise TypeError('Operation function must have exactly one Responses annotation')
 
-    return annos[0].responses
+    responses = annos[0].responses
+    for media_type_map in responses.values():
+        for media_type, typ in media_type_map.items():
+            if not issubclass(typ, ResponseEnvelope):
+                media_type_map[media_type] = DefaultEnvelope[typ]
+    return responses
 
 
 def get_operation_model(

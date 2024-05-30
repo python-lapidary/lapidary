@@ -70,7 +70,7 @@ class Param(RequestPartHandler, ParameterAnnotation, abc.ABC):
 
 
 @dc.dataclass
-class RequestBody(RequestPartHandler, ParameterAnnotation):
+class Body(RequestPartHandler, ParameterAnnotation):
     name: str = dc.field(init=False)
     content: typing.Mapping[str, type]
     _serializer: pydantic.TypeAdapter = dc.field(init=False)

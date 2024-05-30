@@ -5,7 +5,7 @@ from .http_consts import ACCEPT, MIME_JSON
 from .mime import find_mime
 from .model.op import OperationModel
 from .model.request import RequestBuilder, RequestFactory
-from .model.response_map import ResponseMap
+from .model.response import ResponseMap
 
 
 def get_accept_header(response_map: typing.Optional[ResponseMap]) -> typing.Optional[str]:
