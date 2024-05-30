@@ -54,6 +54,7 @@ addopts = "--color=yes"
 mypy_path = "src"
 namespace_packages = true
 python_version = "3.9"
+packages = ["lapidary.runtime"]
 
 [tool.ruff]
 target-version = "py39"
