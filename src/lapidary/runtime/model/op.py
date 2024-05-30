@@ -1,7 +1,6 @@
 import dataclasses as dc
 import inspect
 from collections.abc import Sequence
-from typing import Union
 
 import httpx
 import typing_extensions as typing
@@ -47,11 +46,7 @@ class OperationModel:
 
         fields: typing.MutableMapping[str, typing.Any] = {}
         for field_name, field_info in typ.model_fields.items():
-            handlers: Sequence[Union[ResponsePartHandler, type[ResponsePartHandler]]] = [
-                anno
-                for anno in field_info.metadata
-                if isinstance(anno, ResponsePartHandler) or (inspect.isclass(anno) and issubclass(anno, ResponsePartHandler))
-            ]
+            handlers: Sequence[ResponsePartHandler] = [anno for anno in field_info.metadata if isinstance(anno, ResponsePartHandler)]
             assert len(handlers) == 1
             handler = handlers[0]
             if isinstance(handler, PropertyAnnotation):
