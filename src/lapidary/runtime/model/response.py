@@ -1,7 +1,6 @@
 import abc
 import dataclasses as dc
 from collections.abc import Callable
-from typing import Any
 
 import httpx
 import pydantic
@@ -23,9 +22,9 @@ class Responses:
 class ResponseEnvelopeBuilder:
     def __init__(self, typ: type[pydantic.BaseModel]) -> None:
         self._type = typ
-        self.fields = {}
+        self.fields: typing.MutableMapping[str, typing.Any] = {}
 
-    def build(self) -> Any:
+    def build(self) -> typing.Any:
         return self._type.model_construct(**self.fields)
 
 
@@ -45,14 +44,14 @@ class PropertyAnnotation(abc.ABC):
 
 
 class Body(ResponsePartHandler, PropertyAnnotation):
-    _parse: Callable[[...], Any]
+    _parse: Callable[[bytes], typing.Any]
 
     def supply_formal(self, name: str, type_: type) -> None:
         super().supply_formal(name, type_)
         self._parse = pydantic.TypeAdapter(type_).validate_json
 
     def apply(self, fields: typing.MutableMapping, response: httpx.Response) -> None:
-        fields[self._name] = self._parse(response.text)
+        fields[self._name] = self._parse(response.content)
 
 
 class Header(ResponsePartHandler, PropertyAnnotation):
@@ -71,4 +70,4 @@ BodyT = typing.TypeVar('BodyT')
 
 
 class DefaultEnvelope(ResponseEnvelope, typing.Generic[BodyT]):
-    body: typing.Annotated[BodyT, Body]
+    body: typing.Annotated[BodyT, Body()]

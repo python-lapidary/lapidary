@@ -4,7 +4,6 @@ from collections.abc import Sequence
 from typing import Union
 
 import httpx
-import pydantic.fields
 import typing_extensions as typing
 
 from ..response import find_type
@@ -46,9 +45,8 @@ class OperationModel:
         if typ is None:
             return None
 
-        fields = {}
+        fields: typing.MutableMapping[str, typing.Any] = {}
         for field_name, field_info in typ.model_fields.items():
-            field_info: pydantic.fields.FieldInfo
             handlers: Sequence[Union[ResponsePartHandler, type[ResponsePartHandler]]] = [
                 anno
                 for anno in field_info.metadata
@@ -56,10 +54,10 @@ class OperationModel:
             ]
             assert len(handlers) == 1
             handler = handlers[0]
-            if inspect.isclass(handler):
-                handler = handler()
             if isinstance(handler, PropertyAnnotation):
-                handler.supply_formal(field_name, field_info.annotation)
+                field_type = field_info.annotation
+                assert field_type
+                handler.supply_formal(field_name, field_type)
             handler.apply(fields, response)
         obj = typ.parse_obj(fields)
         # obj: typing.Any = parse_model(response, typ)
@@ -81,7 +79,7 @@ def get_response_map(return_anno: type) -> ResponseMap:
     for media_type_map in responses.values():
         for media_type, typ in media_type_map.items():
             if not issubclass(typ, ResponseEnvelope):
-                media_type_map[media_type] = DefaultEnvelope[typ]
+                media_type_map[media_type] = DefaultEnvelope[typ]  # type: ignore[valid-type]
     return responses
 
 
