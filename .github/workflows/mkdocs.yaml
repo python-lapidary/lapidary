@@ -26,7 +26,7 @@ jobs:
       run: mkdocs build -f config/mkdocs.yml
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./site  # Set this to your 'site_dir' if you have a custom build directory
