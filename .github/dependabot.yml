@@ -1,21 +1,10 @@
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
 - package-ecosystem: pip
   directory: /
   schedule:
-    interval: weekly
-  commit-message:
-    prefix: "⬆️ "
-    include: scope
-  groups:
-    httpx:
-      patterns:
-      - httpx
-      - httpx-auth
+    interval: monthly
 - package-ecosystem: github-actions
   directory: /
   schedule:
     interval: monthly
-    prefix: "⬆️👷 "
