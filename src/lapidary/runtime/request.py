@@ -1,11 +1,13 @@
+import inspect
+
 import httpx
 import typing_extensions as typing
 
 from .http_consts import ACCEPT, MIME_JSON
 from .mime import find_mime
+from .model.annotations import NameTypeAwareAnnotation, ResponseMap, find_annotations
 from .model.op import OperationModel
 from .model.request import RequestBuilder, RequestFactory
-from .model.response_map import ResponseMap
 
 
 def get_accept_header(response_map: typing.Optional[ResponseMap]) -> typing.Optional[str]:
@@ -32,3 +34,19 @@ def build_request(
         builder.headers[ACCEPT] = accept
 
     return builder()
+
+
+def process_params(sig: inspect.Signature) -> typing.Mapping[str, NameTypeAwareAnnotation]:
+    return dict(process_param(param) for param in sig.parameters.values() if param.annotation not in (typing.Self, None))
+
+
+def process_param(param: inspect.Parameter) -> typing.Tuple[str, NameTypeAwareAnnotation]:
+    name = param.name
+    typ = param.annotation
+
+    annotations = find_annotations(typ, NameTypeAwareAnnotation)  # type: ignore[type-abstract]
+    if len(annotations) != 1:
+        raise ValueError(f'{name}: expected exactly one Lapidary annotation.', typ)
+    annotation = annotations[0]
+    annotation.supply_formal(name, typ.__origin__)
+    return name, annotation

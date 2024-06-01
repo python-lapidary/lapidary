@@ -4,6 +4,8 @@ __all__ = (
     'NamedAuth',
     'ParamStyle',
     'RequestBody',
+    'ResponseEnvelope',
+    'ResponseBody',
     'Responses',
     'SecurityRequirements',
     'delete',
@@ -21,9 +23,16 @@ __all__ = (
 
 from .client_base import ClientBase
 from .model import ModelBase
+from .model.annotations import (
+    Cookie,
+    Header,
+    Path,
+    Query,
+    RequestBody,
+    ResponseBody,
+    Responses,
+)
 from .model.encode_param import ParamStyle
-from .model.params import RequestBody
-from .model.response_map import Responses
+from .model.response import ResponseEnvelope
 from .operation import delete, get, head, patch, post, put, trace
-from .param import Cookie, Header, Path, Query
 from .types_ import NamedAuth, SecurityRequirements

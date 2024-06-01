@@ -1,3 +1,4 @@
+import abc
 import dataclasses as dc
 
 import httpx
@@ -58,3 +59,9 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
             headers=self.headers,
             cookies=self.cookies,
         )
+
+
+class RequestHandler(abc.ABC):
+    @abc.abstractmethod
+    def apply_request(self, builder: RequestBuilder, value: typing.Any) -> None:
+        pass

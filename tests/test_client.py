@@ -7,7 +7,7 @@ import pytest
 import typing_extensions as typing
 from starlette.responses import JSONResponse
 
-from lapidary.runtime import ClientBase, ParamStyle, Path, RequestBody, Responses, get, post, put
+from lapidary.runtime import ClientBase, Header, ParamStyle, Path, RequestBody, ResponseBody, ResponseEnvelope, Responses, get, post, put
 from lapidary.runtime.http_consts import MIME_JSON
 
 # model (common to both client and server)
@@ -37,9 +37,14 @@ class ServerError(Exception):
 cats_app = fastapi.FastAPI(debug=True)
 
 
-@cats_app.get('/cats')
-async def cat_list() -> typing.List[Cat]:
-    return [Cat(id=1, name='Tom')]
+@cats_app.get('/cats', responses={'200': {'model': typing.List[Cat]}})
+async def cat_list() -> JSONResponse:
+    serializer = pydantic.TypeAdapter(typing.List[Cat])
+    data = [Cat(id=1, name='Tom')]
+    return JSONResponse(
+        serializer.dump_python(data),
+        headers={'X-Count': str(len(data))},
+    )
 
 
 @cats_app.get(
@@ -66,6 +71,11 @@ async def login(body: AuthRequest) -> AuthResponse:
 # Client
 
 
+class CatListResponse(ResponseEnvelope):
+    body: typing.Annotated[typing.List[Cat], ResponseBody()]
+    count: typing.Annotated[int, Header('X-Count')]
+
+
 class CatClient(ClientBase):
     def __init__(
         self,
@@ -81,10 +91,10 @@ class CatClient(ClientBase):
     async def cat_list(
         self: typing.Self,
     ) -> typing.Annotated[
-        Cat,
+        CatListResponse,
         Responses(
             {
-                'default': {'application/json': typing.List[Cat]},
+                'default': {'application/json': CatListResponse},
             }
         ),
     ]:
@@ -145,10 +155,11 @@ client = CatClient(transport=httpx.ASGITransport(app=cats_app))
 
 
 @pytest.mark.asyncio
-async def test_request():
+async def test_request_response():
     response = await client.cat_list()
-    assert isinstance(response, list)
-    assert response == [Cat(id=1, name='Tom')]
+    assert isinstance(response, CatListResponse)
+    assert response.body == [Cat(id=1, name='Tom')]
+    assert response.count == 1
 
     cat = await client.cat_get(id=1)
     assert isinstance(cat, Cat)

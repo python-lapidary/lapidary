@@ -1,13 +1,12 @@
-import inspect
 import logging
 
 import httpx
-import pydantic
 import typing_extensions as typing
 
 from .http_consts import CONTENT_TYPE
 from .mime import find_mime
-from .model.response_map import ResponseMap
+from .model.annotations import ResponseMap
+from .model.response import ResponseEnvelope
 
 logger = logging.getLogger(__name__)
 
@@ -15,15 +14,7 @@ T = typing.TypeVar('T')
 P = typing.TypeVar('P')
 
 
-def parse_model(response: httpx.Response, typ: type[T]) -> T:
-    if inspect.isclass(typ):
-        if issubclass(typ, pydantic.BaseModel):
-            return typing.cast(T, typ.model_validate_json(response.content))
-
-    return pydantic.TypeAdapter(typ).validate_json(response.content)
-
-
-def find_type(response: httpx.Response, response_map: ResponseMap) -> typing.Optional[type]:
+def find_type(response: httpx.Response, response_map: ResponseMap) -> typing.Optional[type[ResponseEnvelope]]:
     status_code = str(response.status_code)
     if CONTENT_TYPE not in response.headers:
         return None

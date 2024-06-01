@@ -171,15 +171,15 @@ to JSON using Pydantic's BaseModel.model_dump_json() and included in the body of
 ## Return type
 
 The Responses annotation plays a crucial role in mapping HTTP status codes and Content-Type headers to specific return
-types. This mechanism allows developers to define how responses are parsed and returned with high precision.
+types. This mechanism allows developers to define how responses are parsed and returned.
 
-The return type is specified in two essential places:
+The return type is specified in two places:
 
 1. At the method signature level - The declared return type here should reflect the expected successful response
    structure. It can be a single type or a Union of types, accommodating various potential non-error response bodies.
 
-2. Within the Responses annotation - This details the specific type or types to be used for parsing the response body,
-   contingent upon the response's HTTP status code and content type matching those specified.
+2. Within the `Responses` annotation - This details the specific type or types to be used for parsing the response body,
+   depending on the response's HTTP status code and content type matching those specified.
 
 !!! Note
 
@@ -189,12 +189,7 @@ Example:
 
 ```python
 @get('/cat')
-async def list_cats(
-        self: Self,
-        cat: Annotated[Cat, RequestBody({
-            'application/json': Cat,
-        })],
-) -> Annotated[
+async def list_cats(self: Self) -> Annotated[
     List[Cat],
     Responses({
         '2XX': {
@@ -209,6 +204,38 @@ In this setup, the Responses dictionary specifies that for responses with a 2XX 
 application/json, the response body will be parsed as a list of Cat objects. This explicit declaration ensures that the
 method's return type is tightly coupled with the anticipated successful response structure, providing clarity and type
 safety for API interactions.
+
+
+### Mapping headers
+
+Lapidary supports an additional response type that envelops the response body and allows declaring response headers.
+
+Example:
+
+```python
+
+class CatsListResponse(ResponseEnvelope):
+   body: Annotated[List[Cat], ResponseBody()]
+   total_count: Annotated[int, ResponseHeader('X-Total-Count')]
+
+class CatClient(ClientBase):
+   @get('/cat')
+   async def list_cats(self: Self) -> Annotated[
+       CatsListResponse,
+       Responses({
+           '2XX': {
+               'application/json': CatsListResponse,
+           },
+       })
+   ]:
+       pass
+
+client = CatClient()
+cats_response = await client.list_cats()
+assert cats_response.body == [Cat(...)]
+assert cats_response.count == 1
+```
+
 
 ### Handling error responses
 

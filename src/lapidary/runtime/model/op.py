@@ -1,12 +1,13 @@
 import dataclasses as dc
-import inspect
+from collections.abc import Sequence
 
 import httpx
 import typing_extensions as typing
 
-from ..response import find_type, parse_model
-from .params import ParameterAnnotation, RequestPartHandler, find_annotations, process_params
-from .response_map import ResponseMap, Responses
+from ..response import find_type
+from .annotations import NameTypeAwareAnnotation, ResponseBody, ResponseMap
+from .request import RequestHandler
+from .response import ResponseEnvelope, ResponseHandler
 
 if typing.TYPE_CHECKING:
     from .request import RequestBuilder
@@ -16,7 +17,7 @@ if typing.TYPE_CHECKING:
 class OperationModel:
     method: str
     path: str
-    params: typing.Mapping[str, ParameterAnnotation]
+    params: typing.Mapping[str, NameTypeAwareAnnotation]
     response_map: ResponseMap
 
     def process_params(
@@ -26,8 +27,8 @@ class OperationModel:
     ) -> None:
         for param_name, value in actual_params.items():
             param_handler = self.params[param_name]
-            if isinstance(param_handler, RequestPartHandler):
-                param_handler.apply(request, actual_params[param_name])
+            if isinstance(param_handler, RequestHandler):
+                param_handler.apply_request(request, actual_params[param_name])
             else:
                 raise TypeError(param_name, type(value))
 
@@ -43,31 +44,29 @@ class OperationModel:
         if typ is None:
             return None
 
-        obj: typing.Any = parse_model(response, typ)
+        fields: typing.MutableMapping[str, typing.Any] = {}
+        for field_name, field_info in typ.model_fields.items():
+            handlers: Sequence[ResponseHandler] = [anno for anno in field_info.metadata if isinstance(anno, ResponseHandler)]
+            assert len(handlers) == 1
+            handler = handlers[0]
+            if isinstance(handler, NameTypeAwareAnnotation):
+                field_type = field_info.annotation
+                assert field_type
+                handler.supply_formal(field_name, field_type)
+            handler.apply_response(response, fields)
+        obj = typ.parse_obj(fields)
+        # obj: typing.Any = parse_model(response, typ)
 
-        if isinstance(obj, Exception):
-            raise obj
+        if isinstance(obj, DefaultEnvelope):
+            if isinstance(obj.body, Exception):
+                raise obj.body
+            return obj.body
         else:
             return obj
 
 
-def get_response_map(return_anno: type) -> ResponseMap:
-    annos = find_annotations(return_anno, Responses)
-    if len(annos) != 1:
-        raise TypeError('Operation function must have exactly one Responses annotation')
-
-    return annos[0].responses
+BodyT = typing.TypeVar('BodyT')
 
 
-def get_operation_model(
-    method: str,
-    path: str,
-    fn: typing.Callable,
-) -> OperationModel:
-    sig = inspect.signature(fn)
-    return OperationModel(
-        method=method,
-        path=path,
-        params=process_params(sig),
-        response_map=get_response_map(sig.return_annotation),
-    )
+class DefaultEnvelope(ResponseEnvelope, typing.Generic[BodyT]):
+    body: typing.Annotated[BodyT, ResponseBody()]
