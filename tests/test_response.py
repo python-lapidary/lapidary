@@ -1,4 +1,4 @@
-from lapidary.runtime.response import _status_code_matches
+from lapidary.runtime.model.op import _status_code_matches
 
 
 def test__status_code_matches():

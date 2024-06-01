@@ -105,11 +105,6 @@ class Param(RequestHandler, NameTypeAwareAnnotation, abc.ABC):
     def http_name(self) -> str:
         return self.alias or self._name
 
-    def __eq__(self, other):
-        if not isinstance(other, type(self)):
-            raise NotImplementedError
-        return self.__dict__ == other.__dict__
-
 
 T = typing.TypeVar('T')
 

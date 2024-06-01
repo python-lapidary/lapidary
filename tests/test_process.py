@@ -6,7 +6,6 @@ from typing_extensions import Self
 
 from lapidary.runtime import ClientBase, Query, Responses
 from lapidary.runtime.model.op import OperationModel
-from lapidary.runtime.operation import get_operation_model
 
 
 def test_optional_param():
@@ -17,10 +16,12 @@ def test_optional_param():
         ) -> Annotated[None, Responses({})]:
             pass
 
-    op = get_operation_model('GET', '/op', Client.operation)
-    expected_anno = Query()
-    expected_anno.supply_formal('param', Optional[str])
-    assert op == OperationModel('GET', '/op', {'param': expected_anno}, {})
+    op = OperationModel('GET', '/op', None, Client.operation)
+
+    param = next(iter(op.params.values()))
+    assert isinstance(param, Query)
+    assert param._name == 'param'
+    assert param._type == Optional[str]
 
 
 def test_union_param():
@@ -31,10 +32,17 @@ def test_union_param():
         ) -> Annotated[None, Responses({})]:
             pass
 
-    op = get_operation_model('GET', '/op', Client.operation)
-    expected_anno = Query()
-    expected_anno.supply_formal('param', Optional[str])
-    assert op == OperationModel('GET', '/op', {'param': expected_anno}, {})
+    op = OperationModel(
+        'GET',
+        '/op',
+        None,
+        Client.operation,
+    )
+
+    param = next(iter(op.params.values()))
+    assert isinstance(param, Query)
+    assert param._name == 'param'
+    assert param._type == Optional[str]
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason='type-or requires python3.10 or higher')
@@ -46,7 +54,14 @@ def test_or_none_param():
         ) -> Annotated[None, Responses({})]:
             pass
 
-    op = get_operation_model('GET', '/op', Client.operation)
-    expected_anno = Query()
-    expected_anno.supply_formal('param', Optional[str])
-    assert op == OperationModel('GET', '/op', {'param': expected_anno}, {})
+    op = OperationModel(
+        'GET',
+        '/op',
+        None,
+        Client.operation,
+    )
+
+    param = next(iter(op.params.values()))
+    assert isinstance(param, Query)
+    assert param._name == 'param'
+    assert param._type == Optional[str]
