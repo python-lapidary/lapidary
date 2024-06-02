@@ -25,7 +25,7 @@ classifiers = [
 python = "^3.9"
 httpx = {extras = ["http2"], version = "^0.27"}
 httpx-auth = "^0.22"
-pydantic = {extras = ["email"], version = "^2.5.2"}
+pydantic = "^2.5.2"
 python-mimeparse = "^1.6.0"
 typing-extensions = { python = "<3.12", version = "^4.9.0" }
 
