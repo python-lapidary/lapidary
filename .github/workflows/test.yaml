@@ -30,7 +30,7 @@ jobs:
       run: poetry run pre-commit run -a
 
     - name: run mypy
-      run: poetry run mypy -p lapidary
+      run: poetry run mypy
 
   tests:
     name: ${{ matrix.os }} / ${{ matrix.python-version }}
