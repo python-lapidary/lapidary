@@ -6,12 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 and the format of this file is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [NEXT]
+## [0.10.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.10.0) - 2024-06-01
 ### Added
 - Support response envelope objects to allow returning headers together with the body model.
 
 
-## [0.9.1](https://github.com/python-lapidary/lapidary/releases/tag/v0.9.0) - 2024-05-25
+## [0.9.1](https://github.com/python-lapidary/lapidary/releases/tag/v0.9.1) - 2024-05-25
 ### Fixed
 - Moved pytest-asyncio dependency to dev group.
 
