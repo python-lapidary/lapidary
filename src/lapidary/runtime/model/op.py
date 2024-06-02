@@ -1,5 +1,5 @@
 import inspect
-from collections.abc import Awaitable, Callable, Iterable, Mapping, MutableMapping, Sequence
+from collections.abc import Awaitable, Callable, Iterable, Mapping, MutableMapping
 
 import httpx
 import pydantic.fields
@@ -164,23 +164,21 @@ def process_response_envelope(typ: type[ResponseEnvelope]) -> Iterable[ResponseH
 
 
 def process_response_field(name: str, field: pydantic.fields.FieldInfo) -> ResponseHandler:
-    field_handlers: Sequence[ResponseHandler] = [
-        anno
-        for anno in field.metadata
-        if isinstance(anno, ResponseHandler) or (inspect.isclass(anno) and issubclass(anno, ResponseHandler))
-    ]
-    if not len(field_handlers) == 1:
+    field_handlers = []
+    for anno in field.metadata:
+        if inspect.isclass(anno) and issubclass(anno, ResponseHandler):
+            field_handlers.append(anno())
+        elif isinstance(anno, ResponseHandler):
+            field_handlers.append(anno)
+    if len(field_handlers) != 1:
         raise TypeError(f'{name}: Expected exactly one ResponseHandler annotation')
     handler = field_handlers[0]
-    if inspect.isclass(handler) and issubclass(handler, ResponseHandler):
-        handler_inst = typing.cast(type[ResponseHandler], handler)()
-    else:
-        handler_inst = handler
-    if isinstance(handler_inst, NameTypeAwareAnnotation):
+
+    if isinstance(handler, NameTypeAwareAnnotation):
         field_type = field.annotation
         assert field_type
-        handler_inst.supply_formal(name, field_type)
-    return handler_inst
+        handler.supply_formal(name, field_type)
+    return handler
 
 
 def find_type(

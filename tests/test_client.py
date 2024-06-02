@@ -72,7 +72,7 @@ async def login(body: AuthRequest) -> AuthResponse:
 
 
 class CatListResponse(ResponseEnvelope):
-    body: typing.Annotated[typing.List[Cat], ResponseBody()]
+    body: typing.Annotated[typing.List[Cat], ResponseBody]
     count: typing.Annotated[int, Header('X-Count')]
 
 
