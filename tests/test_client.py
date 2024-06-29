@@ -1,4 +1,5 @@
 import dataclasses as dc
+from collections.abc import Awaitable
 
 import fastapi
 import httpx
@@ -91,7 +92,7 @@ class CatClient(ClientBase):
     async def cat_list(
         self: typing.Self,
     ) -> typing.Annotated[
-        CatListResponse,
+        Awaitable[CatListResponse],
         Responses(
             {
                 'default': {'application/json': CatListResponse},
@@ -106,7 +107,7 @@ class CatClient(ClientBase):
         *,
         id: typing.Annotated[int, Path(style=ParamStyle.simple)],  # pylint: disable=redefined-builtin
     ) -> typing.Annotated[
-        Cat,
+        Awaitable[Cat],
         Responses(
             {
                 '2XX': {'application/json': Cat},
@@ -122,7 +123,7 @@ class CatClient(ClientBase):
         *,
         body: typing.Annotated[Cat, RequestBody({'application/json': Cat})],
     ) -> typing.Annotated[
-        Cat,
+        Awaitable[Cat],
         Responses(
             {
                 'default': {'application/json': Cat},
@@ -137,7 +138,7 @@ class CatClient(ClientBase):
         *,
         body: typing.Annotated[AuthRequest, RequestBody({MIME_JSON: AuthRequest})],
     ) -> typing.Annotated[
-        AuthResponse,
+        Awaitable[AuthResponse],
         Responses(
             {
                 '200': {

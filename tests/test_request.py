@@ -1,3 +1,4 @@
+from collections.abc import Awaitable
 from unittest.mock import AsyncMock, Mock
 
 import httpx
@@ -37,7 +38,7 @@ async def test_build_request_from_list(mock_http_client) -> None:
         async def body_list(
             self: typing.Self,
             body: typing.Annotated[MyRequestBodyList, RequestBody({'application/json': MyRequestBodyList})],
-        ) -> typing.Annotated[None, Responses({})]:
+        ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
     async with Client(client=mock_http_client) as client:
@@ -64,7 +65,7 @@ async def test_request_param_list_simple(mock_http_client):
         async def param_list_simple(
             self: typing.Self,
             q_a: typing.Annotated[typing.List[str], Query('a', style=ParamStyle.simple)],
-        ) -> typing.Annotated[None, Responses({})]:
+        ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
     async with Client(client=mock_http_client) as client:
@@ -86,7 +87,7 @@ async def test_build_request_none(mock_http_client):
         @get('/request_none')
         async def request_none(
             self: typing.Self,
-        ) -> typing.Annotated[None, Responses({})]:
+        ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
     async with Client(client=mock_http_client) as client:
@@ -109,7 +110,7 @@ async def test_request_param_list_exploded(mock_http_client):
         async def param_list_exploded(
             self: typing.Self,
             q_a: typing.Annotated[typing.List[str], Query('a', style=ParamStyle.simple, explode=True)],
-        ) -> typing.Annotated[None, Responses({})]:
+        ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
     async with Client(client=mock_http_client) as client:

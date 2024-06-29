@@ -27,6 +27,7 @@ decorated and annotated Python methods. Calling these method handles making HTTP
 back into Python objects.
 
 ```python
+from collections.abc import Awaitable
 from typing import Annotated, Self
 from lapidary.runtime import *
 
@@ -50,7 +51,7 @@ class CatClient(ClientBase):
         self: Self,
         *,
         id: Annotated[int, Path(style=ParamStyle.simple)],
-    ) -> Annotated[Cat, Responses({
+    ) -> Annotated[Awaitable[Cat], Responses({
         '2XX': {
             'application/json': Cat
         },

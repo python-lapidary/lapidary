@@ -1,4 +1,5 @@
 import sys
+from collections.abc import Awaitable
 from typing import Annotated, Optional, Union
 
 import pytest
@@ -13,7 +14,7 @@ def test_optional_param():
         async def operation(
             self: Self,
             param: Annotated[Optional[str], Query()],
-        ) -> Annotated[None, Responses({})]:
+        ) -> Annotated[Awaitable[None], Responses({})]:
             pass
 
     op = OperationModel('GET', '/op', None, Client.operation)
@@ -29,7 +30,7 @@ def test_union_param():
         async def operation(
             self: Self,
             param: Annotated[Union[str, None], Query()],
-        ) -> Annotated[None, Responses({})]:
+        ) -> Annotated[Awaitable[None], Responses({})]:
             pass
 
     op = OperationModel(
@@ -51,7 +52,7 @@ def test_or_none_param():
         async def operation(
             self: Self,
             param: Annotated[str | None, Query()],
-        ) -> Annotated[None, Responses({})]:
+        ) -> Annotated[Awaitable[None], Responses({})]:
             pass
 
     op = OperationModel(

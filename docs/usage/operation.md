@@ -190,7 +190,7 @@ Example:
 ```python
 @get('/cat')
 async def list_cats(self: Self) -> Annotated[
-    List[Cat],
+    Awaitable[List[Cat]],
     Responses({
         '2XX': {
             'application/json': List[Cat],
@@ -221,7 +221,7 @@ class CatsListResponse(ResponseEnvelope):
 class CatClient(ClientBase):
    @get('/cat')
    async def list_cats(self: Self) -> Annotated[
-       CatsListResponse,
+       Awaitable[CatsListResponse],
        Responses({
            '2XX': {
                'application/json': CatsListResponse,
@@ -258,7 +258,7 @@ class ErrorModel(Exception):
 async def list_cats(
         self: Self,
 ) -> Annotated[
-    List[Cat],
+    Awaitable[List[Cat]],
     Responses({
         '2XX': {...},
         '4XX': {
