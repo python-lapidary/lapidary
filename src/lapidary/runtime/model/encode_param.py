@@ -57,9 +57,9 @@ def get_encode_fn(typ: type, style: ParamStyle, explode: bool) -> Optional[Encod
         return None
     elif inspect.isclass(origin) and issubclass(origin, (str, int, float, bool)):
         encode_type = 'atomic'
-    elif origin == list or (inspect.isclass(origin) and issubclass(origin, Iterable)):
+    elif origin is list or (inspect.isclass(origin) and issubclass(origin, Iterable)):
         encode_type = 'array'
-    elif origin == dict or (inspect.isclass(origin) and issubclass(origin, Mapping)):
+    elif origin is dict or (inspect.isclass(origin) and issubclass(origin, Mapping)):
         encode_type = 'object'
     else:
         raise NotImplementedError(typ)
