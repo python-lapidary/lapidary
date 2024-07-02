@@ -1,0 +1,99 @@
+name: Test and publish
+
+on:
+- push
+
+concurrency:
+  group: tests-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Set up environment
+      run: pip install pre-commit
+
+    - name: Cache Pre-commit
+      id: pre-commit-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+        restore-keys: |
+          pre-commit-
+
+    - name: Run pre-commit
+      run: pre-commit run -a
+
+  tests:
+    name: ${{ matrix.os }} / ${{ matrix.python-version }}
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        os:
+        - Ubuntu
+        - macOS
+        - Windows
+        python-version:
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        include:
+        - os: Ubuntu
+          image: ubuntu-latest
+        - os: Windows
+          image: windows-latest
+        - os: macOS
+          image: macos-latest
+      fail-fast: false
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Poetry
+      uses: packetcoders/action-setup-cache-python-poetry@main
+      with:
+        python-version: ${{ matrix.python-version }}
+        poetry-version: 1.8.3
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Run pytest
+      run: poetry run pytest -s
+
+  publish:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+    - lint
+    - tests
+
+    permissions:
+      id-token: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Install Poetry
+      uses: packetcoders/action-setup-cache-python-poetry@main
+      with:
+        python-version: 3.12
+        poetry-version: 1.8.3
+    - name: Mint token
+      id: mint
+      uses: tschm/token-mint-action@v1.0.3
+    - name: Publish the package
+      run: poetry publish --build -u __token__ -p '${{ steps.mint.outputs.api-token }}'
