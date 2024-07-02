@@ -2,7 +2,6 @@ site_name: Lapidary runtime
 repo_url: https://github.com/python-lapidary/lapidary
 
 docs_dir: ../docs
-site_dir: ../site
 
 nav:
 - index.md
@@ -12,12 +11,3 @@ nav:
   - usage/auth.md
 - Reference:
   - reference/lapidary.md
-
-plugins:
-- mkdocstrings:
-    handlers:
-      python:
-        paths:
-        - src
-        options:
-          docstring_style: sphinx
