@@ -1,40 +1,32 @@
+import dataclasses as dc
 import functools as ft
-from collections.abc import Iterable
-from typing import Optional
+from collections.abc import Callable, Iterable
 
 import typing_extensions as typing
 
-from .model.op import OperationModel
+from .model.op import mk_exchange_fn, process_operation_method
 from .types_ import SecurityRequirements
 
-if typing.TYPE_CHECKING:
-    from .client_base import ClientBase
+OperationMethod = typing.TypeVar('OperationMethod', bound=typing.Callable)
+SimpleDecorator: typing.TypeAlias = Callable[[OperationMethod], OperationMethod]
 
 
-def _operation(
-    method: str,
-    path: str,
-    security: typing.Optional[Iterable[SecurityRequirements]] = None,
-) -> typing.Callable:
-    def decorator(fn: typing.Callable):
-        op = OperationModel(
-            method,
-            path,
-            security,
-            fn,
-        )
+@dc.dataclass
+class Operation:
+    method: str
+    path: str
+    security: typing.Optional[Iterable[SecurityRequirements]] = None
 
-        @ft.wraps(fn)
-        def capture(self: 'ClientBase', **kwargs):
-            return op(self, **kwargs)
+    def __call__(self, fn: OperationMethod) -> OperationMethod:
+        request_adapter, response_handler = process_operation_method(fn, self)
+        return typing.cast(OperationMethod, ft.wraps(fn)(mk_exchange_fn(request_adapter, response_handler)))
 
-        return capture
 
-    return decorator
+_operation = Operation
 
 
 class MethodProto(typing.Protocol):
-    def __call__(self, path: str, security: Optional[Iterable[SecurityRequirements]] = None) -> typing.Callable:
+    def __call__(self, path: str, security: typing.Optional[Iterable[SecurityRequirements]] = None) -> typing.Callable:
         pass
 
 

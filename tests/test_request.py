@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 import typing_extensions as typing
 
-from lapidary.runtime import ParamStyle, Query, RequestBody, Responses, get
+from lapidary.runtime import Body, ParamStyle, Query, Responses, get
 from lapidary.runtime.http_consts import CONTENT_TYPE
 from tests.client import ClientTestBase
 
@@ -37,7 +37,7 @@ async def test_build_request_from_list(mock_http_client) -> None:
         @get('/body_list')
         async def body_list(
             self: typing.Self,
-            body: typing.Annotated[MyRequestBodyList, RequestBody({'application/json': MyRequestBodyList})],
+            body: typing.Annotated[MyRequestBodyList, Body({'application/json': MyRequestBodyList})],
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 

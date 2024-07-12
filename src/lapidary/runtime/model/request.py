@@ -1,10 +1,16 @@
 import abc
 import dataclasses as dc
+from collections.abc import Iterable, Mapping
 
 import httpx
 import typing_extensions as typing
 
 from .. import _httpx
+from ..http_consts import ACCEPT
+from ..types_ import SecurityRequirements
+
+if typing.TYPE_CHECKING:
+    from ..client_base import ClientBase
 
 
 class RequestFactory(typing.Protocol):
@@ -37,8 +43,8 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
 
     request_factory: RequestFactory
 
-    method: typing.Optional[str] = None
-    path: typing.Optional[str] = None
+    method: str
+    path: str
 
     cookies: httpx.Cookies = dc.field(default_factory=httpx.Cookies)
     headers: httpx.Headers = dc.field(default_factory=httpx.Headers)
@@ -61,7 +67,36 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
         )
 
 
-class RequestHandler(abc.ABC):
+class RequestContributor(abc.ABC):
     @abc.abstractmethod
     def apply_request(self, builder: RequestBuilder, value: typing.Any) -> None:
         pass
+
+
+@dc.dataclass
+class RequestAdapter:
+    name: str
+    http_method: str
+    http_path_template: str
+    contributors: Mapping[str, RequestContributor]
+    accept: typing.Optional[Iterable[str]]
+    security: typing.Optional[Iterable[SecurityRequirements]]
+
+    def build_request(
+        self,
+        client: 'ClientBase',
+        kwargs: dict[str, typing.Any],
+    ) -> tuple[httpx.Request, typing.Optional[httpx.Auth]]:
+        builder = RequestBuilder(
+            typing.cast(RequestFactory, client._client.build_request),
+            self.http_method,
+            self.http_path_template,
+        )
+
+        for param_name, value in kwargs.items():
+            self.contributors[param_name].apply_request(builder, value)
+
+        if ACCEPT not in builder.headers and self.accept is not None:
+            builder.headers.update([(ACCEPT, value) for value in self.accept])
+        auth = client._auth_registry.resolve_auth(self.name, self.security)
+        return builder(), auth

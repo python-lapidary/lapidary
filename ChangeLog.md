@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html),
 and the format of this file is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+
+- Support bare response body or body and headers as result of operation methods.
+
+### Removed
+
+- Drop support for response envelopes.
+
 
 ## [0.10.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.10.0) - 2024-06-01
 ### Added
@@ -70,3 +80,5 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 
 ### Fixed
 - Dynamically creating generic types
+
+[unreleased]: https://github.com/python-lapidary/lapidary/compare/v0.10.0...HEAD
