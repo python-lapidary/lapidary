@@ -1,6 +1,6 @@
 # Lapidary
 
-[![test](https://github.com/python-lapidary/lapidary/actions/workflows/test.yaml/badge.svg)](https://github.com/python-lapidary/lapidary/actions/workflows/test.yaml)
+[![test](https://github.com/python-lapidary/lapidary/actions/workflows/test_publish.yaml/badge.svg)](https://github.com/python-lapidary/lapidary/actions/workflows/test_publsh.yaml)
 
 Python DSL for Web API clients.
 
