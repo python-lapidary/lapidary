@@ -2,10 +2,9 @@ import abc
 import logging
 from collections.abc import Iterable
 from importlib.metadata import version
-from typing import Optional
 
 import httpx
-from typing_extensions import Self
+import typing_extensions as typing
 
 from .model.auth import AuthRegistry
 from .types_ import NamedAuth, SecurityRequirements
@@ -20,8 +19,8 @@ class ClientBase(abc.ABC):
         self,
         base_url: str,
         user_agent: str = USER_AGENT,
-        security: Optional[Iterable[SecurityRequirements]] = None,
-        _http_client: Optional[httpx.AsyncClient] = None,
+        security: typing.Optional[Iterable[SecurityRequirements]] = None,
+        _http_client: typing.Optional[httpx.AsyncClient] = None,
         **httpx_kwargs,
     ):
         if httpx_kwargs and _http_client:
@@ -34,7 +33,7 @@ class ClientBase(abc.ABC):
         self._client = _http_client or httpx.AsyncClient(base_url=base_url, headers=headers, **httpx_kwargs)
         self._auth_registry = AuthRegistry(security)
 
-    async def __aenter__(self: Self) -> Self:
+    async def __aenter__(self: typing.Self) -> typing.Self:
         await self._client.__aenter__()
         return self
 

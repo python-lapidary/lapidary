@@ -2,21 +2,19 @@
 
 import inspect
 import logging
-import typing
 from collections.abc import Callable, Iterable, Mapping
 from enum import Enum, unique
-from typing import Optional, Union, cast
 
-from typing_extensions import TypeAlias
+import typing_extensions as typing
 
 from ..pycompat import UNION_TYPES
 
 logger = logging.getLogger(__name__)
 
-Atomic: TypeAlias = Union[str, int, float, bool]
-ObjectType: TypeAlias = Mapping[str, Optional[Atomic]]
-ValueType: TypeAlias = Union[Atomic, Iterable[Atomic], ObjectType]
-Encoder: TypeAlias = Callable[[str, ValueType], Union[str, Iterable[str]]]
+Atomic: typing.TypeAlias = typing.Union[str, int, float, bool]
+ObjectType: typing.TypeAlias = Mapping[str, typing.Optional[Atomic]]
+ValueType: typing.TypeAlias = typing.Union[Atomic, Iterable[Atomic], ObjectType]
+Encoder: typing.TypeAlias = Callable[[str, ValueType], typing.Union[str, Iterable[str]]]
 
 
 @unique
@@ -32,17 +30,17 @@ class ParamStyle(Enum):
 
 def encode(
     name: str,
-    value: Union[Atomic, Mapping[str, Atomic], Iterable[Atomic]],
+    value: typing.Union[Atomic, Mapping[str, Atomic], Iterable[Atomic]],
     typ: type,
     style: ParamStyle,
     explode: bool,
-) -> Union[str, Iterable[str]]:
+) -> typing.Union[str, Iterable[str]]:
     encoder = get_encode_fn(typ, style, explode)
     assert encoder
     return encoder(name, value)
 
 
-def get_encode_fn(typ: type, style: ParamStyle, explode: bool) -> Optional[Encoder]:
+def get_encode_fn(typ: type, style: ParamStyle, explode: bool) -> typing.Optional[Encoder]:
     origin = typing.get_origin(typ) or typ
 
     if origin in UNION_TYPES:
@@ -65,14 +63,14 @@ def get_encode_fn(typ: type, style: ParamStyle, explode: bool) -> Optional[Encod
         raise NotImplementedError(typ)
 
     fn_name = f'encode_{encode_type}_{style.value}{"_explode" if explode else ""}'
-    encode_fn = cast(Optional[Encoder], globals().get(fn_name, None))
+    encode_fn = typing.cast(typing.Optional[Encoder], globals().get(fn_name, None))
     if not encode_fn:
         raise TypeError('Unable to encode', typ, style, explode)
     return encode_fn
 
 
 def encode_union(encoders: Mapping[type, Encoder]) -> Encoder:
-    def encode_(name: str, value: ValueType) -> Union[str, Iterable[str]]:
+    def encode_(name: str, value: ValueType) -> typing.Union[str, Iterable[str]]:
         for formal_typ, encoder in encoders.items():
             if isinstance(value, formal_typ):
                 return encoder(name, value)
@@ -103,7 +101,9 @@ encode_array_simple_explode = encode_array_simple
 
 
 def encode_object_simple(_name: str, value: ObjectType) -> str:
-    return ','.join(encode_atomic_simple(_name, cast(Atomic, item)) for pair in value.items() for item in pair if pair[1] is not None)
+    return ','.join(
+        encode_atomic_simple(_name, typing.cast(Atomic, item)) for pair in value.items() for item in pair if pair[1] is not None
+    )
 
 
 def encode_object_simple_explode(name: str, value: ObjectType) -> str:
