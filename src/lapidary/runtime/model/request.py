@@ -1,5 +1,5 @@
-import abc
 import dataclasses as dc
+import inspect
 from collections.abc import Iterable, Mapping
 
 import httpx
@@ -8,9 +8,11 @@ import typing_extensions as typing
 from .. import _httpx
 from ..http_consts import ACCEPT
 from ..types_ import SecurityRequirements
+from .annotations import NameTypeAwareAnnotation, RequestContributor, find_annotation
 
 if typing.TYPE_CHECKING:
     from ..client_base import ClientBase
+    from ..operation import Operation
 
 
 class RequestFactory(typing.Protocol):
@@ -67,12 +69,6 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
         )
 
 
-class RequestContributor(abc.ABC):
-    @abc.abstractmethod
-    def apply_request(self, builder: RequestBuilder, value: typing.Any) -> None:
-        pass
-
-
 @dc.dataclass
 class RequestAdapter:
     name: str
@@ -100,3 +96,28 @@ class RequestAdapter:
             builder.headers.update([(ACCEPT, value) for value in self.accept])
         auth = client._auth_registry.resolve_auth(self.name, self.security)
         return builder(), auth
+
+
+def prepare_request_adapter(name: str, sig: inspect.Signature, operation: 'Operation', accept: Iterable[str]) -> RequestAdapter:
+    contributors = dict(process_param(param) for param in sig.parameters.values() if param.annotation != typing.Self)
+    return RequestAdapter(
+        name,
+        operation.method,
+        operation.path,
+        contributors,
+        accept,
+        operation.security,
+    )
+
+
+def process_param(param: inspect.Parameter) -> tuple[str, RequestContributor]:
+    name = param.name
+    annotation = param.annotation
+
+    if annotation is None:
+        raise TypeError(f'{name}: Missing  type annotation')
+
+    typ, annotation = find_annotation(annotation, RequestContributor)  # type: ignore[type-abstract]
+    if isinstance(annotation, NameTypeAwareAnnotation):
+        annotation.supply_formal(name, typ)
+    return name, annotation

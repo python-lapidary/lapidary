@@ -1,4 +1,3 @@
-import abc
 import dataclasses as dc
 from collections.abc import Iterable, Mapping
 from functools import cache
@@ -10,7 +9,7 @@ import typing_extensions as typing
 from ..http_consts import CONTENT_TYPE
 from ..mime import find_mime
 from ..types_ import MimeType, ResponseMap
-from .annotations import NameTypeAwareAnnotation, find_annotation, find_field_annotation
+from .annotations import NameTypeAwareAnnotation, ResponseExtractor, find_annotation, find_field_annotation
 
 # base stuff
 
@@ -30,12 +29,6 @@ class Responses:
 
 # similar structure to openapi responses
 ResponseHandlerMap: typing.TypeAlias = Mapping[str, Mapping[MimeType, pydantic.TypeAdapter]]
-
-
-class ResponseExtractor(abc.ABC):
-    @abc.abstractmethod
-    def handle_response(self, response: httpx.Response) -> typing.Any:
-        pass
 
 
 @dc.dataclass

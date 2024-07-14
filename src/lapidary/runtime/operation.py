@@ -4,7 +4,7 @@ from collections.abc import Callable, Iterable
 
 import typing_extensions as typing
 
-from .model.op import mk_exchange_fn, process_operation_method
+from .model.op import mk_exchange_fn
 from .types_ import SecurityRequirements
 
 OperationMethod = typing.TypeVar('OperationMethod', bound=typing.Callable)
@@ -18,8 +18,8 @@ class Operation:
     security: typing.Optional[Iterable[SecurityRequirements]] = None
 
     def __call__(self, fn: OperationMethod) -> OperationMethod:
-        request_adapter, response_handler = process_operation_method(fn, self)
-        return typing.cast(OperationMethod, ft.wraps(fn)(mk_exchange_fn(request_adapter, response_handler)))
+        exchange_fn = mk_exchange_fn(fn, self)
+        return typing.cast(OperationMethod, ft.wraps(fn)(exchange_fn))
 
 
 _operation = Operation

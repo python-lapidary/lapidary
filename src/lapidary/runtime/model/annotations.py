@@ -6,9 +6,10 @@ import pydantic.fields
 import typing_extensions as typing
 
 from .encode_param import ParamStyle, get_encode_fn
-from .request import RequestContributor
 
 if typing.TYPE_CHECKING:
+    import httpx
+
     from .._httpx import ParamValue
     from .encode_param import Encoder
     from .request import RequestBuilder
@@ -24,6 +25,12 @@ class NameTypeAwareAnnotation(abc.ABC):
     def supply_formal(self, name: str, typ: type) -> None:
         self._name = name
         self._type = typ
+
+
+class RequestContributor(abc.ABC):
+    @abc.abstractmethod
+    def apply_request(self, builder: 'RequestBuilder', value: typing.Any) -> None:
+        pass
 
 
 class Param(RequestContributor, NameTypeAwareAnnotation, abc.ABC):
@@ -86,3 +93,9 @@ def _find_annotation(return_type: type, annotations: Iterable[typing.Any], annot
             return return_type, anno()
         else:
             return return_type, anno
+
+
+class ResponseExtractor(abc.ABC):
+    @abc.abstractmethod
+    def handle_response(self, response: 'httpx.Response') -> typing.Any:
+        pass

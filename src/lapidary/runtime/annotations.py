@@ -4,10 +4,8 @@ import pydantic
 import typing_extensions as typing
 
 from .http_consts import CONTENT_TYPE, MIME_JSON
-from .model.annotations import NameTypeAwareAnnotation, Param
+from .model.annotations import NameTypeAwareAnnotation, Param, RequestContributor, ResponseExtractor
 from .model.encode_param import ParamStyle
-from .model.request import RequestContributor
-from .model.response import ResponseExtractor
 
 if typing.TYPE_CHECKING:
     import httpx
