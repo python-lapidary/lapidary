@@ -18,6 +18,8 @@ repos:
   - id: ruff
     name: ruff-check
     pass_filenames: false
+    args:
+    - --fix
   - id: ruff-format
     pass_filenames: false
 - repo: https://github.com/python-poetry/poetry
