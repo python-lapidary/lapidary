@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 Atomic: typing.TypeAlias = typing.Union[str, int, float, bool]
 ObjectType: typing.TypeAlias = Mapping[str, typing.Optional[Atomic]]
 ValueType: typing.TypeAlias = typing.Union[Atomic, Iterable[Atomic], ObjectType]
-Encoder: typing.TypeAlias = Callable[[str, ValueType], typing.Union[str, Iterable[str]]]
+Encoder: typing.TypeAlias = Callable[[str, ValueType], str]
 
 
 @unique
@@ -70,7 +70,7 @@ def get_encode_fn(typ: type, style: ParamStyle, explode: bool) -> typing.Optiona
 
 
 def encode_union(encoders: Mapping[type, Encoder]) -> Encoder:
-    def encode_(name: str, value: ValueType) -> typing.Union[str, Iterable[str]]:
+    def encode_(name: str, value: ValueType) -> str:
         for formal_typ, encoder in encoders.items():
             if isinstance(value, formal_typ):
                 return encoder(name, value)

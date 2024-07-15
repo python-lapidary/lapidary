@@ -1,34 +1,27 @@
+import abc
 import dataclasses as dc
 from collections.abc import Iterable, Mapping
-from functools import cache
 
 import httpx
 import pydantic
 import typing_extensions as typing
 
+from ..annotations import Cookie, Header, Link, Param, Responses, StatusCode, WebArg
 from ..http_consts import CONTENT_TYPE
 from ..mime import find_mime
-from ..types_ import MimeType, ResponseMap
-from .annotations import NameTypeAwareAnnotation, ResponseExtractor, find_annotation, find_field_annotation
-
-# base stuff
-
-
-@cache
-def mk_type_adapter(typ: type) -> pydantic.TypeAdapter:
-    return pydantic.TypeAdapter(typ)
-
-
-@dc.dataclass
-class Responses:
-    responses: ResponseMap
-
+from ..types_ import MimeType
+from .annotations import find_annotation, find_field_annotation, mk_type_adapter
 
 # body handling
 
-
 # similar structure to openapi responses
 ResponseHandlerMap: typing.TypeAlias = Mapping[str, Mapping[MimeType, pydantic.TypeAdapter]]
+
+
+class ResponseExtractor(abc.ABC):
+    @abc.abstractmethod
+    def handle_response(self, response: 'httpx.Response') -> typing.Any:
+        pass
 
 
 @dc.dataclass
@@ -83,6 +76,64 @@ class BodyExtractor(ResponseExtractor):
 
 
 @dc.dataclass
+class ParamExtractor(ResponseExtractor, abc.ABC):
+    param: Param
+    python_name: str
+    python_type: type
+
+    def handle_response(self, response: 'httpx.Response') -> typing.Any:
+        part = self._get_response_part(response)
+        return part[self.http_name()]
+
+    @staticmethod
+    @abc.abstractmethod
+    def _get_response_part(response: 'httpx.Response') -> Mapping[str, str]:
+        pass
+
+    def http_name(self) -> str:
+        return self.param.alias or self.python_name
+
+
+class HeaderExtractor(ParamExtractor):
+    @staticmethod
+    def _get_response_part(response: 'httpx.Response') -> Mapping[str, str]:
+        return response.headers
+
+
+class CookieExtractor(ParamExtractor):
+    @staticmethod
+    def _get_response_part(response: 'httpx.Response') -> Mapping[str, str]:
+        return response.cookies
+
+
+class LinkExtractor(ParamExtractor):
+    @staticmethod
+    def _get_response_part(response: 'httpx.Response') -> Mapping[str, str]:
+        if 'lapidary_links' not in dir(response):
+            links = {}
+            for link in response.links.values():
+                try:
+                    links[link['rel']] = link['url']
+                except KeyError:
+                    continue
+            response.links_cached = links
+        return response.lapidary_links
+
+
+class StatusCodeExtractor(ResponseExtractor):
+    def handle_response(self, response: 'httpx.Response') -> int:
+        return response.status_code
+
+
+EXTRACTOR_MAP = {
+    Header: HeaderExtractor,
+    Cookie: CookieExtractor,
+    Link: LinkExtractor,
+    StatusCode: StatusCodeExtractor,
+}
+
+
+@dc.dataclass
 class MetadataExtractor(ResponseExtractor):
     field_extractors: Mapping[str, ResponseExtractor]
     target_type_adapter: pydantic.TypeAdapter
@@ -90,9 +141,11 @@ class MetadataExtractor(ResponseExtractor):
     def handle_response(self, response: httpx.Response) -> typing.Any:
         target_dict = {}
         for field_name, field_extractor in self.field_extractors.items():
-            raw_value = field_extractor.handle_response(response)
-            if raw_value:
+            try:
+                raw_value = field_extractor.handle_response(response)
                 target_dict[field_name] = raw_value
+            except KeyError:
+                continue
 
         return self.target_type_adapter.validate_python(target_dict)
 
@@ -100,11 +153,13 @@ class MetadataExtractor(ResponseExtractor):
     def for_type(metadata_type: type[pydantic.BaseModel]) -> ResponseExtractor:
         header_extractors = {}
         for field_name, field_info in metadata_type.model_fields.items():
-            _, extractor = find_field_annotation(field_info, ResponseExtractor)  # type: ignore[type-abstract]
-            if isinstance(extractor, NameTypeAwareAnnotation):
-                extractor.supply_formal(field_name, field_info.metadata[0])
+            typ, webarg = find_field_annotation(field_info, WebArg)  # type: ignore[type-abstract]
+            try:
+                extractor = EXTRACTOR_MAP[type(webarg)](webarg, field_name, typ)
+            except KeyError:
+                raise TypeError('Unsupported annotation', webarg)
             header_extractors[field_name] = extractor
-        return MetadataExtractor(field_extractors=header_extractors, target_type_adapter=pydantic.TypeAdapter(metadata_type))
+        return MetadataExtractor(field_extractors=header_extractors, target_type_adapter=mk_type_adapter(metadata_type))
 
 
 # wrap it up

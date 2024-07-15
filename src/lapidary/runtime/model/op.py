@@ -1,12 +1,10 @@
 import inspect
-from collections.abc import Awaitable
-from typing import Callable
+from collections.abc import Awaitable, Callable
 
 import typing_extensions as typing
 
-from .annotations import ResponseExtractor
 from .request import RequestAdapter, prepare_request_adapter
-from .response import mk_response_extractor
+from .response import ResponseExtractor, mk_response_extractor
 
 if typing.TYPE_CHECKING:
     from ..client_base import ClientBase
