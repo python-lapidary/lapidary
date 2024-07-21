@@ -2,10 +2,11 @@ import abc
 import dataclasses as dc
 from collections.abc import Mapping
 
+import pydantic
 import typing_extensions as typing
 
 from .model.encode_param import ParamStyle
-from .types_ import MimeType, ResponseMap
+from .types_ import MimeType, ResponseCode
 
 
 class WebArg(abc.ABC):
@@ -90,5 +91,11 @@ class StatusCode(WebArg):
 
 
 @dc.dataclass
+class Response:
+    body: Body
+    headers: typing.Optional[type[pydantic.BaseModel]] = None
+
+
+@dc.dataclass
 class Responses(WebArg):
-    responses: ResponseMap
+    responses: Mapping[ResponseCode, Response]

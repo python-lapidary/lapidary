@@ -8,6 +8,7 @@ __all__ = (
     'ParamStyle',
     'Path',
     'Query',
+    'Response',
     'Responses',
     'SecurityRequirements',
     'delete',
@@ -19,7 +20,7 @@ __all__ = (
     'trace',
 )
 
-from .annotations import Body, Cookie, Header, Path, Query, Responses
+from .annotations import Body, Cookie, Header, Path, Query, Response, Responses
 from .client_base import ClientBase
 from .model import ModelBase
 from .model.encode_param import ParamStyle

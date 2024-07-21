@@ -1,5 +1,5 @@
 import abc
-from collections.abc import Mapping, MutableMapping
+from collections.abc import MutableMapping
 
 import httpx
 import httpx_auth
@@ -17,7 +17,6 @@ BodyModel = typing.TypeVar('BodyModel', bound=pydantic.BaseModel)
 MimeType: typing.TypeAlias = str
 ResponseCode: typing.TypeAlias = str
 MimeMap: typing.TypeAlias = MutableMapping[MimeType, type]
-ResponseMap: typing.TypeAlias = Mapping[ResponseCode, MimeMap]
 
 
 class Dumper(abc.ABC):
