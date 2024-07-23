@@ -9,8 +9,9 @@ import typing_extensions as typing
 from ..annotations import Cookie, Header, Link, Param, Responses, StatusCode, WebArg
 from ..http_consts import CONTENT_TYPE
 from ..mime import find_mime
+from ..type_adapter import TypeAdapter, mk_type_adapter
 from ..types_ import MimeType, ResponseCode
-from .annotations import find_annotation, find_field_annotation, mk_type_adapter
+from .annotations import find_annotation, find_field_annotation
 
 
 class ResponseExtractor(abc.ABC):
@@ -29,10 +30,10 @@ _NOOP = NoopExtractor()
 
 @dc.dataclass
 class BodyExtractor(ResponseExtractor):
-    type_adapter: typing.Optional[pydantic.TypeAdapter]
+    type_adapter: typing.Optional[TypeAdapter]
 
     def handle_response(self, response: httpx.Response) -> typing.Any:
-        return self.type_adapter.validate_json(response.text) if self.type_adapter else None
+        return self.type_adapter(response.text) if self.type_adapter else None
 
 
 # header handling
@@ -99,7 +100,7 @@ EXTRACTOR_MAP = {
 @dc.dataclass
 class MetadataExtractor(ResponseExtractor):
     field_extractors: Mapping[str, ResponseExtractor]
-    target_type_adapter: pydantic.TypeAdapter
+    target_type_adapter: TypeAdapter
 
     def handle_response(self, response: httpx.Response) -> typing.Any:
         target_dict = {}
@@ -110,7 +111,7 @@ class MetadataExtractor(ResponseExtractor):
             except KeyError:
                 continue
 
-        return self.target_type_adapter.validate_python(target_dict)
+        return self.target_type_adapter(target_dict)
 
     @staticmethod
     def for_type(metadata_type: type[pydantic.BaseModel]) -> ResponseExtractor:
@@ -122,7 +123,7 @@ class MetadataExtractor(ResponseExtractor):
             except KeyError:
                 raise TypeError('Unsupported annotation', webarg)
             header_extractors[field_name] = extractor
-        return MetadataExtractor(field_extractors=header_extractors, target_type_adapter=mk_type_adapter(metadata_type))
+        return MetadataExtractor(field_extractors=header_extractors, target_type_adapter=mk_type_adapter(metadata_type, json=False))
 
 
 # wrap it up
@@ -183,7 +184,7 @@ class ResponseMessageExtractor(ResponseExtractor):
             for media_type, typ in response.body.content.items():
                 response_map[status_code][media_type] = TupleExtractor(
                     (
-                        BodyExtractor(mk_type_adapter(typ)),
+                        BodyExtractor(mk_type_adapter(typ, json=True)),
                         headers_extractor,
                     )
                 )

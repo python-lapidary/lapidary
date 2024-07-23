@@ -1,7 +1,6 @@
 import inspect
 from collections.abc import Iterable
 
-import pydantic
 import pydantic.fields
 import typing_extensions as typing
 
@@ -34,8 +33,3 @@ def _find_annotation(annotations: Iterable[typing.Any], annotation_type: type[T]
             return anno()
         else:
             return anno
-
-
-# @lru_cache
-def mk_type_adapter(typ: type) -> pydantic.TypeAdapter:
-    return pydantic.TypeAdapter(typ)

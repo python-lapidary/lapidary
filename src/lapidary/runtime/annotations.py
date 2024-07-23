@@ -18,8 +18,8 @@ class Body(WebArg):
     content: Mapping[MimeType, type]
 
 
-class Headers(WebArg):
-    pass
+class Metadata(WebArg):
+    """Annotation for models that hold other WebArg fields"""
 
 
 class Param(WebArg, abc.ABC):

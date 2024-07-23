@@ -2,21 +2,20 @@ import abc
 import dataclasses as dc
 import functools as ft
 import inspect
-from collections.abc import Iterable, Mapping, MutableMapping
+from collections.abc import Callable, Iterable, Mapping, MutableMapping
 
 import httpx
 import mimeparse
 import pydantic
 import typing_extensions as typing
 
-from ..annotations import Body, Cookie, Header, Headers, Param, Path, Query, WebArg
+from ..annotations import Body, Cookie, Header, Metadata, Param, Path, Query, WebArg
 from ..http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from ..mime import find_mime
 from ..types_ import Dumper, MimeType, RequestFactory, SecurityRequirements
 from .annotations import (
     find_annotation,
     find_field_annotation,
-    mk_type_adapter,
 )
 from .encode_param import Encoder, get_encode_fn
 
@@ -130,10 +129,10 @@ CONTRIBUTOR_MAP = {
 @dc.dataclass
 class ParamsContributor(RequestContributor):
     contributors: Mapping[str, RequestContributor]
-    type_adapter: pydantic.TypeAdapter
+    type_adapter: Callable[[pydantic.BaseModel], dict]
 
     def update_builder(self, builder: RequestBuilder, headers_model: pydantic.BaseModel) -> None:
-        raw_model = self.type_adapter.dump_json(headers_model)
+        raw_model = self.type_adapter(headers_model)
         for field_name, field_info in headers_model.model_fields.items():
             value = raw_model[field_info]
             if not value and field_name not in headers_model.model_fields_set:
@@ -151,7 +150,7 @@ class ParamsContributor(RequestContributor):
             except KeyError:
                 raise TypeError('Unsupported annotation', webarg)
             contributors[field_name] = contributor
-        return cls(contributors=contributors, type_adapter=mk_type_adapter(model_type))
+        return cls(contributors=contributors, type_adapter=pydantic.TypeAdapter(model_type).dump_python)
 
 
 @dc.dataclass
@@ -224,7 +223,7 @@ class RequestObjectContributor(RequestContributor):
             elif isinstance(annotation, Body):
                 body_param = param.name
                 body_contributor = BodyContributor.for_parameter(param.annotation)
-            elif isinstance(annotation, Headers):
+            elif isinstance(annotation, Metadata):
                 contributors[param.name] = ParamsContributor.for_type(typing.cast(type[pydantic.BaseModel], typ))
             else:
                 raise TypeError('Unsupported annotation', annotation)
@@ -281,4 +280,4 @@ class PydanticDumper(Dumper):
 
 @ft.cache
 def mk_pydantic_dumper(typ: type) -> Dumper:
-    return PydanticDumper(mk_type_adapter(typ))
+    return PydanticDumper(pydantic.TypeAdapter(typ))

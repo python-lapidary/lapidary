@@ -7,7 +7,7 @@ import pytest
 import typing_extensions as typing
 from starlette.responses import JSONResponse
 
-from lapidary.runtime import Body, ClientBase, Header, ParamStyle, Path, Responses, get, post, put
+from lapidary.runtime import Body, ClientBase, Header, ParamStyle, Path, Response, Responses, get, post, put
 from lapidary.runtime.http_consts import MIME_JSON
 
 # model (common to both client and server)
@@ -93,7 +93,7 @@ class CatClient(ClientBase):
         tuple[list[Cat], CatListHeaders],
         Responses(
             {
-                'default': {'application/json': list[Cat]},
+                'default': Response(Body({'application/json': list[Cat]}), CatListHeaders),
             }
         ),
     ]:
@@ -105,11 +105,11 @@ class CatClient(ClientBase):
         *,
         id: typing.Annotated[int, Path(style=ParamStyle.simple)],  # pylint: disable=redefined-builtin
     ) -> typing.Annotated[
-        Cat,
+        tuple[Cat, None],
         Responses(
             {
-                '2XX': {'application/json': Cat},
-                '4XX': {'application/json': ServerError},
+                '2XX': Response(Body({'application/json': Cat})),
+                '4XX': Response(Body({'application/json': ServerError})),
             }
         ),
     ]:
@@ -121,10 +121,10 @@ class CatClient(ClientBase):
         *,
         body: typing.Annotated[Cat, Body({'application/json': Cat})],
     ) -> typing.Annotated[
-        Cat,
+        tuple[Cat, None],
         Responses(
             {
-                'default': {'application/json': Cat},
+                'default': Response(Body({'application/json': Cat})),
             }
         ),
     ]:
@@ -136,12 +136,16 @@ class CatClient(ClientBase):
         *,
         body: typing.Annotated[AuthRequest, Body({MIME_JSON: AuthRequest})],
     ) -> typing.Annotated[
-        AuthResponse,
+        tuple[AuthResponse, None],
         Responses(
             {
-                '200': {
-                    MIME_JSON: AuthResponse,
-                }
+                '200': Response(
+                    Body(
+                        {
+                            MIME_JSON: AuthResponse,
+                        }
+                    )
+                )
             }
         ),
     ]:
@@ -160,14 +164,14 @@ async def test_request_response():
     assert response_body == [Cat(id=1, name='Tom')]
     assert response_headers.count == 1
 
-    cat = await client.cat_get(id=1)
+    cat, _ = await client.cat_get(id=1)
     assert isinstance(cat, Cat)
     assert cat == Cat(id=1, name='Tom')
 
 
 @pytest.mark.asyncio
 async def test_response_auth():
-    response = await client.login(body=AuthRequest(login='login', password='passwd'))
+    response, _ = await client.login(body=AuthRequest(login='login', password='passwd'))
 
     assert response.api_key == "you're in"
 
