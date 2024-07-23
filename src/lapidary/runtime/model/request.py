@@ -134,7 +134,7 @@ class ParamsContributor(RequestContributor):
     def update_builder(self, builder: RequestBuilder, headers_model: pydantic.BaseModel) -> None:
         raw_model = self.type_adapter(headers_model)
         for field_name, field_info in headers_model.model_fields.items():
-            value = raw_model[field_info]
+            value = raw_model[field_name]
             if not value and field_name not in headers_model.model_fields_set:
                 continue
             contributor = self.contributors[field_name]

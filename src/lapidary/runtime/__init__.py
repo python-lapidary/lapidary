@@ -3,6 +3,7 @@ __all__ = (
     'ClientBase',
     'Cookie',
     'Header',
+    'Metadata',
     'ModelBase',
     'NamedAuth',
     'ParamStyle',
@@ -20,7 +21,7 @@ __all__ = (
     'trace',
 )
 
-from .annotations import Body, Cookie, Header, Path, Query, Response, Responses
+from .annotations import Body, Cookie, Header, Metadata, Path, Query, Response, Responses
 from .client_base import ClientBase
 from .model import ModelBase
 from .model.encode_param import ParamStyle
