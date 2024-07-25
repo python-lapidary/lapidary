@@ -38,13 +38,17 @@ cats_app = fastapi.FastAPI(debug=True)
 
 
 @cats_app.get('/cats', responses={'200': {'model': typing.List[Cat]}})
-async def cat_list(header: typing.Annotated[str, fastapi.Header()]) -> JSONResponse:
-    assert header == 'header-value'
+async def cat_list(token: typing.Annotated[typing.Optional[str], fastapi.Header()] = None) -> JSONResponse:
     serializer = pydantic.TypeAdapter(typing.List[Cat])
     data = [Cat(id=1, name='Tom')]
+    headers = {
+        'X-Count': str(len(data)),
+    }
+    if token:
+        headers['token'] = token
     return JSONResponse(
         serializer.dump_python(data),
-        headers={'X-Count': str(len(data))},
+        headers=headers,
     )
 
 
@@ -73,11 +77,12 @@ async def login(body: AuthRequest) -> AuthResponse:
 
 
 class CatListRequestHeaders(pydantic.BaseModel):
-    header: typing.Annotated[str, Header]
+    token: typing.Annotated[typing.Optional[str], Header] = None
 
 
 class CatListResponseHeaders(pydantic.BaseModel):
     count: typing.Annotated[int, Header('X-Count')]
+    token: typing.Annotated[typing.Optional[str], Header] = None
 
 
 class CatClient(ClientBase):
@@ -165,10 +170,14 @@ client = CatClient(transport=httpx.ASGITransport(app=cats_app))
 
 @pytest.mark.asyncio
 async def test_request_response():
-    response_body, response_headers = await client.cat_list(meta=CatListRequestHeaders(header='header-value'))
+    response_body, response_headers = await client.cat_list(meta=CatListRequestHeaders(token='header-value'))
     assert isinstance(response_body, list)
     assert response_body == [Cat(id=1, name='Tom')]
     assert response_headers.count == 1
+    assert response_headers.token == 'header-value'
+
+    response_body, response_headers = await client.cat_list()
+    assert response_headers.token is None
 
     cat, _ = await client.cat_get(id=1)
     assert isinstance(cat, Cat)
