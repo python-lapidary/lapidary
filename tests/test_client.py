@@ -1,11 +1,12 @@
 import dataclasses as dc
+import datetime as dt
 
 import fastapi
 import httpx
 import pydantic
 import pytest
 import typing_extensions as typing
-from starlette.responses import JSONResponse
+from fastapi.responses import JSONResponse
 
 from lapidary.runtime import Body, ClientBase, Header, Metadata, ParamStyle, Path, Response, Responses, get, post, put
 from lapidary.runtime.http_consts import MIME_JSON
@@ -41,9 +42,7 @@ cats_app = fastapi.FastAPI(debug=True)
 async def cat_list(token: typing.Annotated[typing.Optional[str], fastapi.Header()] = None) -> JSONResponse:
     serializer = pydantic.TypeAdapter(typing.List[Cat])
     data = [Cat(id=1, name='Tom')]
-    headers = {
-        'X-Count': str(len(data)),
-    }
+    headers = {'X-Count': str(len(data)), 'Date': dt.datetime.now(dt.timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')}
     if token:
         headers['token'] = token
     return JSONResponse(
@@ -83,6 +82,11 @@ class CatListRequestHeaders(pydantic.BaseModel):
 class CatListResponseHeaders(pydantic.BaseModel):
     count: typing.Annotated[int, Header('X-Count')]
     token: typing.Annotated[typing.Optional[str], Header] = None
+    date: typing.Annotated[
+        dt.datetime,
+        Header,
+        pydantic.BeforeValidator(lambda value: dt.datetime.strptime(value, '%a, %d %b %Y %H:%M:%S GMT')),
+    ]
 
 
 class CatClient(ClientBase):
@@ -175,6 +179,7 @@ async def test_request_response():
     assert response_body == [Cat(id=1, name='Tom')]
     assert response_headers.count == 1
     assert response_headers.token == 'header-value'
+    assert isinstance(response_headers.date, dt.datetime)
 
     response_body, response_headers = await client.cat_list()
     assert response_headers.token is None

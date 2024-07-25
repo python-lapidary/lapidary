@@ -22,7 +22,7 @@ def _find_annotation(annotations: Iterable[typing.Any], annotation_type: type[T]
     matching = [
         annotation
         for annotation in annotations
-        if not inspect.isclass(annotation) and isinstance(annotation, annotation_type) or issubclass(annotation, annotation_type)
+        if (issubclass(annotation, annotation_type) if inspect.isclass(annotation) else isinstance(annotation, annotation_type))
     ]
 
     if len(matching) != 1:
