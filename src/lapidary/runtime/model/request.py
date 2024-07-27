@@ -131,10 +131,9 @@ CONTRIBUTOR_MAP = {
 @dc.dataclass
 class ParamsContributor(RequestContributor):
     contributors: Mapping[str, RequestContributor]
-    type_adapter: Callable[[pydantic.BaseModel], dict]
 
     def update_builder(self, builder: RequestBuilder, headers_model: pydantic.BaseModel) -> None:
-        raw_model = self.type_adapter(headers_model)
+        raw_model = headers_model.model_dump()
         for field_name, field_info in headers_model.model_fields.items():
             value = raw_model[field_name]
             if not value and field_name not in headers_model.model_fields_set:
@@ -152,7 +151,15 @@ class ParamsContributor(RequestContributor):
             except KeyError:
                 raise TypeError('Unsupported annotation', webarg)
             contributors[field_name] = contributor
-        return cls(contributors=contributors, type_adapter=pydantic.TypeAdapter(model_type).dump_python)
+        return cls(contributors=contributors)
+
+
+@dc.dataclass
+class FreeParamsContributor(ParamsContributor):
+    model_type: type[pydantic.BaseModel]
+
+    def update_builder(self, builder: RequestBuilder, free_params: Mapping[str, typing.Any]) -> None:
+        super().update_builder(builder, self.model_type.model_validate(free_params))
 
 
 @dc.dataclass
@@ -197,40 +204,76 @@ class RequestObjectContributor(RequestContributor):
     body_param: typing.Optional[str]
     body_contributor: typing.Optional[BodyContributor]
 
+    free_param_contributor: typing.Optional[FreeParamsContributor]
+    free_param_names: Iterable[str]
+
     def update_builder(self, builder: RequestBuilder, kwargs: dict[str, typing.Any]) -> None:
+        free_params: dict[str, typing.Any] = {}
         for name, value in kwargs.items():
             if name == self.body_param:
                 assert self.body_contributor is not None
                 self.body_contributor.update_builder(builder, value)
+            elif name in self.free_param_names:
+                free_params[name] = value
             else:
                 try:
                     contributor = self.contributors[name]
                 except KeyError:
                     raise TypeError('Unexpected argument', name)
                 contributor.update_builder(builder, value)
+        if free_params:
+            assert self.free_param_contributor
+            self.free_param_contributor.update_builder(builder, free_params)
 
     @classmethod
     def for_signature(cls, sig: inspect.Signature) -> typing.Self:
         contributors: dict[str, RequestContributor] = {}
         body_param: typing.Optional[str] = None
         body_contributor: typing.Optional[BodyContributor] = None
+
+        free_params: dict[str, typing.Any] = {}  # python name => annotation
+
         for param in sig.parameters.values():
             if param.annotation is typing.Self:
                 continue
 
-            typ, annotation = find_annotation(param.annotation, WebArg)
+            typ, web_arg = find_annotation(param.annotation, WebArg)
 
-            if type(annotation) in CONTRIBUTOR_MAP:
-                contributors[param.name] = CONTRIBUTOR_MAP[type(annotation)](annotation, param.name, typ)  # type: ignore[abstract,index,arg-type]
-            elif isinstance(annotation, Body):
+            if type(web_arg) in CONTRIBUTOR_MAP:
+                default = ... if param.default is inspect.Parameter.empty else param.default
+                free_params[param.name] = param.annotation, typ, web_arg, default
+            elif isinstance(web_arg, Body):
                 body_param = param.name
                 body_contributor = BodyContributor.for_parameter(param.annotation)
-            elif isinstance(annotation, Metadata):
+            elif isinstance(web_arg, Metadata):
                 contributors[param.name] = ParamsContributor.for_type(typing.cast(type[pydantic.BaseModel], typ))
             else:
-                raise TypeError('Unsupported annotation', annotation)
+                raise TypeError('Unsupported annotation', web_arg)
 
-        return cls(contributors=contributors, body_param=body_param, body_contributor=body_contributor)
+        free_param_contributor, free_param_names = cls._mk_free_params_contributor(free_params)
+
+        return cls(
+            contributors=contributors,
+            body_param=body_param,
+            body_contributor=body_contributor,
+            free_param_contributor=free_param_contributor,
+            free_param_names=free_param_names,
+        )
+
+    @staticmethod
+    def _mk_free_params_contributor(free_params: Mapping[str, typing.Any]) -> tuple[typing.Optional[FreeParamsContributor], Iterable[str]]:
+        if not free_params:
+            return None, set()
+
+        model_fields = {}
+        contributors = {}
+        for python_name, anno_tuple in free_params.items():
+            annotation, typ, web_arg, default = anno_tuple
+            model_fields[python_name] = (annotation, default)
+            contributors[python_name] = CONTRIBUTOR_MAP[type(web_arg)](web_arg, python_name, typ)  # type: ignore[abstract,index,arg-type]
+        model_type = pydantic.create_model('$name', **model_fields)
+        free_param_contributor = FreeParamsContributor(contributors=contributors, model_type=model_type)
+        return free_param_contributor, set(model_fields.keys())
 
 
 @dc.dataclass
