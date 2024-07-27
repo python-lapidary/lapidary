@@ -1,6 +1,7 @@
 import abc
 import dataclasses as dc
-from collections.abc import Iterable, Mapping
+import inspect
+from collections.abc import Callable, Iterable, Mapping
 
 import httpx
 import pydantic
@@ -8,10 +9,12 @@ import typing_extensions as typing
 
 from ..annotations import Cookie, Header, Link, Param, Responses, StatusCode, WebArg
 from ..http_consts import CONTENT_TYPE
+from ..metattype import make_not_optional
 from ..mime import find_mime
 from ..type_adapter import TypeAdapter, mk_type_adapter
 from ..types_ import MimeType, ResponseCode
 from .annotations import find_annotation, find_field_annotation
+from .encode_param import SCALAR_TYPES, ValueType
 
 
 class ResponseExtractor(abc.ABC):
@@ -44,10 +47,23 @@ class ParamExtractor(ResponseExtractor, abc.ABC):
     param: Param
     python_name: str
     python_type: type
+    _deserializer: Callable[[str], ValueType] = dc.field(init=False)
+
+    def __post_init__(self):
+        non_optional_type = make_not_optional(self.python_type)
+        if non_optional_type in SCALAR_TYPES:
+            self._deserialize = self.param.style.deserialize_scalar
+        elif inspect.isclass(non_optional_type) and issubclass(non_optional_type, Iterable):
+            self._deserialize = self.param.style.deserialize_array
+        else:
+            self._deserialize = self.param.style.deserialize
 
     def handle_response(self, response: 'httpx.Response') -> typing.Any:
         part = self._get_response_part(response)
-        return part[self.http_name()]
+        value = part[self.http_name()]
+        if value is None:
+            return None
+        return self._deserialize(value)
 
     @staticmethod
     @abc.abstractmethod

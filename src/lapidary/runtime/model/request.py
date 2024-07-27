@@ -11,13 +11,14 @@ import typing_extensions as typing
 
 from ..annotations import Body, Cookie, Header, Metadata, Param, Path, Query, WebArg
 from ..http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
+from ..metattype import make_not_optional
 from ..mime import find_mime
 from ..types_ import Dumper, MimeType, RequestFactory, SecurityRequirements
 from .annotations import (
     find_annotation,
     find_field_annotation,
 )
-from .encode_param import Encoder, get_encode_fn
+from .encode_param import SCALAR_TYPES
 
 if typing.TYPE_CHECKING:
     from ..client_base import ClientBase
@@ -68,15 +69,16 @@ class ParamContributor(RequestContributor, abc.ABC):
     param: Param
     python_name: str
     python_type: type
-    encode: Encoder = dc.field(init=False)
+    _serialize: Callable[..., str] = dc.field(init=False)
 
-    def __post_init__(self) -> None:
-        encode = get_encode_fn(self.python_type, self.param.style, self.param.explode)
-        if not encode:
-            raise TypeError(f'Unsupported encoding for {self.param}, style={self.param.style}, explode={self.param.explode}')
-        self.encode = encode
-        # TODO we need to determine the raw type or base the encoder resolution on actual type
-        #  and move it to update_builder
+    def __post_init__(self):
+        non_optional_type = make_not_optional(self.python_type)
+        if non_optional_type in SCALAR_TYPES:
+            self._serialize = self.param.style.serialize_scalar
+        elif inspect.isclass(non_optional_type) and issubclass(non_optional_type, Iterable):
+            self._serialize = self.param.style.serialize_array
+        else:
+            self._serialize = self.param.style.serialize
 
     def http_name(self) -> str:
         return self.param.alias or self.python_name
@@ -86,7 +88,7 @@ class DictParamContributor(ParamContributor):
     def update_builder(self, builder: RequestBuilder, value: typing.Any) -> None:
         part = self._get_builder_part(builder)
         http_name = self.http_name()
-        part[http_name] = self.encode(http_name, value)
+        part[http_name] = self._serialize(http_name, value)
 
     @staticmethod
     @abc.abstractmethod
@@ -115,7 +117,7 @@ class PathContributor(DictParamContributor):
 class QueryContributor(ParamContributor):
     def update_builder(self, builder: RequestBuilder, value: typing.Any) -> None:
         http_name = self.http_name()
-        builder.query_params.append((http_name, self.encode(http_name, value)))
+        builder.query_params.append((http_name, self._serialize(http_name, value)))
 
 
 CONTRIBUTOR_MAP = {

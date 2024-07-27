@@ -5,7 +5,7 @@ from collections.abc import Mapping
 import pydantic
 import typing_extensions as typing
 
-from .model.encode_param import ParamStyle
+from .model.encode_param import FormExplode, SerializationStyle, Simple
 from .types_ import MimeType, ResponseCode
 
 
@@ -23,14 +23,12 @@ class Metadata(WebArg):
 
 
 class Param(WebArg, abc.ABC):
-    style: ParamStyle
+    style: type[SerializationStyle]
     alias: typing.Optional[str]
-    explode: bool
 
-    def __init__(self, alias: typing.Optional[str], /, *, style: ParamStyle, explode: bool) -> None:
+    def __init__(self, alias: typing.Optional[str], /, *, style: type[SerializationStyle]) -> None:
         self.alias = alias
         self.style = style
-        self.explode = explode
 
 
 class Header(Param):
@@ -39,10 +37,9 @@ class Header(Param):
         alias: typing.Optional[str] = None,
         /,
         *,
-        style: ParamStyle = ParamStyle.simple,
-        explode: typing.Optional[bool] = None,
+        style: type[SerializationStyle] = Simple,
     ) -> None:
-        super().__init__(alias, style=style, explode=explode if explode is not None else style == ParamStyle.form)
+        super().__init__(alias, style=style)
 
 
 class Cookie(Param):
@@ -51,10 +48,9 @@ class Cookie(Param):
         alias: typing.Optional[str] = None,
         /,
         *,
-        style: ParamStyle = ParamStyle.form,
-        explode: typing.Optional[bool] = None,
+        style: type[SerializationStyle] = FormExplode,
     ) -> None:
-        super().__init__(alias, style=style, explode=explode if explode is not None else style == ParamStyle.form)
+        super().__init__(alias, style=style)
 
 
 class Path(Param):
@@ -63,10 +59,9 @@ class Path(Param):
         alias: typing.Optional[str] = None,
         /,
         *,
-        style: ParamStyle = ParamStyle.simple,
-        explode: typing.Optional[bool] = None,
+        style: type[SerializationStyle] = Simple,
     ) -> None:
-        super().__init__(alias, style=style, explode=explode if explode is not None else style == ParamStyle.form)
+        super().__init__(alias, style=style)
 
 
 class Query(Param):
@@ -75,10 +70,9 @@ class Query(Param):
         alias: typing.Optional[str] = None,
         /,
         *,
-        style: ParamStyle = ParamStyle.form,
-        explode: typing.Optional[bool] = None,
+        style: type[SerializationStyle] = FormExplode,
     ) -> None:
-        super().__init__(alias, style=style, explode=explode if explode is not None else style == ParamStyle.form)
+        super().__init__(alias, style=style)
 
 
 @dc.dataclass

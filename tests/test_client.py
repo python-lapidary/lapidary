@@ -8,7 +8,7 @@ import pytest
 import typing_extensions as typing
 from fastapi.responses import JSONResponse
 
-from lapidary.runtime import Body, ClientBase, Header, Metadata, ParamStyle, Path, Response, Responses, get, post, put
+from lapidary.runtime import Body, ClientBase, Header, Metadata, Path, Response, Responses, Simple, get, post, put
 from lapidary.runtime.http_consts import MIME_JSON
 
 # model (common to both client and server)
@@ -118,7 +118,7 @@ class CatClient(ClientBase):
     async def cat_get(
         self: typing.Self,
         *,
-        id: typing.Annotated[int, Path(style=ParamStyle.simple)],  # pylint: disable=redefined-builtin
+        id: typing.Annotated[int, Path(style=Simple)],  # pylint: disable=redefined-builtin
     ) -> typing.Annotated[
         tuple[Cat, None],
         Responses(
