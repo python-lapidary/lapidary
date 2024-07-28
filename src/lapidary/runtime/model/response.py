@@ -100,6 +100,9 @@ class LinkExtractor(ParamExtractor):
 
 
 class StatusCodeExtractor(ResponseExtractor):
+    def __init__(self, _webarg: WebArg, _field_name: str, _typ: typing.Any) -> None:
+        pass
+
     def handle_response(self, response: 'httpx.Response') -> int:
         return response.status_code
 
