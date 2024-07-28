@@ -136,11 +136,11 @@ class MetadataExtractor(ResponseExtractor):
         header_extractors = {}
         for field_name, field_info in metadata_type.model_fields.items():
             try:
-                typ, webarg = find_field_annotation(field_info, WebArg)  # type: ignore[type-abstract]
+                typ, webarg = find_field_annotation(field_info, WebArg)
             except TypeError:
                 raise TypeError('Problem with annotations', field_name)
             try:
-                extractor = EXTRACTOR_MAP[type(webarg)](webarg, field_name, typ)
+                extractor = EXTRACTOR_MAP[type(webarg)](webarg, field_name, typ)  # type: ignore[abstract, arg-type]
             except KeyError:
                 raise TypeError('Unsupported annotation', field_name, webarg)
             header_extractors[field_name] = extractor

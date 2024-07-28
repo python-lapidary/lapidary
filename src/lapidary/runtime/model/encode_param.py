@@ -12,18 +12,25 @@ import typing_extensions as typing
 
 from ..metattype import make_not_optional
 
-SCALAR_TYPES = (
+# Some basic scalar types that we're sure are passed unchanged by pydantic
+PYTHON_SCALARS = (
     bool,
     float,
     int,
     str,
+)
+
+# Some basic scalar types that we're sure are handled by pydantic
+SCALAR_TYPES = (
+    *PYTHON_SCALARS,
     Decimal,
     dt.date,
     dt.datetime,
     dt.time,
     uuid.UUID,
 )
-ScalarType: typing.TypeAlias = typing.Union[SCALAR_TYPES]  # type: ignore[valid-type]
+
+ScalarType: typing.TypeAlias = typing.Union[PYTHON_SCALARS]  # type: ignore[valid-type]
 ArrayType: typing.TypeAlias = typing.Iterable[ScalarType]
 ObjectType: typing.TypeAlias = typing.Mapping[str, typing.Optional[ScalarType]]
 ValueType: typing.TypeAlias = typing.Union[str, ArrayType, ObjectType]
@@ -36,7 +43,7 @@ class SerializationError(ValueError):
 class SerializationStyle(abc.ABC):
     @classmethod
     def serialize(cls, name: str, value: ValueType) -> str:
-        if isinstance(value, SCALAR_TYPES):
+        if isinstance(value, PYTHON_SCALARS):
             return cls.serialize_scalar(name, value)
         elif isinstance(value, Mapping):
             return cls.serialize_object(name, value)
@@ -63,7 +70,7 @@ class SerializationStyle(abc.ABC):
     @classmethod
     def deserialize(cls, value: typing.Any, target: type) -> ValueType:
         target = make_not_optional(target)
-        if target in SCALAR_TYPES:
+        if target in PYTHON_SCALARS:
             return cls.deserialize_scalar(value)
         elif issubclass(target, Mapping):
             return cls.deserialize_object(value)
@@ -104,7 +111,7 @@ class Simple(SerializationStyle):
     @classmethod
     def deserialize(cls, value: typing.Any, target: type) -> ValueType:
         target = make_not_optional(target)
-        if target in SCALAR_TYPES:
+        if target in PYTHON_SCALARS:
             return cls.deserialize_scalar(value)
         elif issubclass(target, Mapping):
             return cls.deserialize_object(value)
