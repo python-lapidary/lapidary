@@ -1,6 +1,6 @@
 import abc
 import dataclasses as dc
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 
 import httpx
 import pydantic
@@ -8,10 +8,12 @@ import typing_extensions as typing
 
 from ..annotations import Cookie, Header, Link, Param, Responses, StatusCode, WebArg
 from ..http_consts import CONTENT_TYPE
+from ..metattype import is_array_like, make_not_optional
 from ..mime import find_mime
 from ..type_adapter import TypeAdapter, mk_type_adapter
 from ..types_ import MimeType, ResponseCode
 from .annotations import find_annotation, find_field_annotation
+from .encode_param import SCALAR_TYPES, ValueType
 
 
 class ResponseExtractor(abc.ABC):
@@ -44,10 +46,23 @@ class ParamExtractor(ResponseExtractor, abc.ABC):
     param: Param
     python_name: str
     python_type: type
+    _deserializer: Callable[[str], ValueType] = dc.field(init=False)
+
+    def __post_init__(self):
+        non_optional_type = make_not_optional(self.python_type)
+        if non_optional_type in SCALAR_TYPES:
+            self._deserialize = self.param.style.deserialize_scalar
+        elif is_array_like(non_optional_type):
+            self._deserialize = self.param.style.deserialize_array
+        else:
+            self._deserialize = self.param.style.deserialize
 
     def handle_response(self, response: 'httpx.Response') -> typing.Any:
         part = self._get_response_part(response)
-        return part[self.http_name()]
+        value = part[self.http_name()]
+        if value is None:
+            return None
+        return self._deserialize(value)
 
     @staticmethod
     @abc.abstractmethod
@@ -85,6 +100,9 @@ class LinkExtractor(ParamExtractor):
 
 
 class StatusCodeExtractor(ResponseExtractor):
+    def __init__(self, _webarg: WebArg, _field_name: str, _typ: typing.Any) -> None:
+        pass
+
     def handle_response(self, response: 'httpx.Response') -> int:
         return response.status_code
 
@@ -117,11 +135,14 @@ class MetadataExtractor(ResponseExtractor):
     def for_type(metadata_type: type[pydantic.BaseModel]) -> ResponseExtractor:
         header_extractors = {}
         for field_name, field_info in metadata_type.model_fields.items():
-            typ, webarg = find_field_annotation(field_info, WebArg)  # type: ignore[type-abstract]
             try:
-                extractor = EXTRACTOR_MAP[type(webarg)](webarg, field_name, typ)
+                typ, webarg = find_field_annotation(field_info, WebArg)
+            except TypeError:
+                raise TypeError('Problem with annotations', field_name)
+            try:
+                extractor = EXTRACTOR_MAP[type(webarg)](webarg, field_name, typ)  # type: ignore[abstract, arg-type]
             except KeyError:
-                raise TypeError('Unsupported annotation', webarg)
+                raise TypeError('Unsupported annotation', field_name, webarg)
             header_extractors[field_name] = extractor
         return MetadataExtractor(field_extractors=header_extractors, target_type_adapter=mk_type_adapter(metadata_type, json=False))
 
