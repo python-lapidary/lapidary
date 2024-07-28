@@ -14,6 +14,7 @@ from ..type_adapter import TypeAdapter, mk_type_adapter
 from ..types_ import MimeType, ResponseCode
 from .annotations import find_annotation, find_field_annotation
 from .encode_param import SCALAR_TYPES, ValueType
+from .error import UnexpectedResponseError
 
 
 class ResponseExtractor(abc.ABC):
@@ -168,7 +169,9 @@ class ResponseMessageExtractor(ResponseExtractor):
 
     def handle_response(self, response: 'httpx.Response') -> typing.Any:
         extractor = self._find_extractor(response)
-        return extractor.handle_response(response) if extractor else None
+        if not extractor:
+            raise UnexpectedResponseError(response)
+        return extractor.handle_response(response)
 
     def _find_extractor(self, response: httpx.Response) -> typing.Optional[ResponseExtractor]:
         if not self.response_map:

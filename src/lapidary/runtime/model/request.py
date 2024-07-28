@@ -320,7 +320,7 @@ class PydanticDumper(Dumper):
     _type_adapter: pydantic.TypeAdapter
 
     def __call__(self, value: typing.Any) -> bytes:
-        return self._type_adapter.dump_json(value)
+        return self._type_adapter.dump_json(value, by_alias=True, exclude_defaults=True)
 
 
 @ft.cache

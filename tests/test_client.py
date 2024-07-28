@@ -9,14 +9,28 @@ import pytest
 import typing_extensions as typing
 from fastapi.responses import JSONResponse
 
-from lapidary.runtime import Body, ClientBase, Header, Metadata, Path, Response, Responses, Simple, StatusCode, get, post, put
+from lapidary.runtime import (
+    Body,
+    ClientBase,
+    Header,
+    Metadata,
+    Path,
+    Response,
+    Responses,
+    Simple,
+    StatusCode,
+    UnexpectedResponseError,
+    get,
+    post,
+    put,
+)
 from lapidary.runtime.http_consts import MIME_JSON
 
 # model (common to both client and server)
 
 
 class Cat(pydantic.BaseModel):
-    id: int
+    id: typing.Optional[int] = None
     name: str
 
 
@@ -73,6 +87,17 @@ async def get_cat(cat_id: int) -> JSONResponse:
     if cat_id != 1:
         return JSONResponse(pydantic.TypeAdapter(ServerError).dump_python(ServerError('Cat not found')), 404)
     return JSONResponse(Cat(id=1, name='Tom').model_dump(), 200)
+
+
+class CatWriteDTO(pydantic.BaseModel):
+    name: str
+    model_config = pydantic.ConfigDict(extra='forbid')
+
+
+@cats_app.post('/cat/')
+async def create_cat(cat: CatWriteDTO) -> JSONResponse:
+    print(cat.model_dump())
+    return JSONResponse(Cat(name=cat.name, id=2).model_dump(), 201)
 
 
 @cats_app.post('/login')
@@ -159,6 +184,21 @@ class CatClient(ClientBase):
     ]:
         pass
 
+    @post('/cat/')
+    async def cat_create(
+        self: typing.Self,
+        *,
+        body: typing.Annotated[Cat, Body({'application/json': Cat})],
+    ) -> typing.Annotated[
+        tuple[Cat, None],
+        Responses(
+            {
+                '2XX': Response(Body({'application/json': Cat})),
+            }
+        ),
+    ]:
+        pass
+
     @post('/login')
     async def login(
         self: typing.Self,
@@ -224,3 +264,17 @@ async def test_error():
         assert False, 'Expected ServerError'
     except ServerError as e:
         assert e.msg == 'Cat not found'
+
+
+@pytest.mark.asyncio
+async def test_create():
+    body, _ = await client.cat_create(body=Cat(name='Benny'))
+    assert body.id == 2
+    assert body.name == 'Benny'
+
+
+@pytest.mark.asyncio
+async def test_create_error():
+    with pytest.raises(UnexpectedResponseError) as error:
+        await client.cat_create(body=Cat(id=1, name='Benny'))
+    assert error.value.response.status_code == 422
