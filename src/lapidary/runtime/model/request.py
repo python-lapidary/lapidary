@@ -11,7 +11,7 @@ import typing_extensions as typing
 
 from ..annotations import Body, Cookie, Header, Metadata, Param, Path, Query, WebArg
 from ..http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
-from ..metattype import make_not_optional
+from ..metattype import is_array_like, make_not_optional
 from ..mime import find_mime
 from ..types_ import Dumper, MimeType, RequestFactory, SecurityRequirements
 from .annotations import (
@@ -75,7 +75,7 @@ class ParamContributor(RequestContributor, abc.ABC):
         non_optional_type = make_not_optional(self.python_type)
         if non_optional_type in SCALAR_TYPES:
             self._serialize = self.param.style.serialize_scalar
-        elif inspect.isclass(non_optional_type) and issubclass(non_optional_type, Iterable):
+        elif is_array_like(non_optional_type):
             self._serialize = self.param.style.serialize_array
         else:
             self._serialize = self.param.style.serialize

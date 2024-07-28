@@ -1,4 +1,6 @@
+import inspect
 import typing
+from collections.abc import Iterable, Mapping
 
 import typing_extensions
 
@@ -12,3 +14,7 @@ def make_not_optional(typ: typing.Any) -> typing.Any:
         return typing_extensions.Union[non_none_types]
     else:
         return typ
+
+
+def is_array_like(typ: typing.Any) -> bool:
+    return inspect.isclass(typ) and issubclass(typ, Iterable) and not (typ in (str, bytes) or issubclass(typ, Mapping))

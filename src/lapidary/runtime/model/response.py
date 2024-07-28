@@ -1,6 +1,5 @@
 import abc
 import dataclasses as dc
-import inspect
 from collections.abc import Callable, Iterable, Mapping
 
 import httpx
@@ -9,7 +8,7 @@ import typing_extensions as typing
 
 from ..annotations import Cookie, Header, Link, Param, Responses, StatusCode, WebArg
 from ..http_consts import CONTENT_TYPE
-from ..metattype import make_not_optional
+from ..metattype import is_array_like, make_not_optional
 from ..mime import find_mime
 from ..type_adapter import TypeAdapter, mk_type_adapter
 from ..types_ import MimeType, ResponseCode
@@ -53,7 +52,7 @@ class ParamExtractor(ResponseExtractor, abc.ABC):
         non_optional_type = make_not_optional(self.python_type)
         if non_optional_type in SCALAR_TYPES:
             self._deserialize = self.param.style.deserialize_scalar
-        elif inspect.isclass(non_optional_type) and issubclass(non_optional_type, Iterable):
+        elif is_array_like(non_optional_type):
             self._deserialize = self.param.style.deserialize_array
         else:
             self._deserialize = self.param.style.deserialize
