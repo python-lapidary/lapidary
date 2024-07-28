@@ -135,11 +135,14 @@ class MetadataExtractor(ResponseExtractor):
     def for_type(metadata_type: type[pydantic.BaseModel]) -> ResponseExtractor:
         header_extractors = {}
         for field_name, field_info in metadata_type.model_fields.items():
-            typ, webarg = find_field_annotation(field_info, WebArg)  # type: ignore[type-abstract]
+            try:
+                typ, webarg = find_field_annotation(field_info, WebArg)  # type: ignore[type-abstract]
+            except TypeError:
+                raise TypeError('Problem with annotations', field_name)
             try:
                 extractor = EXTRACTOR_MAP[type(webarg)](webarg, field_name, typ)
             except KeyError:
-                raise TypeError('Unsupported annotation', webarg)
+                raise TypeError('Unsupported annotation', field_name, webarg)
             header_extractors[field_name] = extractor
         return MetadataExtractor(field_extractors=header_extractors, target_type_adapter=mk_type_adapter(metadata_type, json=False))
 
