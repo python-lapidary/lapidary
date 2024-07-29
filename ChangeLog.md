@@ -9,11 +9,15 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 
 ### Added
 
-- Support bare response body or body and headers as result of operation methods.
+- Always return response body and headers (metadata) model as result of operation methods.
+- Use pydantic to encode request parameters and decode response headers.
+- Response annotation accepts metadata model, which can be used to send headers and or parameters.
 
-### Removed
+### Changed
 
-- Drop support for response envelopes.
+- Serialization styles are now classes.
+- Response annotation uses explicit Body argument
+- Instead of response models, return values are always a `tuple[body, metadata]`
 
 
 ## [0.10.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.10.0) - 2024-06-01
