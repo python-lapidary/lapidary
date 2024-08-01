@@ -30,7 +30,7 @@ python-mimeparse = "^1.6.0"
 typing-extensions = { python = "<3.12", version = "^4.9.0" }
 
 [tool.poetry.group.dev.dependencies]
-fastapi = "^0.109.0"
+fastapi = ">=0.109,<0.112"
 pytest = ">=7.1,<9.0"
 pytest-asyncio = "^0.23.3"
 
