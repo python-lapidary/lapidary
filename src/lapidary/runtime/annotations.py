@@ -6,7 +6,7 @@ import pydantic
 import typing_extensions as typing
 
 from .model.encode_param import FormExplode, SerializationStyle, Simple
-from .types_ import MimeType, ResponseCode
+from .types_ import MimeType, StatusCodeRange
 
 
 class WebArg(abc.ABC):
@@ -92,4 +92,4 @@ class Response:
 
 @dc.dataclass
 class Responses(WebArg):
-    responses: Mapping[ResponseCode, Response]
+    responses: Mapping[StatusCodeRange, Response]

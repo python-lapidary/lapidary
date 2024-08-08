@@ -3,15 +3,16 @@ from collections.abc import Awaitable, Callable
 
 import typing_extensions as typing
 
+from .error import ClientError, ServerError
 from .request import RequestAdapter, prepare_request_adapter
-from .response import ResponseExtractor, mk_response_extractor
+from .response import ResponseMessageExtractor, mk_response_extractor
 
 if typing.TYPE_CHECKING:
     from ..client_base import ClientBase
     from ..operation import Operation
 
 
-def process_operation_method(fn: Callable, op: 'Operation') -> tuple[RequestAdapter, ResponseExtractor]:
+def process_operation_method(fn: Callable, op: 'Operation') -> tuple[RequestAdapter, ResponseMessageExtractor]:
     sig = inspect.signature(fn)
     try:
         response_extractor, media_types = mk_response_extractor(sig.return_annotation)
@@ -33,6 +34,12 @@ def mk_exchange_fn(
         response = await self._client.send(request, auth=auth)
 
         await response.aread()
-        return response_handler.handle_response(response)
+        status_code, result = response_handler.handle_response(response)
+        if 500 > status_code >= 400:
+            raise ClientError(status_code, *result)
+        elif status_code >= 500:
+            raise ServerError(status_code, *result)
+        else:
+            return result
 
     return exchange

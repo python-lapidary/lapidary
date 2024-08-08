@@ -12,6 +12,7 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 - Always return response body and headers (metadata) model as result of operation methods.
 - Use pydantic to encode request parameters and decode response headers.
 - Response annotation accepts metadata model, which can be used to send headers and or parameters.
+- Raise ClientError for 4XX responses and ServerError for 5XX responses.
 
 ### Changed
 

@@ -3,7 +3,6 @@ from collections.abc import MutableMapping
 
 import httpx
 import httpx_auth
-import pydantic
 import typing_extensions as typing
 
 from . import _httpx
@@ -12,10 +11,9 @@ MultiAuth: typing.TypeAlias = httpx_auth._authentication._MultiAuth  # pylint: d
 NamedAuth: typing.TypeAlias = tuple[str, httpx.Auth]
 SecurityRequirements: typing.TypeAlias = typing.Mapping[str, typing.Iterable[str]]
 
-HeadersModel = typing.TypeVar('HeadersModel', bound=pydantic.BaseModel)
-BodyModel = typing.TypeVar('BodyModel', bound=pydantic.BaseModel)
 MimeType: typing.TypeAlias = str
-ResponseCode: typing.TypeAlias = str
+StatusCodeRange: typing.TypeAlias = str
+StatusCodeType: typing.TypeAlias = int
 MimeMap: typing.TypeAlias = MutableMapping[MimeType, type]
 
 

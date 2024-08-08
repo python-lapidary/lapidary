@@ -11,7 +11,7 @@ from ..http_consts import CONTENT_TYPE
 from ..metattype import is_array_like, make_not_optional
 from ..mime import find_mime
 from ..type_adapter import TypeAdapter, mk_type_adapter
-from ..types_ import MimeType, ResponseCode
+from ..types_ import MimeType, StatusCodeRange, StatusCodeType
 from .annotations import find_annotation, find_field_annotation
 from .encode_param import SCALAR_TYPES, ValueType
 from .error import UnexpectedResponseError
@@ -160,18 +160,18 @@ class TupleExtractor(ResponseExtractor):
 
 
 # similar structure to openapi responses
-ResponseExtractorMap: typing.TypeAlias = dict[ResponseCode, dict[MimeType, ResponseExtractor]]
+ResponseExtractorMap: typing.TypeAlias = dict[StatusCodeRange, dict[MimeType, ResponseExtractor]]
 
 
 @dc.dataclass
 class ResponseMessageExtractor(ResponseExtractor):
     response_map: ResponseExtractorMap
 
-    def handle_response(self, response: 'httpx.Response') -> typing.Any:
+    def handle_response(self, response: 'httpx.Response') -> tuple[StatusCodeType, tuple[typing.Any, typing.Any]]:
         extractor = self._find_extractor(response)
         if not extractor:
             raise UnexpectedResponseError(response)
-        return extractor.handle_response(response)
+        return response.status_code, extractor.handle_response(response)
 
     def _find_extractor(self, response: httpx.Response) -> typing.Optional[ResponseExtractor]:
         if not self.response_map:
@@ -196,7 +196,7 @@ class ResponseMessageExtractor(ResponseExtractor):
         return mime_map[mime_match] if mime_match is not None else None
 
     @staticmethod
-    def for_annotated(responses: Responses) -> tuple[ResponseExtractor, Iterable[str]]:
+    def for_annotated(responses: Responses) -> 'tuple[ResponseMessageExtractor, Iterable[str]]':
         # Ideally Lapidary should avoid the first Annotated argument (the type) and leave it to type checkers.
         # Instead it should focus on the `Responses` annotation.
 
@@ -217,6 +217,6 @@ class ResponseMessageExtractor(ResponseExtractor):
         return ResponseMessageExtractor(response_map), media_types
 
 
-def mk_response_extractor(annotated: type) -> tuple[ResponseExtractor, Iterable[MimeType]]:
+def mk_response_extractor(annotated: type) -> tuple[ResponseMessageExtractor, Iterable[MimeType]]:
     _, responses = find_annotation(annotated, Responses)
     return ResponseMessageExtractor.for_annotated(responses)

@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from lapidary.runtime import (
     Body,
     ClientBase,
+    ClientError,
     Header,
     Metadata,
     Path,
@@ -44,7 +45,7 @@ class AuthResponse(pydantic.BaseModel):
 
 
 @dc.dataclass
-class ServerError(Exception):
+class ServerErrorModel(Exception):
     msg: str
 
 
@@ -80,12 +81,12 @@ async def cat_list(
     '/cat/{cat_id}',
     responses={
         '2XX': {MIME_JSON: Cat},
-        '4XX': {MIME_JSON: ServerError},
+        '4XX': {MIME_JSON: ServerErrorModel},
     },
 )
 async def get_cat(cat_id: int) -> JSONResponse:
     if cat_id != 1:
-        return JSONResponse(pydantic.TypeAdapter(ServerError).dump_python(ServerError('Cat not found')), 404)
+        return JSONResponse(pydantic.TypeAdapter(ServerErrorModel).dump_python(ServerErrorModel('Cat not found')), 404)
     return JSONResponse(Cat(id=1, name='Tom').model_dump(), 200)
 
 
@@ -163,7 +164,7 @@ class CatClient(ClientBase):
         Responses(
             {
                 '2XX': Response(Body({'application/json': Cat})),
-                '4XX': Response(Body({'application/json': ServerError})),
+                '4XX': Response(Body({'application/json': ServerErrorModel})),
             }
         ),
     ]:
@@ -257,13 +258,13 @@ async def test_response_auth():
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason='raising errors not implemented')
 async def test_error():
     try:
         await client.cat_get(id=7)
         assert False, 'Expected ServerError'
-    except ServerError as e:
-        assert e.msg == 'Cat not found'
+    except ClientError as e:
+        assert isinstance(e.body, ServerErrorModel)
+        assert e.body.msg == 'Cat not found'
 
 
 @pytest.mark.asyncio

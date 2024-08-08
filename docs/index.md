@@ -50,11 +50,11 @@ class CatClient(ClientBase):
     async def cat_get(
         self: Self,
         *,
-        id: Annotated[int, Path(style=ParamStyle.simple)],
+        id: Annotated[int, Path],
     ) -> Annotated[Awaitable[Cat], Responses({
-        '2XX': {
+        '2XX': Response(Body({
             'application/json': Cat
-        },
+        })),
     })]:
         pass
 
