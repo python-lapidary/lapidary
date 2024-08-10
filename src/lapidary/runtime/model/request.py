@@ -298,8 +298,10 @@ class RequestAdapter:
 
         self.contributor.update_builder(builder, kwargs)
 
+        accept_values: set[str] = set()
         if ACCEPT not in builder.headers and self.accept is not None:
-            builder.headers.update([(ACCEPT, value) for value in self.accept])
+            accept_values |= set(self.accept)
+        builder.headers.update([(ACCEPT, value) for value in accept_values])
         auth = client._auth_registry.resolve_auth(self.name, self.security)
         return builder(), auth
 
