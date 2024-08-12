@@ -5,7 +5,7 @@ from collections.abc import Mapping
 import pydantic
 import typing_extensions as typing
 
-from .model.encode_param import FormExplode, SerializationStyle, Simple
+from .model.param_serialization import FormExplode, MultimapSerializationStyle, SimpleMultimap, SimpleString, StringSerializationStyle
 from .types_ import MimeType, StatusCodeRange
 
 
@@ -23,12 +23,11 @@ class Metadata(WebArg):
 
 
 class Param(WebArg, abc.ABC):
-    style: type[SerializationStyle]
+    style: typing.Any
     alias: typing.Optional[str]
 
-    def __init__(self, alias: typing.Optional[str], /, *, style: type[SerializationStyle]) -> None:
+    def __init__(self, alias: typing.Optional[str], /) -> None:
         self.alias = alias
-        self.style = style
 
 
 class Header(Param):
@@ -37,9 +36,10 @@ class Header(Param):
         alias: typing.Optional[str] = None,
         /,
         *,
-        style: type[SerializationStyle] = Simple,
+        style: type[MultimapSerializationStyle] = SimpleMultimap,
     ) -> None:
-        super().__init__(alias, style=style)
+        super().__init__(alias)
+        self.style = style
 
 
 class Cookie(Param):
@@ -48,9 +48,10 @@ class Cookie(Param):
         alias: typing.Optional[str] = None,
         /,
         *,
-        style: type[SerializationStyle] = FormExplode,
+        style: type[MultimapSerializationStyle] = FormExplode,
     ) -> None:
-        super().__init__(alias, style=style)
+        super().__init__(alias)
+        self.style = style
 
 
 class Path(Param):
@@ -59,9 +60,10 @@ class Path(Param):
         alias: typing.Optional[str] = None,
         /,
         *,
-        style: type[SerializationStyle] = Simple,
+        style: type[StringSerializationStyle] = SimpleString,
     ) -> None:
-        super().__init__(alias, style=style)
+        super().__init__(alias)
+        self.style = style
 
 
 class Query(Param):
@@ -70,9 +72,10 @@ class Query(Param):
         alias: typing.Optional[str] = None,
         /,
         *,
-        style: type[SerializationStyle] = FormExplode,
+        style: type[MultimapSerializationStyle] = FormExplode,
     ) -> None:
-        super().__init__(alias, style=style)
+        super().__init__(alias)
+        self.style = style
 
 
 @dc.dataclass

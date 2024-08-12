@@ -18,7 +18,7 @@ from .annotations import (
     find_annotation,
     find_field_annotation,
 )
-from .encode_param import SCALAR_TYPES
+from .param_serialization import SCALAR_TYPES, Multimap, ScalarType
 
 if typing.TYPE_CHECKING:
     from ..client_base import ClientBase
@@ -39,8 +39,8 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
 
     cookies: httpx.Cookies = dc.field(default_factory=httpx.Cookies)
     headers: httpx.Headers = dc.field(default_factory=httpx.Headers)
-    path_params: typing.MutableMapping[str, httpx._types.PrimitiveData] = dc.field(default_factory=dict)
-    query_params: typing.MutableSequence[tuple[str, str]] = dc.field(default_factory=list)
+    path_params: typing.MutableMapping[str, ScalarType] = dc.field(default_factory=dict)
+    query_params: list[tuple[str, str]] = dc.field(default_factory=list)
 
     content: typing.Optional[httpx._types.RequestContent] = None
 
@@ -52,7 +52,7 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
             self.method,
             self.path.format_map(self.path_params),
             content=self.content,
-            params=httpx.QueryParams(tuple(self.query_params)),
+            params=httpx.QueryParams(self.query_params),
             headers=self.headers,
             cookies=self.cookies,
         )
@@ -64,12 +64,15 @@ class RequestContributor(abc.ABC):
         pass
 
 
+PST = typing.TypeVar('PST', Multimap, str)
+
+
 @dc.dataclass
-class ParamContributor(RequestContributor, abc.ABC):
+class ParamContributor(typing.Generic[PST], RequestContributor, abc.ABC):
     param: Param
     python_name: str
     python_type: type
-    _serialize: Callable[..., str] = dc.field(init=False)
+    _serialize: Callable[[str, typing.Any], PST] = dc.field(init=False)
 
     def __post_init__(self):
         non_optional_type = make_not_optional(self.python_type)
@@ -88,7 +91,7 @@ class DictParamContributor(ParamContributor):
     def update_builder(self, builder: RequestBuilder, value: typing.Any) -> None:
         part = self._get_builder_part(builder)
         http_name = self.http_name()
-        part[http_name] = self._serialize(http_name, value)
+        part.update(self._serialize(http_name, value))
 
     @staticmethod
     @abc.abstractmethod
@@ -102,22 +105,25 @@ class HeaderContributor(DictParamContributor):
         return builder.headers
 
 
-class CookieContributor(DictParamContributor):
+class CookieContributor(ParamContributor):
     @staticmethod
     def _get_builder_part(builder: RequestBuilder) -> MutableMapping[str, str]:
         return builder.cookies
 
+    def update_builder(self, builder: RequestBuilder, value: Multimap) -> None:
+        for key, value in value:
+            builder.cookies.set(key, value, builder.path)
 
-class PathContributor(DictParamContributor):
-    @staticmethod
-    def _get_builder_part(builder: RequestBuilder) -> MutableMapping[str, str]:
-        return builder.path_params
+
+class PathContributor(ParamContributor):
+    def update_builder(self, builder: RequestBuilder, value: typing.Any) -> None:
+        builder.path_params[self.http_name()] = self._serialize(self.http_name(), value)
 
 
 class QueryContributor(ParamContributor):
     def update_builder(self, builder: RequestBuilder, value: typing.Any) -> None:
         http_name = self.http_name()
-        builder.query_params.append((http_name, self._serialize(http_name, value)))
+        builder.query_params.extend(self._serialize(http_name, value))
 
 
 CONTRIBUTOR_MAP = {

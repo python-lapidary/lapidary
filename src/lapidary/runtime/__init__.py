@@ -3,10 +3,10 @@ __all__ = (
     'ClientBase',
     'ClientError',
     'Cookie',
+    'Form',
     'FormExplode',
     'HTTPError',
     'Header',
-    'MatrixExplode',
     'Metadata',
     'ModelBase',
     'NamedAuth',
@@ -16,7 +16,8 @@ __all__ = (
     'Responses',
     'SecurityRequirements',
     'ServerError',
-    'Simple',
+    'SimpleMultimap',
+    'SimpleString',
     'StatusCode',
     'UnexpectedResponseError',
     'delete',
@@ -31,7 +32,7 @@ __all__ = (
 from .annotations import Body, Cookie, Header, Metadata, Path, Query, Response, Responses, StatusCode
 from .client_base import ClientBase
 from .model import ModelBase
-from .model.encode_param import FormExplode, MatrixExplode, Simple
 from .model.error import ClientError, HTTPError, ServerError, UnexpectedResponseError
+from .model.param_serialization import Form, FormExplode, SimpleMultimap, SimpleString
 from .operation import delete, get, head, patch, post, put, trace
 from .types_ import NamedAuth, SecurityRequirements

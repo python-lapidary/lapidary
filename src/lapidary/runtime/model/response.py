@@ -13,8 +13,8 @@ from ..mime import find_mime
 from ..type_adapter import TypeAdapter, mk_type_adapter
 from ..types_ import MimeType, StatusCodeRange, StatusCodeType
 from .annotations import find_annotation, find_field_annotation
-from .encode_param import SCALAR_TYPES, ValueType
 from .error import UnexpectedResponseError
+from .param_serialization import SCALAR_TYPES, ValueType
 
 
 class ResponseExtractor(abc.ABC):

@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 import typing_extensions as typing
 
-from lapidary.runtime import Body, Query, Responses, Simple, UnexpectedResponseError, get
+from lapidary.runtime import Body, Query, Responses, SimpleMultimap, UnexpectedResponseError, get
 from lapidary.runtime.http_consts import CONTENT_TYPE
 from tests.client import ClientTestBase
 
@@ -65,7 +65,7 @@ async def test_request_param_list_simple(mock_http_client):
         @get('/param_list_simple')
         async def param_list_simple(
             self: typing.Self,
-            q_a: typing.Annotated[typing.List[str], Query('a', style=Simple)],
+            q_a: typing.Annotated[typing.List[str], Query('a', style=SimpleMultimap)],
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
@@ -112,7 +112,7 @@ async def test_request_param_list_exploded(mock_http_client):
         @get('/param_list_exploded')
         async def param_list_exploded(
             self: typing.Self,
-            q_a: typing.Annotated[typing.List[str], Query('a', style=Simple)],
+            q_a: typing.Annotated[typing.List[str], Query('a', style=SimpleMultimap)],
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 

@@ -18,7 +18,7 @@ from lapidary.runtime import (
     Path,
     Response,
     Responses,
-    Simple,
+    SimpleString,
     StatusCode,
     UnexpectedResponseError,
     get,
@@ -158,7 +158,7 @@ class CatClient(ClientBase):
     async def cat_get(
         self: typing.Self,
         *,
-        id: typing.Annotated[int, Path(style=Simple)],  # pylint: disable=redefined-builtin
+        id: typing.Annotated[int, Path(style=SimpleString)],  # pylint: disable=redefined-builtin
     ) -> typing.Annotated[
         tuple[Cat, None],
         Responses(

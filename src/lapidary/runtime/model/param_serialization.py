@@ -1,4 +1,4 @@
-"""Converting between python values and HTTP messages"""
+"""Converting between types returned by pydantic and accepted by httpx"""
 
 # Some encoding methods are missing. Please raise an issue if you need them.
 import abc
@@ -34,13 +34,17 @@ ScalarType: typing.TypeAlias = typing.Union[PYTHON_SCALARS]  # type: ignore[vali
 ArrayType: typing.TypeAlias = typing.Iterable[ScalarType]
 ObjectType: typing.TypeAlias = typing.Mapping[str, typing.Optional[ScalarType]]
 ValueType: typing.TypeAlias = typing.Union[str, ArrayType, ObjectType]
+Entry: typing.TypeAlias = tuple[str, ScalarType]
+Multimap: typing.TypeAlias = Iterable[Entry]
 
 
 class SerializationError(ValueError):
     pass
 
 
-class SerializationStyle(abc.ABC):
+class StringSerializationStyle(abc.ABC):
+    """Used for serializing path parameters"""
+
     @classmethod
     def serialize(cls, name: str, value: ValueType) -> str:
         if isinstance(value, PYTHON_SCALARS):
@@ -65,6 +69,34 @@ class SerializationStyle(abc.ABC):
     @classmethod
     @abc.abstractmethod
     def serialize_scalar(cls, name: str, value: ScalarType) -> str:
+        pass
+
+
+class MultimapSerializationStyle(abc.ABC):
+    @classmethod
+    def serialize(cls, name: str, value: ValueType) -> Multimap:
+        if isinstance(value, PYTHON_SCALARS):
+            return cls.serialize_scalar(name, value)
+        elif isinstance(value, Mapping):
+            return cls.serialize_object(name, value)
+        elif isinstance(value, Iterable):
+            return cls.serialize_array(name, value)
+        else:
+            raise SerializationError(type(value))
+
+    @classmethod
+    @abc.abstractmethod
+    def serialize_object(cls, name: str, value: ObjectType) -> Multimap:
+        pass
+
+    @classmethod
+    @abc.abstractmethod
+    def serialize_array(cls, name: str, value: ArrayType) -> Multimap:
+        pass
+
+    @classmethod
+    @abc.abstractmethod
+    def serialize_scalar(cls, name: str, value: ScalarType) -> Multimap:
         pass
 
     @classmethod
@@ -95,18 +127,26 @@ class SerializationStyle(abc.ABC):
         pass
 
 
-class Simple(SerializationStyle):
+class SimpleMultimap(MultimapSerializationStyle):
     @classmethod
-    def serialize_object(cls, name: str, value: ObjectType) -> str:
-        return ','.join(itertools.chain(*[(cls.serialize_scalar(k, v)) for k, v in value.items() if v is not None]))
+    def serialize_object(cls, name: str, value: ObjectType) -> Multimap:
+        return [(name, ','.join(itertools.chain.from_iterable(cls._scalar_as_entry(k, v) for k, v in value.items())))]
 
     @classmethod
-    def serialize_array(cls, name: str, value: ArrayType) -> str:
-        return ','.join(cls.serialize_scalar(name, scalar) for scalar in value)
+    def serialize_array(cls, name: str, value: ArrayType) -> Multimap:
+        return [(name, ','.join(cls._serialize_scalar(scalar) for scalar in value))]
+
+    @classmethod
+    def serialize_scalar(cls, name: str, value: ScalarType) -> Multimap:
+        return [cls._scalar_as_entry(name, value)]
 
     @staticmethod
-    def serialize_scalar(name: str, value: ScalarType) -> str:
+    def _serialize_scalar(value: ScalarType) -> str:
         return str(value)
+
+    @classmethod
+    def _scalar_as_entry(cls, name: str, value: ScalarType) -> Entry:
+        return name, cls._serialize_scalar(value)
 
     @classmethod
     def deserialize(cls, value: typing.Any, target: type) -> ValueType:
@@ -134,71 +174,44 @@ class Simple(SerializationStyle):
         return [cls.deserialize_scalar(scalar) for scalar in value.split(',')]
 
 
-class BaseNamedSerializer(SerializationStyle):
+class SimpleString(StringSerializationStyle):
+    @classmethod
+    def serialize_object(cls, name: str, value: ObjectType) -> str:
+        return ','.join(entry for name, entry in SimpleMultimap.serialize_object(name, value))
+
+    @classmethod
+    def serialize_array(cls, name: str, value: ArrayType) -> str:
+        return ','.join(entry for name, entry in SimpleMultimap.serialize_array(name, value))
+
     @classmethod
     def serialize_scalar(cls, name: str, value: ScalarType) -> str:
-        return f'{name}={super().serialize_scalar(name, value)}'
-
-    @classmethod
-    def serialize_object(cls, name: str, value: ObjectType) -> str:
-        return (
-            name
-            + '='
-            + (','.join(itertools.chain(*[cls.serialize_scalar(name, item) for name, item in value.items() if item is not None])))
-        )
-
-    @classmethod
-    def serialize_array(cls, name: str, value: ArrayType) -> str:
-        return name + '=' + (','.join(value))
-
-    @staticmethod
-    def deserialize_scalar(value: str) -> str:
-        raise NotImplementedError
-
-    @staticmethod
-    def deserialize_object(value: str) -> ObjectType:
-        raise NotImplementedError
-
-    @staticmethod
-    def deserialize_array(value: str) -> ArrayType:
-        raise NotImplementedError
-
-
-# matrix
-
-
-class Matrix(BaseNamedSerializer):
-    @classmethod
-    def serialize_scalar(cls, name: str, value: ScalarType) -> str:
-        return ';' + super().serialize_scalar(name, value)
-
-    @classmethod
-    def serialize_object(cls, name: str, value: ObjectType) -> str:
-        return ';' + super().serialize_object(name, value)
-
-    @classmethod
-    def serialize_array(cls, name: str, value: ArrayType) -> str:
-        return ';' + super().serialize_array(name, value)
-
-
-class MatrixExplode(Matrix):
-    @classmethod
-    def serialize_array(cls, name: str, value: ArrayType) -> str:
-        return ''.join(super().serialize_scalar(name, item) for item in value)
-
-    @classmethod
-    def serialize_object(cls, name: str, value: ObjectType) -> str:
-        return ''.join(super().serialize_scalar(k, v) for k, v in value.items() if v)
+        return SimpleMultimap._serialize_scalar(value)
 
 
 # form
 
 
-class FormExplode(BaseNamedSerializer):
+class FormExplode(MultimapSerializationStyle):
     @classmethod
-    def serialize_array(cls, name: str, value: ArrayType) -> str:
-        return '&'.join(super().serialize_scalar(name, item) for item in value)
+    def serialize_scalar(cls, name: str, value: ScalarType) -> Multimap:
+        return SimpleMultimap.serialize_scalar(name, value)
 
     @classmethod
-    def serialize_object(cls, _name: str, value: ObjectType) -> str:
-        return '&'.join(super().serialize_scalar(key, item) for key, item in value.items() if item)
+    def serialize_array(cls, name: str, value: ArrayType) -> Multimap:
+        return itertools.chain.from_iterable(cls.serialize_scalar(name, item) for item in value)
+
+    @classmethod
+    def serialize_object(cls, _name: str, value: ObjectType) -> Multimap:
+        """Disregard name, return a map of {key: value}"""
+        return itertools.chain.from_iterable(cls.serialize_scalar(key, item) for key, item in value.items() if item)
+
+    @classmethod
+    def deserialize_scalar(cls, value: str) -> str:
+        return value
+
+    @classmethod
+    def deserialize_array(cls, value: str) -> ArrayType:
+        raise NotImplementedError
+
+
+Form = SimpleMultimap
