@@ -5,14 +5,14 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html),
 and the format of this file is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.11.0] - 2024-08-13
 
 ### Added
 
-- Always return response body and headers (metadata) model as result of operation methods.
+- Always return response body and headers (metadata, possibly `None`) model as result of operation methods.
 - Use pydantic to encode request parameters and decode response headers.
 - Response annotation accepts metadata model, which can be used to send headers and or parameters.
-- Raise ClientError for 4XX responses and ServerError for 5XX responses.
+- Raise exceptions for error responses and undeclared responses.
 
 ### Changed
 
@@ -21,7 +21,7 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 - Instead of response models, return values are always a `tuple[body, metadata]`
 
 
-## [0.10.0](https://github.com/python-lapidary/lapidary/releases/tag/v0.10.0) - 2024-06-01
+## [0.10.0] - 2024-06-01
 ### Added
 - Support response envelope objects to allow returning headers together with the body model.
 
@@ -86,4 +86,6 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 ### Fixed
 - Dynamically creating generic types
 
-[unreleased]: https://github.com/python-lapidary/lapidary/compare/v0.10.0...HEAD
+[unreleased]: https://github.com/python-lapidary/lapidary/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/python-lapidary/lapidary/compare/v0.10.0...v0.11.0
+[0.10.0]: https://github.com/python-lapidary/lapidary/compare/v0.9.1...v0.10.0
