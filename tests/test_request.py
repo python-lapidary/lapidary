@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 import typing_extensions as typing
 
-from lapidary.runtime import Body, Query, Responses, SimpleMultimap, UnexpectedResponseError, get
+from lapidary.runtime import Body, Query, Responses, SimpleMultimap, UnexpectedResponse, get
 from lapidary.runtime.http_consts import CONTENT_TYPE
 from tests.client import ClientTestBase
 
@@ -42,7 +42,7 @@ async def test_build_request_from_list(mock_http_client) -> None:
             pass
 
     async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponseError):
+        with pytest.raises(UnexpectedResponse):
             await client.body_list(body=MyRequestBodyList(root=[MyRequestBodyModel(a='a')]))
 
     mock_http_client.build_request.assert_called_with(
@@ -70,7 +70,7 @@ async def test_request_param_list_simple(mock_http_client):
             pass
 
     async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponseError):
+        with pytest.raises(UnexpectedResponse):
             await client.param_list_simple(q_a=['hello', 'world'])
 
     mock_http_client.build_request.assert_called_with(
@@ -93,7 +93,7 @@ async def test_build_request_none(mock_http_client):
             pass
 
     async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponseError):
+        with pytest.raises(UnexpectedResponse):
             await client.request_none()
 
     mock_http_client.build_request.assert_called_with(
@@ -117,7 +117,7 @@ async def test_request_param_list_exploded(mock_http_client):
             pass
 
     async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponseError):
+        with pytest.raises(UnexpectedResponse):
             await client.param_list_exploded(q_a=['hello', 'world'])
 
     mock_http_client.build_request.assert_called_with(

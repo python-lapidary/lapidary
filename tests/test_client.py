@@ -12,15 +12,15 @@ from fastapi.responses import JSONResponse
 from lapidary.runtime import (
     Body,
     ClientBase,
-    ClientError,
     Header,
+    HttpErrorResponse,
     Metadata,
     Path,
     Response,
     Responses,
     SimpleString,
     StatusCode,
-    UnexpectedResponseError,
+    UnexpectedResponse,
     get,
     post,
     put,
@@ -262,7 +262,7 @@ async def test_error():
     try:
         await client.cat_get(id=7)
         assert False, 'Expected ServerError'
-    except ClientError as e:
+    except HttpErrorResponse as e:
         assert isinstance(e.body, ServerErrorModel)
         assert e.body.msg == 'Cat not found'
 
@@ -276,6 +276,6 @@ async def test_create():
 
 @pytest.mark.asyncio
 async def test_create_error():
-    with pytest.raises(UnexpectedResponseError) as error:
+    with pytest.raises(UnexpectedResponse) as error:
         await client.cat_create(body=Cat(id=1, name='Benny'))
     assert error.value.response.status_code == 422

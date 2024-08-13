@@ -13,7 +13,7 @@ from ..mime import find_mime
 from ..type_adapter import TypeAdapter, mk_type_adapter
 from ..types_ import MimeType, StatusCodeRange, StatusCodeType
 from .annotations import find_annotation, find_field_annotation
-from .error import UnexpectedResponseError
+from .error import UnexpectedResponse
 from .param_serialization import SCALAR_TYPES, ValueType
 
 
@@ -36,7 +36,10 @@ class BodyExtractor(ResponseExtractor):
     type_adapter: typing.Optional[TypeAdapter]
 
     def handle_response(self, response: httpx.Response) -> typing.Any:
-        return self.type_adapter(response.text) if self.type_adapter else None
+        try:
+            return self.type_adapter(response.text) if self.type_adapter else None
+        except pydantic.ValidationError as e:
+            raise UnexpectedResponse(response) from e
 
 
 # header handling
@@ -170,7 +173,7 @@ class ResponseMessageExtractor(ResponseExtractor):
     def handle_response(self, response: 'httpx.Response') -> tuple[StatusCodeType, tuple[typing.Any, typing.Any]]:
         extractor = self._find_extractor(response)
         if not extractor:
-            raise UnexpectedResponseError(response)
+            raise UnexpectedResponse(response)
         return response.status_code, extractor.handle_response(response)
 
     def _find_extractor(self, response: httpx.Response) -> typing.Optional[ResponseExtractor]:

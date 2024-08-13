@@ -1,33 +1,43 @@
+"""
+Names of HttpErrorResponse and UnexpectedResponse don't end with `Error` in order to avoid double `Error` in the name.
+So because both errors really wrap a HTTP response, both their names end with `Response` for consistency.
+"""
+
+from __future__ import annotations
+
 import typing_extensions as typing
 
 if typing.TYPE_CHECKING:
     import httpx
 
 
-class HTTPError(Exception):
+class LapidaryError(Exception):
     pass
 
 
-class UnexpectedResponseError(HTTPError):
-    def __init__(self, response: 'httpx.Response'):
-        self.response = response
+class LapidaryResponseError(LapidaryError):
+    """Base class for errors that wrap the response"""
 
 
-class ExpectedHTTPError(HTTPError):
-    status_code: int
-    body: typing.Any
-    headers: typing.Any
+Body = typing.TypeVar('Body')
+Headers = typing.TypeVar('Headers')
 
-    def __init__(self, status_code: int, body: typing.Any, headers: typing.Any):
+
+class HttpErrorResponse(typing.Generic[Body, Headers], LapidaryResponseError):
+    """
+    Base error class for declared HTTP error responses - 4XX & 5XX.
+    Python doesn't fully support parametrized exception types, but extending types can concretize it.
+    """
+
+    def __init__(self, status_code: int, headers: Headers, body: Body):
         super().__init__()
         self.status_code = status_code
         self.headers = headers
         self.body = body
 
 
-class ClientError(ExpectedHTTPError):
-    pass
+class UnexpectedResponse(LapidaryResponseError):
+    """Base error class for undeclared responses"""
 
-
-class ServerError(ExpectedHTTPError):
-    pass
+    def __init__(self, response: httpx.Response):
+        self.response = response

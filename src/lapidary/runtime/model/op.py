@@ -3,7 +3,7 @@ from collections.abc import Awaitable, Callable
 
 import typing_extensions as typing
 
-from .error import ClientError, ServerError
+from .error import HttpErrorResponse
 from .request import RequestAdapter, prepare_request_adapter
 from .response import ResponseMessageExtractor, mk_response_extractor
 
@@ -35,10 +35,8 @@ def mk_exchange_fn(
 
         await response.aread()
         status_code, result = response_handler.handle_response(response)
-        if 500 > status_code >= 400:
-            raise ClientError(status_code, *result)
-        elif status_code >= 500:
-            raise ServerError(status_code, *result)
+        if status_code >= 400:
+            raise HttpErrorResponse(status_code, result[1], result[0])
         else:
             return result
 
