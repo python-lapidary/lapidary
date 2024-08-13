@@ -75,7 +75,9 @@ class StringSerializationStyle(abc.ABC):
 class MultimapSerializationStyle(abc.ABC):
     @classmethod
     def serialize(cls, name: str, value: ValueType) -> Multimap:
-        if isinstance(value, PYTHON_SCALARS):
+        if value is None:
+            return ()
+        elif isinstance(value, PYTHON_SCALARS):
             return cls.serialize_scalar(name, value)
         elif isinstance(value, Mapping):
             return cls.serialize_object(name, value)
