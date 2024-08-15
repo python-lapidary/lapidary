@@ -1,4 +1,3 @@
-import dataclasses as dc
 import datetime as dt
 import email.utils
 
@@ -15,6 +14,7 @@ from lapidary.runtime import (
     Header,
     HttpErrorResponse,
     Metadata,
+    ModelBase,
     Path,
     Response,
     Responses,
@@ -23,7 +23,6 @@ from lapidary.runtime import (
     UnexpectedResponse,
     get,
     post,
-    put,
 )
 from lapidary.runtime.http_consts import MIME_JSON
 
@@ -44,8 +43,7 @@ class AuthResponse(pydantic.BaseModel):
     api_key: str
 
 
-@dc.dataclass
-class ServerErrorModel(Exception):
+class ServerErrorModel(ModelBase):
     msg: str
 
 
@@ -86,7 +84,7 @@ async def cat_list(
 )
 async def get_cat(cat_id: int) -> JSONResponse:
     if cat_id != 1:
-        return JSONResponse(pydantic.TypeAdapter(ServerErrorModel).dump_python(ServerErrorModel('Cat not found')), 404)
+        return JSONResponse(pydantic.TypeAdapter(ServerErrorModel).dump_python(ServerErrorModel(msg='Cat not found')), 404)
     return JSONResponse(Cat(id=1, name='Tom').model_dump(), 200)
 
 
@@ -165,21 +163,6 @@ class CatClient(ClientBase):
             {
                 '2XX': Response(Body({'application/json': Cat})),
                 '4XX': Response(Body({'application/json': ServerErrorModel})),
-            }
-        ),
-    ]:
-        pass
-
-    @put('/cat')
-    async def cat_update(
-        self: typing.Self,
-        *,
-        body: typing.Annotated[Cat, Body({'application/json': Cat})],
-    ) -> typing.Annotated[
-        tuple[Cat, None],
-        Responses(
-            {
-                'default': Response(Body({'application/json': Cat})),
             }
         ),
     ]:

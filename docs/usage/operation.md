@@ -49,7 +49,7 @@ To declare a query parameter in Lapidary, use the Query() annotation:
 @get('/cats')
 async def list_cats(
         self: Self,
-        color: Annotated[str, Query()],
+        color: Annotated[str, Query],
 ):
     pass
 ```
@@ -57,7 +57,7 @@ async def list_cats(
 Calling a method like this:
 
 ```python
-client.list_cats(color='black')
+await client.list_cats(color='black')
 ```
 
 results in a GET request being sent to the following URL: https://example.com/cats?color=black.
@@ -77,7 +77,7 @@ parameter with Path(). Here is an example of how to define and use a path parame
 @get('/cat/{cat_id}')
 async def get_cat(
         self: Self,
-        cat_id: Annotated[str, Path()],
+        cat_id: Annotated[str, Path],
 ):
     pass
 ```
@@ -85,7 +85,7 @@ async def get_cat(
 When you call this method like so:
 
 ```python
-client.get_cat(cat_id=1)
+await client.get_cat(cat_id=1)
 ```
 
 it constructs and sends a GET request to https://example.com/cat/1. This demonstrates the method's ability to
@@ -95,7 +95,7 @@ dynamically incorporate the provided argument (cat_id=1) into the request URL as
 
 ### Non-cookie headers
 
-Header parameters are utilized to add HTTP headers to a request. These can be defined using the Header() annotation in a
+Header parameters are utilized to add HTTP headers to a request. These can be defined using the `Header` annotation in a
 method declaration, specifying the header name and the expected value type.
 
 Example:
@@ -104,7 +104,7 @@ Example:
 @get('/cats')
 async def list_cats(
         self: Self,
-    version: Annotated[str, Header('version')],
+        version: Annotated[str, Header],
 ):
     pass
 ```
@@ -112,7 +112,7 @@ async def list_cats(
 Invoking this method with:
 
 ```python
-client.list_cats(version='2')
+await client.list_cats(version='2')
 ```
 
 results in the execution of a GET request that includes the header `version: 2`.
@@ -139,7 +139,7 @@ async def list_cats(
 Calling this method as
 
 ```python
-client.list_cats(cookie_key='value')
+await client.list_cats(cookie_key='value')
 ```
 
 will send a GET request that includes the header Cookie: key=value.
@@ -155,7 +155,7 @@ Example:
 @POST('/cat')
 async def add_cat(
         self: Self,
-        cat: Annotated[Cat, RequestBody({
+        cat: Annotated[Cat, Body({
             'application/json': Cat,
         })],
 ):
@@ -190,11 +190,11 @@ Example:
 ```python
 @get('/cat')
 async def list_cats(self: Self) -> Annotated[
-    Awaitable[List[Cat]],
+    tuple[List[Cat], None],
     Responses({
-        '2XX': {
+        '2XX': Response(Body({
             'application/json': List[Cat],
-        },
+        })),
     })
 ]:
     pass
@@ -206,50 +206,48 @@ method's return type is tightly coupled with the anticipated successful response
 safety for API interactions.
 
 
-### Mapping headers
+### Mapping headers and response status code
 
-Lapidary supports an additional response type that envelops the response body and allows declaring response headers.
+Lapidary operation methods always return a tuple. The first element is the response body, the second is the response metadata (headers and/or status code), each of them being optional.
 
 Example:
 
 ```python
 
-class CatsListResponse(ResponseEnvelope):
-   body: Annotated[List[Cat], ResponseBody()]
-   total_count: Annotated[int, ResponseHeader('X-Total-Count')]
+class CatListMeta(ModelBase):
+   total_count: Annotated[int, Header('Total-Count')]
+   status_code: Annotated[int, StatusCode]
+
 
 class CatClient(ClientBase):
    @get('/cat')
    async def list_cats(self: Self) -> Annotated[
-       Awaitable[CatsListResponse],
+       tuple[list[Cat], CatListMeta],
        Responses({
-           '2XX': {
-               'application/json': CatsListResponse,
-           },
+           '2XX': Response(
+                Body({
+                    'application/json': list[Cat],
+                }),
+                CatListMeta
+           ),
        })
    ]:
        pass
 
 client = CatClient()
-cats_response = await client.list_cats()
-assert cats_response.body == [Cat(...)]
-assert cats_response.count == 1
+cats_body, cats_meta = await client.list_cats()
+assert cats_body.body == [Cat(...)]
+assert cats_meta.count == 1
+assert cats_meta.status_code == 200
 ```
 
 
 ### Handling error responses
 
-Lapidary allows you to map specific responses to exceptions. This feature is commonly used for error responses, like
-those with non-2XX status codes, but it's not limited to them. Any response specified in the Responses annotation can be
-set to raise an exception if it meets the defined conditions. This gives developers the flexibility to either raise
-exceptions for particular responses or handle them in the standard flow, based on what's needed for the application.
+Lapidary maps HTTP error responses to exceptions.
 
 ```python
-from dataclasses import dataclass
-
-
-@dataclass
-class ErrorModel(Exception):
+class ErrorModel(ModelBase):
     error_code: int
     error_message: str
 
@@ -258,20 +256,36 @@ class ErrorModel(Exception):
 async def list_cats(
         self: Self,
 ) -> Annotated[
-    Awaitable[List[Cat]],
+    tuple[List[Cat], None],
     Responses({
-        '2XX': {...},
-        '4XX': {
+        '2XX': Response(...),
+        '4XX': Response(Body({
             'application/json': ErrorModel,
-        }
+        }))
     }),
 ]:
     pass
 ```
 
-!!! note
+Responses with status code 400 and up will cause `HttpErrorResponse` to be risen as long as they're declared in the response map.
 
-    When creating a response model to be raised as an exception, it cannot derive from both pydantic.BaseModel and Exception due to inheritance conflicts. Opt for a straightforward class or a dataclass.
+```python
+try:
+    await client.list_cats()
+except HttpErrorResponse as e:
+    assert e.status_code == 400
+    assert e.headers is None
+    assert isinstance(e.body, ErrorModel)
+```
+
+Any responses not declared in the response map, regardless of their status code, raise `UnexpectedResponse`.
+
+```python
+try:
+    await client.list_cats()
+except UnexpectedResponse as e:
+    assert isinstance(e.response, httpx.response)
+```
 
 !!! note
 
