@@ -1,13 +1,19 @@
+from __future__ import annotations
+
 import abc
 import logging
-from collections.abc import Iterable
 from importlib.metadata import version
 
 import httpx
 import typing_extensions as typing
 
 from .model.auth import AuthRegistry
-from .types_ import NamedAuth, SecurityRequirements
+
+if typing.TYPE_CHECKING:
+    import types
+    from collections.abc import Iterable
+
+    from .types_ import NamedAuth, SecurityRequirements
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +25,8 @@ class ClientBase(abc.ABC):
         self,
         base_url: str,
         user_agent: str = USER_AGENT,
-        security: typing.Optional[Iterable[SecurityRequirements]] = None,
-        _http_client: typing.Optional[httpx.AsyncClient] = None,
+        security: Iterable[SecurityRequirements] | None = None,
+        _http_client: httpx.AsyncClient | None = None,
         **httpx_kwargs,
     ):
         if httpx_kwargs and _http_client:
@@ -37,8 +43,13 @@ class ClientBase(abc.ABC):
         await self._client.__aenter__()
         return self
 
-    async def __aexit__(self, __exc_type=None, __exc_value=None, __traceback=None) -> None:
-        return await self._client.__aexit__(__exc_type, __exc_value, __traceback)
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None = None,
+        exc_value: BaseException | None = None,
+        traceback: types.TracebackType | None = None,
+    ) -> bool | None:
+        return await self._client.__aexit__(exc_type, exc_value, traceback)
 
     def lapidary_authenticate(self, *auth_args: NamedAuth, **auth_kwargs: httpx.Auth) -> None:
         """Register named Auth instances for future use with methods that require authentication."""
