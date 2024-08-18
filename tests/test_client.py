@@ -1,12 +1,13 @@
 import datetime as dt
 import email.utils
 
-import fastapi
 import httpx
 import pydantic
 import pytest
+import pytest_asyncio
 import typing_extensions as typing
-from fastapi.responses import JSONResponse
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from lapidary.runtime import (
     Body,
@@ -49,17 +50,13 @@ class ServerErrorModel(ModelBase):
 
 DATE = dt.datetime(2024, 7, 28, 0, 55, tzinfo=dt.timezone.utc)
 
-# FastAPI server
-
-cats_app = fastapi.FastAPI(debug=True)
+# server
 
 
-@cats_app.get('/cats', responses={'200': {'model': typing.List[Cat]}})
-async def cat_list(
-    return_list: typing.Annotated[typing.Optional[bool], fastapi.Header()] = None,
-    token: typing.Annotated[typing.Optional[str], fastapi.Header()] = None,
-) -> JSONResponse:
-    assert isinstance(return_list, (bool, type(None)))
+async def cat_list(request: Request) -> JSONResponse:
+    return_list = request.headers.get('return-list', 'false') == 'True'
+    token = request.headers.get('token')
+
     serializer = pydantic.TypeAdapter(typing.List[Cat])
     data = [Cat(id=1, name='Tom')]
     headers = {
@@ -75,14 +72,8 @@ async def cat_list(
     )
 
 
-@cats_app.get(
-    '/cat/{cat_id}',
-    responses={
-        '2XX': {MIME_JSON: Cat},
-        '4XX': {MIME_JSON: ServerErrorModel},
-    },
-)
-async def get_cat(cat_id: int) -> JSONResponse:
+async def get_cat(request: Request) -> JSONResponse:
+    cat_id = request.path_params['cat_id']
     if cat_id != 1:
         return JSONResponse(pydantic.TypeAdapter(ServerErrorModel).dump_python(ServerErrorModel(msg='Cat not found')), 404)
     return JSONResponse(Cat(id=1, name='Tom').model_dump(), 200)
@@ -93,18 +84,21 @@ class CatWriteDTO(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra='forbid')
 
 
-@cats_app.post('/cat/')
-async def create_cat(cat: CatWriteDTO) -> JSONResponse:
+async def create_cat(request: Request) -> JSONResponse:
+    try:
+        cat = CatWriteDTO.model_validate_json(await request.body())
+    except pydantic.ValidationError as e:
+        return JSONResponse(e.json(), 422)
     print(cat.model_dump())
     return JSONResponse(Cat(name=cat.name, id=2).model_dump(), 201)
 
 
-@cats_app.post('/login')
-async def login(body: AuthRequest) -> AuthResponse:
+async def login(request: Request) -> JSONResponse:
+    body = AuthRequest.model_validate_json(await request.body())
     assert body.login == 'login'
     assert body.password == 'passwd'
 
-    return AuthResponse(api_key="you're in")
+    return JSONResponse(AuthResponse(api_key="you're in").model_dump())
 
 
 # Client
@@ -138,7 +132,7 @@ class CatClient(ClientBase):
             **httpx_args,
         )
 
-    @get('/cats')
+    @get('/cat')
     async def cat_list(
         self: typing.Self,
         meta: typing.Annotated[CatListRequestHeaders, Metadata],
@@ -168,7 +162,7 @@ class CatClient(ClientBase):
     ]:
         pass
 
-    @post('/cat/')
+    @post('/cat')
     async def cat_create(
         self: typing.Self,
         *,
@@ -205,13 +199,29 @@ class CatClient(ClientBase):
         pass
 
 
-# tests
+@pytest_asyncio.fixture
+async def client() -> CatClient:
+    from starlette.applications import Starlette
+    from starlette.routing import Route
 
-client = CatClient(transport=httpx.ASGITransport(app=cats_app))
+    app = Starlette(
+        debug=True,
+        routes=[
+            Route('/cat/{cat_id:int}', get_cat),
+            Route('/cat', cat_list),
+            Route('/cat', create_cat, methods=['POST']),
+            Route('/login', login, methods=['POST']),
+        ],
+    )
+
+    return CatClient(transport=httpx.ASGITransport(app=app))
+
+
+# tests
 
 
 @pytest.mark.asyncio
-async def test_request_response():
+async def test_request_response(client: CatClient):
     response_body, response_headers = await client.cat_list(
         meta=CatListRequestHeaders(
             token='header-value',
@@ -227,21 +237,20 @@ async def test_request_response():
 
     response_body, response_headers = await client.cat_list()
     assert response_headers.token is None
-
     cat, _ = await client.cat_get(id=1)
     assert isinstance(cat, Cat)
     assert cat == Cat(id=1, name='Tom')
 
 
 @pytest.mark.asyncio
-async def test_response_auth():
+async def test_response_auth(client: CatClient):
     response, _ = await client.login(body=AuthRequest(login='login', password='passwd'))
 
     assert response.api_key == "you're in"
 
 
 @pytest.mark.asyncio
-async def test_error():
+async def test_error(client: CatClient):
     try:
         await client.cat_get(id=7)
         assert False, 'Expected ServerError'
@@ -251,14 +260,14 @@ async def test_error():
 
 
 @pytest.mark.asyncio
-async def test_create():
+async def test_create(client: CatClient):
     body, _ = await client.cat_create(body=Cat(name='Benny'))
     assert body.id == 2
     assert body.name == 'Benny'
 
 
 @pytest.mark.asyncio
-async def test_create_error():
+async def test_create_error(client: CatClient):
     with pytest.raises(UnexpectedResponse) as error:
         await client.cat_create(body=Cat(id=1, name='Benny'))
     assert error.value.response.status_code == 422
