@@ -22,18 +22,15 @@ class Operation:
         return typing.cast(OperationMethod, ft.wraps(fn)(exchange_fn))
 
 
-_operation = Operation
-
-
 class MethodProto(typing.Protocol):
     def __call__(self, path: str, security: typing.Optional[Iterable[SecurityRequirements]] = None) -> typing.Callable:
         pass
 
 
-get: MethodProto = ft.partial(_operation, 'GET')
-put: MethodProto = ft.partial(_operation, 'PUT')
-post: MethodProto = ft.partial(_operation, 'POST')
-delete: MethodProto = ft.partial(_operation, 'DELETE')
-head: MethodProto = ft.partial(_operation, 'HEAD')
-patch: MethodProto = ft.partial(_operation, 'PATCH')
-trace: MethodProto = ft.partial(_operation, 'TRACE')
+get: MethodProto = ft.partial(Operation, 'GET')
+put: MethodProto = ft.partial(Operation, 'PUT')
+post: MethodProto = ft.partial(Operation, 'POST')
+delete: MethodProto = ft.partial(Operation, 'DELETE')
+head: MethodProto = ft.partial(Operation, 'HEAD')
+patch: MethodProto = ft.partial(Operation, 'PATCH')
+trace: MethodProto = ft.partial(Operation, 'TRACE')
