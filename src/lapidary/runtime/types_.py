@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 from collections.abc import MutableMapping
 
@@ -37,14 +39,14 @@ class RequestFactory(typing.Protocol):
         method: str,
         url: str,
         *,
-        content: typing.Optional[httpx._types.RequestContent] = None,
-        _data: typing.Optional[httpx._types.RequestData] = None,
-        _files: typing.Optional[httpx._types.RequestFiles] = None,
-        _json: typing.Optional[typing.Any] = None,
-        params: typing.Optional[httpx._types.QueryParamTypes] = None,
-        headers: typing.Optional[httpx._types.HeaderTypes] = None,
-        cookies: typing.Optional[httpx._types.CookieTypes] = None,
-        _timeout: typing.Union[httpx._types.TimeoutTypes, _httpx.UseClientDefault] = httpx.USE_CLIENT_DEFAULT,
-        _extensions: typing.Optional[httpx._types.RequestExtensions] = None,
+        content: httpx._types.RequestContent | None = None,
+        _data: httpx._types.RequestData | None = None,
+        _files: httpx._types.RequestFiles | None = None,
+        _json: typing.Any | None = None,
+        params: httpx._types.QueryParamTypes | None = None,
+        headers: httpx._types.HeaderTypes | None = None,
+        cookies: httpx._types.CookieTypes | None = None,
+        _timeout: httpx._types.TimeoutTypes | _httpx.UseClientDefault = httpx.USE_CLIENT_DEFAULT,
+        _extensions: httpx._types.RequestExtensions | None = None,
     ) -> httpx.Request:
         pass
