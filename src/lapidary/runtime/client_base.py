@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import logging
-from importlib.metadata import version
 
 import httpx
 import typing_extensions as typing
@@ -17,19 +16,20 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-USER_AGENT = f'lapidary.dev/{version("lapidary")}'
-
 
 class ClientBase(abc.ABC):
     def __init__(
         self,
-        user_agent: str = USER_AGENT,
+        user_agent: str | None = None,
         security: Iterable[SecurityRequirements] | None = None,
         **httpx_kwargs: typing.Unpack[ClientArgs],
     ):
         headers = httpx.Headers(httpx_kwargs.pop('headers', None))
-        if user_agent:
-            headers['User-Agent'] = user_agent
+        if user_agent is None:
+            from importlib.metadata import version
+
+            user_agent = f'lapidary.dev/#{version("lapidary")}'
+        headers['User-Agent'] = user_agent
 
         self._client = httpx.AsyncClient(headers=headers, **httpx_kwargs)
         self._auth_registry = AuthRegistry(security)
