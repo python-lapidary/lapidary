@@ -1,6 +1,7 @@
 __all__ = (
     'Body',
     'ClientBase',
+    'ClientArgs',
     'Cookie',
     'Form',
     'FormExplode',
@@ -35,4 +36,4 @@ from .model import ModelBase
 from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError, UnexpectedResponse
 from .model.param_serialization import Form, FormExplode, SimpleMultimap, SimpleString
 from .operation import delete, get, head, patch, post, put, trace
-from .types_ import NamedAuth, SecurityRequirements
+from .types_ import ClientArgs, NamedAuth, SecurityRequirements
