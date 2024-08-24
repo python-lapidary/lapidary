@@ -3,6 +3,7 @@ __all__ = (
     'ClientBase',
     'ClientArgs',
     'Cookie',
+    'lapidary_user_agent',
     'Form',
     'FormExplode',
     'Header',
@@ -17,6 +18,7 @@ __all__ = (
     'Response',
     'Responses',
     'SecurityRequirements',
+    'SessionFactory',
     'SimpleMultimap',
     'SimpleString',
     'StatusCode',
@@ -31,9 +33,9 @@ __all__ = (
 )
 
 from .annotations import Body, Cookie, Header, Metadata, Path, Query, Response, Responses, StatusCode
-from .client_base import ClientBase
+from .client_base import ClientBase, lapidary_user_agent
 from .model import ModelBase
 from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError, UnexpectedResponse
 from .model.param_serialization import Form, FormExplode, SimpleMultimap, SimpleString
 from .operation import delete, get, head, patch, post, put, trace
-from .types_ import ClientArgs, NamedAuth, SecurityRequirements
+from .types_ import ClientArgs, NamedAuth, SecurityRequirements, SessionFactory

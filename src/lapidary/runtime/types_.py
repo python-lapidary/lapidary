@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from collections.abc import MutableMapping
+from collections.abc import Callable, MutableMapping
 
 import httpx
 import httpx._transports.base
@@ -15,9 +15,10 @@ NamedAuth: typing.TypeAlias = tuple[str, httpx.Auth]
 SecurityRequirements: typing.TypeAlias = typing.Mapping[str, typing.Iterable[str]]
 
 MimeType: typing.TypeAlias = str
+MimeMap: typing.TypeAlias = MutableMapping[MimeType, type]
 StatusCodeRange: typing.TypeAlias = str
 StatusCodeType: typing.TypeAlias = int
-MimeMap: typing.TypeAlias = MutableMapping[MimeType, type]
+SessionFactory: typing.TypeAlias = Callable[..., httpx.AsyncClient]
 
 
 class Dumper(abc.ABC):

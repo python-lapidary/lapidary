@@ -6,32 +6,35 @@ import logging
 import httpx
 import typing_extensions as typing
 
+from .http_consts import USER_AGENT
 from .model.auth import AuthRegistry
 
 if typing.TYPE_CHECKING:
     import types
     from collections.abc import Iterable
 
-    from .types_ import ClientArgs, NamedAuth, SecurityRequirements
+    from .types_ import ClientArgs, NamedAuth, SecurityRequirements, SessionFactory
 
 logger = logging.getLogger(__name__)
+
+
+def lapidary_user_agent() -> str:
+    from importlib.metadata import version
+
+    return f'Lapidary/{version("lapidary")}'
 
 
 class ClientBase(abc.ABC):
     def __init__(
         self,
-        user_agent: str | None = None,
         security: Iterable[SecurityRequirements] | None = None,
+        session_factory: SessionFactory = httpx.AsyncClient,
         **httpx_kwargs: typing.Unpack[ClientArgs],
-    ):
-        headers = httpx.Headers(httpx_kwargs.pop('headers', None))
-        if user_agent is None:
-            from importlib.metadata import version
+    ) -> None:
+        self._client = session_factory(**httpx_kwargs)
+        if USER_AGENT not in self._client.headers:
+            self._client.headers[USER_AGENT] = lapidary_user_agent()
 
-            user_agent = f'lapidary.dev/#{version("lapidary")}'
-        headers['User-Agent'] = user_agent
-
-        self._client = httpx.AsyncClient(headers=headers, **httpx_kwargs)
         self._auth_registry = AuthRegistry(security)
 
     async def __aenter__(self: typing.Self) -> typing.Self:
