@@ -128,3 +128,18 @@ async def test_request_param_list_exploded(mock_http_client):
         headers=httpx.Headers(),
         cookies=httpx.Cookies(),
     )
+
+
+@pytest.mark.asyncio
+async def test_missing_required_param(mock_http_client):
+    class Client(ClientTestBase):
+        @get('/param_list_exploded')
+        async def op(
+            self: typing.Self,
+            q_a: typing.Annotated[typing.List[str], Query],
+        ) -> typing.Annotated[Awaitable[None], Responses({})]:
+            pass
+
+    async with Client(client=mock_http_client) as client:
+        with pytest.raises(TypeError):
+            await client.op()

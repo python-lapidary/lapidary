@@ -165,7 +165,11 @@ class FreeParamsContributor(ParamsContributor):
     model_type: type[pydantic.BaseModel]
 
     def update_builder(self, builder: RequestBuilder, free_params: Mapping[str, typing.Any]) -> None:
-        super().update_builder(builder, self.model_type.model_validate(free_params))
+        try:
+            model = self.model_type.model_validate(free_params)
+        except pydantic.ValidationError as e:
+            raise TypeError from e
+        super().update_builder(builder, model)
 
 
 @dc.dataclass
@@ -227,8 +231,7 @@ class RequestObjectContributor(RequestContributor):
                 except KeyError:
                     raise TypeError('Unexpected argument', name)
                 contributor.update_builder(builder, value)
-        if free_params:
-            assert self.free_param_contributor
+        if self.free_param_contributor:
             self.free_param_contributor.update_builder(builder, free_params)
 
     @classmethod
