@@ -7,6 +7,14 @@ def test_simple_multimap_string():
     assert SimpleMultimap.serialize_scalar('name', 'value') == [('name', 'value')]
 
 
+def test_simple_multimap_scalar_none():
+    assert list(SimpleMultimap.serialize_scalar('name', None)) == []
+
+
+def test_simple_multimap_none():
+    assert list(SimpleMultimap.serialize('name', None)) == []
+
+
 def test_simple_multimap_int():
     assert SimpleMultimap.serialize_scalar('name', 1) == [('name', '1')]
 
@@ -17,6 +25,30 @@ def test_simple_multimap_list():
 
 def test_simple_multimap_object():
     assert SimpleMultimap.serialize_object('name', {'key1': 'value', 'key2': 1}) == [('name', 'key1,value,key2,1')]
+
+
+def test_deser_simple_multimap_str():
+    assert SimpleMultimap.deserialize_scalar('value', str) == 'value'
+
+
+def test_deser_simple_multimap_str_generic():
+    assert SimpleMultimap.deserialize('value', str) == 'value'
+
+
+def test_deser_simple_multimap_array():
+    assert SimpleMultimap.deserialize_array('value1,value2', list[str]) == ['value1', 'value2']
+
+
+def test_deser_simple_multimap_array_generic():
+    assert SimpleMultimap.deserialize('value1,value2', list[str]) == ['value1', 'value2']
+
+
+def test_deser_simple_multimap_object():
+    assert SimpleMultimap.deserialize_object('name1,value1,name2,value2', dict[str, str]) == {'name1': 'value1', 'name2': 'value2'}
+
+
+def test_deser_simple_multimap_object_generic():
+    assert SimpleMultimap.deserialize('name1,value1,name2,value2', dict[str, str]) == {'name1': 'value1', 'name2': 'value2'}
 
 
 # simple no-explode, string version

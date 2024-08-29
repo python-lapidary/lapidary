@@ -66,7 +66,7 @@ class ParamExtractor(ResponseExtractor, abc.ABC):
         value = part[self.http_name()]
         if value is None:
             return None
-        return self._deserialize(value)
+        return self._deserialize(value, make_not_optional(self.python_type))
 
     @staticmethod
     @abc.abstractmethod
