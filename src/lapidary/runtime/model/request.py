@@ -12,7 +12,6 @@ import typing_extensions as typing
 from ..annotations import Body, Cookie, Header, Metadata, Param, Path, Query, WebArg
 from ..http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from ..metattype import is_array_like, make_not_optional
-from ..mime import find_mime
 from ..types_ import Dumper, MimeType, RequestFactory, SecurityRequirements
 from .annotations import (
     find_annotation,
@@ -23,6 +22,9 @@ from .param_serialization import SCALAR_TYPES, Multimap, ScalarType
 if typing.TYPE_CHECKING:
     from ..client_base import ClientBase
     from ..operation import Operation
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dc.dataclass
@@ -174,37 +176,41 @@ class FreeParamsContributor(ParamsContributor):
 
 @dc.dataclass
 class BodyContributor:
-    dumpers: Mapping[type, Mapping[MimeType, Dumper]]
+    serializers: list[tuple[pydantic.TypeAdapter, str]]
 
     def update_builder(self, builder: 'RequestBuilder', value: typing.Any, media_type: MimeType = MIME_JSON) -> None:
-        matched_media_type, dump = self.find_dumper(type(value), media_type)
+        matched_media_type, content = self._dump(value, media_type)
         builder.headers[CONTENT_TYPE] = matched_media_type
-        builder.content = dump(value)
+        builder.content = content
 
-    def find_dumper(self, typ: type, media_type: MimeType) -> tuple[MimeType, Dumper]:
-        for base in typ.__mro__[:-1]:
-            try:
-                media_dumpers = self.dumpers[base]
-                matched_media_type = find_mime(media_dumpers.keys(), media_type)
-                if not matched_media_type:
-                    raise ValueError('Unsupported media_type', media_type)
-                return matched_media_type, media_dumpers[matched_media_type]
-            except KeyError:
+    def _dump(self, value: typing.Any, media_type: MimeType = MIME_JSON):
+        for type_adapter, media_type_ in self.serializers:
+            if not BodyContributor._media_matches(media_type_, media_type):
+                logger.debug('Ignoring unsupported media_type: %s', media_type)
                 continue
-        raise TypeError(f'Unsupported type: {typ.__name__}')
+            try:
+                raw = type_adapter.dump_json(value, exclude_unset=True, by_alias=True)
+                return media_type_, raw
+            except pydantic.ValidationError:
+                continue
+        else:
+            raise ValueError('Unsupported value')
 
     @classmethod
     def for_parameter(cls, annotation: type) -> typing.Self:
-        dumpers: dict[type, dict[MimeType, Dumper]] = {}
         body: Body
         _, body = find_annotation(annotation, Body)
-        for media_type, typ in body.content.items():
-            m_type, m_subtype, _ = mimeparse.parse_media_range(media_type)
-            if f'{m_type}/{m_subtype}' != MIME_JSON:
-                raise TypeError(f'Unsupported media type: {media_type}')
-            type_dumpers = dumpers.setdefault(typ, {})
-            type_dumpers[media_type] = mk_pydantic_dumper(typ)
-        return cls(dumpers=dumpers)
+        serializers = [
+            (pydantic.TypeAdapter(python_type), media_type)
+            for media_type, python_type in body.content.items()
+            if BodyContributor._media_matches(media_type)
+        ]
+        return cls(serializers)
+
+    @staticmethod
+    def _media_matches(media_type: str, match: str = MIME_JSON) -> bool:
+        m_type, m_subtype, _ = mimeparse.parse_media_range(media_type)
+        return f'{m_type}/{m_subtype}' == match
 
 
 @dc.dataclass
