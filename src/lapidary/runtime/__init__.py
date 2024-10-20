@@ -26,6 +26,7 @@ __all__ = (
     'delete',
     'get',
     'head',
+    'iter_pages',
     'patch',
     'post',
     'put',
@@ -38,4 +39,5 @@ from .model import ModelBase
 from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError, UnexpectedResponse
 from .model.param_serialization import Form, FormExplode, SimpleMultimap, SimpleString
 from .operation import delete, get, head, patch, post, put, trace
+from .paging import iter_pages
 from .types_ import ClientArgs, NamedAuth, SecurityRequirements, SessionFactory
