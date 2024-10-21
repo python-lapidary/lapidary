@@ -61,6 +61,7 @@ line-length = 140
 [tool.ruff.lint]
 #extend-select = ["E501", "E4", "E7", "E9", "F", "B", 'UP', 'D']
 select = ['F', 'E', 'W', 'C90', 'I', 'UP']
+ignore = ['F842']
 
 [tool.ruff.format]
 quote-style = "single"
