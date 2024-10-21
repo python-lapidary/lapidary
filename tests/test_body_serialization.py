@@ -118,10 +118,10 @@ def test_serialize_generic_union():
 
     adapter, _ = process_operation_method(Client.op, get('/path'))
 
-    request, _ = adapter.build_request(client, dict(body=[GenericBodyModel(a=BodyModel(a='a'))]))
+    request, _ = adapter.build_request(client, dict(body=[GenericBodyModel[BodyModel](a=BodyModel(a='a'))]))
     assert request.content == b'[{"a":{"a":"a"}}]'
 
-    request, _ = adapter.build_request(client, dict(body=GenericBodyModel(a=BodyModel(a='a'))))
+    request, _ = adapter.build_request(client, dict(body=GenericBodyModel[BodyModel](a=BodyModel(a='a'))))
     assert request.content == b'{"a":{"a":"a"}}'
 
     request, _ = adapter.build_request(client, dict(body=BodyModel(a='a')))
