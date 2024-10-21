@@ -7,11 +7,12 @@ import httpx
 import typing_extensions as typing
 
 from .http_consts import USER_AGENT
+from .middleware import HttpxMiddleware
 from .model.auth import AuthRegistry
 
 if typing.TYPE_CHECKING:
     import types
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Sequence
 
     from .types_ import ClientArgs, NamedAuth, SecurityRequirements, SessionFactory
 
@@ -29,6 +30,7 @@ class ClientBase(abc.ABC):
         self,
         security: Iterable[SecurityRequirements] | None = None,
         session_factory: SessionFactory = httpx.AsyncClient,
+        middlewares: Sequence[HttpxMiddleware] = (),
         **httpx_kwargs: typing.Unpack[ClientArgs],
     ) -> None:
         self._client = session_factory(**httpx_kwargs)
@@ -36,6 +38,7 @@ class ClientBase(abc.ABC):
             self._client.headers[USER_AGENT] = lapidary_user_agent()
 
         self._auth_registry = AuthRegistry(security)
+        self._middlewares = middlewares
 
     async def __aenter__(self: typing.Self) -> typing.Self:
         await self._client.__aenter__()

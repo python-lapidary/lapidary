@@ -8,6 +8,7 @@ __all__ = (
     'FormExplode',
     'Header',
     'HttpErrorResponse',
+    'HttpxMiddleware',
     'LapidaryError',
     'LapidaryResponseError',
     'Metadata',
@@ -35,6 +36,7 @@ __all__ = (
 
 from .annotations import Body, Cookie, Header, Metadata, Path, Query, Response, Responses, StatusCode
 from .client_base import ClientBase, lapidary_user_agent
+from .middleware import HttpxMiddleware
 from .model import ModelBase
 from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError, UnexpectedResponse
 from .model.param_serialization import Form, FormExplode, SimpleMultimap, SimpleString

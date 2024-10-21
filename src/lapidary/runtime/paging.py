@@ -1,7 +1,7 @@
 from collections.abc import AsyncIterable, Awaitable, Callable
 from typing import Optional, TypeVar
 
-from typing_extensions import ParamSpec, Unpack
+from typing_extensions import ParamSpec
 
 P = ParamSpec('P')
 R = TypeVar('R')

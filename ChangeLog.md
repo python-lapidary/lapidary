@@ -11,6 +11,7 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 ### Added
 - Accept session_factory in `ClientBase.__init__`.
 - Helper function to iterate over pages.
+- Accept middleware.
 
 ### Fixed
 - Handling collections in request bodies.

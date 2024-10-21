@@ -31,9 +31,17 @@ def mk_exchange_fn(
     async def exchange(self: 'ClientBase', **kwargs) -> typing.Any:
         request, auth = request_adapter.build_request(self, kwargs)
 
+        mw_state = []
+        for mw in self._middlewares:
+            mw_state.append(await mw.handle_request(request))
+
         response = await self._client.send(request, auth=auth)
 
         await response.aread()
+
+        for mw, state in zip(reversed(self._middlewares), reversed(mw_state)):
+            await mw.handle_response(response, request, state)
+
         status_code, result = response_handler.handle_response(response)
         if status_code >= 400:
             raise HttpErrorResponse(status_code, result[1], result[0])
