@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 and the format of this file is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased]
+## [0.12.0] - 2024-10-21
 
 ### Added
 - Accept session_factory in `ClientBase.__init__`.
@@ -39,7 +39,7 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 - Support response envelope objects to allow returning headers together with the body model.
 
 
-## [0.9.1](https://github.com/python-lapidary/lapidary/releases/tag/v0.9.1) - 2024-05-25
+## [0.9.1] - 2024-05-25
 ### Fixed
 - Moved pytest-asyncio dependency to dev group.
 
@@ -99,6 +99,8 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 ### Fixed
 - Dynamically creating generic types
 
-[unreleased]: https://github.com/python-lapidary/lapidary/compare/v0.11.0...HEAD
+[unreleased]: https://github.com/python-lapidary/lapidary/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/python-lapidary/lapidary/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/python-lapidary/lapidary/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/python-lapidary/lapidary/compare/v0.9.1...v0.10.0
+[0.9.1]: https://github.com/python-lapidary/lapidary/compare/v0.9.0...v0.9.1
