@@ -1,6 +1,7 @@
 import abc
 import dataclasses as dc
 from collections.abc import Callable, Iterable, Mapping
+from typing import Optional
 
 import httpx
 import pydantic
@@ -163,7 +164,7 @@ class TupleExtractor(ResponseExtractor):
 
 
 # similar structure to openapi responses
-ResponseExtractorMap: typing.TypeAlias = dict[StatusCodeRange, dict[MimeType, ResponseExtractor]]
+ResponseExtractorMap: typing.TypeAlias = dict[StatusCodeRange, dict[Optional[MimeType], ResponseExtractor]]
 
 
 @dc.dataclass
@@ -181,13 +182,6 @@ class ResponseMessageExtractor(ResponseExtractor):
             return None
 
         status_code = str(response.status_code)
-        if CONTENT_TYPE not in response.headers:
-            return None
-
-        media_type = response.headers[CONTENT_TYPE]
-        if media_type is None:
-            return None
-
         for code_match in (status_code, status_code[0] + 'XX', 'default'):
             if code_match in self.response_map:
                 mime_map = self.response_map[code_match]
@@ -195,7 +189,11 @@ class ResponseMessageExtractor(ResponseExtractor):
         else:
             return None
 
-        mime_match = find_mime(mime_map.keys(), media_type)
+        media_type = response.headers.get(CONTENT_TYPE)
+        if media_type is None:
+            return mime_map.get(None)
+
+        mime_match = find_mime([media_type for media_type in mime_map.keys() if media_type is not None], media_type)
         return mime_map[mime_match] if mime_match is not None else None
 
     @staticmethod
@@ -216,6 +214,13 @@ class ResponseMessageExtractor(ResponseExtractor):
                     )
                 )
                 media_types.add(media_type)
+            else:
+                response_map[status_code][None] = TupleExtractor(
+                    (
+                        _NOOP,
+                        headers_extractor,
+                    )
+                )
 
         return ResponseMessageExtractor(response_map), media_types
 
