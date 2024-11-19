@@ -163,6 +163,9 @@ class TupleExtractor(ResponseExtractor):
         return tuple(extractor.handle_response(response) for extractor in self.response_extractors)
 
 
+_NOOP_TUPLE = TupleExtractor(response_extractors=(_NOOP, _NOOP))
+
+
 # similar structure to openapi responses
 ResponseExtractorMap: typing.TypeAlias = dict[StatusCodeRange, dict[Optional[MimeType], ResponseExtractor]]
 
@@ -173,28 +176,31 @@ class ResponseMessageExtractor(ResponseExtractor):
 
     def handle_response(self, response: 'httpx.Response') -> tuple[StatusCodeType, tuple[typing.Any, typing.Any]]:
         extractor = self._find_extractor(response)
-        if not extractor:
-            raise UnexpectedResponse(response)
         return response.status_code, extractor.handle_response(response)
 
-    def _find_extractor(self, response: httpx.Response) -> typing.Optional[ResponseExtractor]:
+    def _find_extractor(self, response: httpx.Response) -> ResponseExtractor:
         if not self.response_map:
-            return None
+            raise UnexpectedResponse(response)
 
         status_code = str(response.status_code)
         for code_match in (status_code, status_code[0] + 'XX', 'default'):
-            if code_match in self.response_map:
+            try:
                 mime_map = self.response_map[code_match]
                 break
+            except KeyError:
+                pass
         else:
-            return None
+            raise UnexpectedResponse(response)
 
-        media_type = response.headers.get(CONTENT_TYPE)
-        if media_type is None:
-            return mime_map.get(None)
+        try:
+            media_type = response.headers[CONTENT_TYPE]
+        except KeyError:
+            return _NOOP_TUPLE
 
         mime_match = find_mime([media_type for media_type in mime_map.keys() if media_type is not None], media_type)
-        return mime_map[mime_match] if mime_match is not None else None
+        if not mime_match:
+            raise UnexpectedResponse(response)
+        return mime_map[mime_match]
 
     @staticmethod
     def for_annotated(responses: Responses) -> 'tuple[ResponseMessageExtractor, Iterable[str]]':

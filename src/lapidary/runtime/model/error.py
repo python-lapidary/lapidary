@@ -41,3 +41,4 @@ class UnexpectedResponse(LapidaryResponseError):
 
     def __init__(self, response: httpx.Response):
         self.response = response
+        self.content_type = response.headers.get('content-type')
