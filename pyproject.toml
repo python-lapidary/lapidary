@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lapidary"
-version = "0.12.1"
+version = "0.12.2"
 description = "Python async OpenAPI client library"
 authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
 license = "MIT"
