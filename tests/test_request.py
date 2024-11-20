@@ -1,3 +1,4 @@
+import datetime as dt
 from collections.abc import Awaitable
 from unittest.mock import AsyncMock, Mock
 
@@ -143,3 +144,29 @@ async def test_missing_required_param(mock_http_client):
     async with Client(client=mock_http_client) as client:
         with pytest.raises(TypeError):
             await client.op()
+
+
+@pytest.mark.asyncio
+async def test_build_request_param_date(mock_http_client):
+    class Client(ClientTestBase):
+        @get('/request_date')
+        async def request_date(
+            self: typing.Self,
+            date: typing.Annotated[dt.date, Query()],
+        ) -> typing.Annotated[tuple[dt.date, None], Responses({})]:
+            pass
+
+    today = dt.date.today()
+
+    async with Client(client=mock_http_client) as client:
+        with pytest.raises(UnexpectedResponse):
+            await client.request_date(date=today)
+
+    mock_http_client.build_request.assert_called_with(
+        'GET',
+        '/request_date',
+        content=None,
+        params=httpx.QueryParams({'date': today.isoformat()}),
+        headers=httpx.Headers(),
+        cookies=httpx.Cookies(),
+    )

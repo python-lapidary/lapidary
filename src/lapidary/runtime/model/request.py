@@ -89,7 +89,7 @@ class ParamContributor(typing.Generic[PST], RequestContributor, abc.ABC):
         return self.param.alias or self.python_name
 
 
-class DictParamContributor(ParamContributor):
+class DictParamContributor(ParamContributor, abc.ABC):
     def update_builder(self, builder: RequestBuilder, value: typing.Any) -> None:
         part = self._get_builder_part(builder)
         http_name = self.http_name()
@@ -141,10 +141,11 @@ class ParamsContributor(RequestContributor):
     contributors: Mapping[str, RequestContributor]
 
     def update_builder(self, builder: RequestBuilder, headers_model: pydantic.BaseModel) -> None:
-        raw_model = headers_model.model_dump()
-        for field_name, field_info in headers_model.model_fields.items():
+        raw_model = headers_model.model_dump(mode='json', exclude_unset=True)
+        for field_name in headers_model.model_fields_set:
+            assert field_name in headers_model.model_fields
             value = raw_model[field_name]
-            if not value and field_name not in headers_model.model_fields_set:
+            if value is None:
                 continue
             contributor = self.contributors[field_name]
             contributor.update_builder(builder, value)
