@@ -18,7 +18,7 @@ class MyRequestBodyModel(pydantic.BaseModel):
 
 
 class MyRequestBodyList(pydantic.RootModel):
-    root: typing.List[MyRequestBodyModel]
+    root: list[MyRequestBodyModel]
 
 
 @pytest_asyncio.fixture(scope='function')
@@ -66,7 +66,7 @@ async def test_request_param_list_simple(mock_http_client):
         @get('/param_list_simple')
         async def param_list_simple(
             self: typing.Self,
-            q_a: typing.Annotated[typing.List[str], Query('a', style=SimpleMultimap)],
+            q_a: typing.Annotated[list[str], Query('a', style=SimpleMultimap)],
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
@@ -113,7 +113,7 @@ async def test_request_param_list_exploded(mock_http_client):
         @get('/param_list_exploded')
         async def param_list_exploded(
             self: typing.Self,
-            q_a: typing.Annotated[typing.List[str], Query('a', style=SimpleMultimap)],
+            q_a: typing.Annotated[list[str], Query('a', style=SimpleMultimap)],
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
@@ -137,7 +137,7 @@ async def test_missing_required_param(mock_http_client):
         @get('/param_list_exploded')
         async def op(
             self: typing.Self,
-            q_a: typing.Annotated[typing.List[str], Query],
+            q_a: typing.Annotated[list[str], Query],
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 

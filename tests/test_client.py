@@ -57,7 +57,7 @@ async def cat_list(request: Request) -> JSONResponse:
     return_list = request.headers.get('return-list', 'false') == 'True'
     token = request.headers.get('token')
 
-    serializer = pydantic.TypeAdapter(typing.List[Cat])
+    serializer = pydantic.TypeAdapter(list[Cat])
     data = [Cat(id=1, name='Tom')]
     headers = {
         'X-Count': str(len(data)),
