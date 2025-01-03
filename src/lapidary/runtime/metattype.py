@@ -17,6 +17,7 @@ def make_not_optional(typ: typing.Any) -> typing.Any:
 
 
 def is_array_like(typ: typing.Any) -> bool:
+    typ = unwrap_origin(typ)
     return inspect.isclass(typ) and issubclass(typ, Iterable) and not (typ in (str, bytes) or issubclass(typ, Mapping))
 
 
