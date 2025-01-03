@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from collections.abc import Callable, MutableMapping
+from collections.abc import Callable, Mapping, MutableMapping
 
 import httpx
 import httpx._transports.base
@@ -16,6 +16,7 @@ SecurityRequirements: typing.TypeAlias = typing.Mapping[str, typing.Iterable[str
 
 MimeType: typing.TypeAlias = str
 MimeMap: typing.TypeAlias = MutableMapping[MimeType, type]
+Signature: typing.TypeAlias = Mapping[str, typing.Any]
 StatusCodeRange: typing.TypeAlias = str
 StatusCodeType: typing.TypeAlias = int
 SessionFactory: typing.TypeAlias = Callable[..., httpx.AsyncClient]

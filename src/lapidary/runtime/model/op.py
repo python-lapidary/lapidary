@@ -14,9 +14,11 @@ if typing.TYPE_CHECKING:
 
 def process_operation_method(fn: Callable, op: 'Operation') -> tuple[RequestAdapter, ResponseMessageExtractor]:
     sig = inspect.signature(fn)
+    type_hints = typing.get_type_hints(fn, include_extras=True)
+    params = {name: param.replace(annotation=type_hints[name]) for name, param in sig.parameters.items()}
     try:
-        response_extractor, media_types = mk_response_extractor(sig.return_annotation)
-        request_adapter = prepare_request_adapter(fn.__name__, sig, op, media_types)
+        response_extractor, media_types = mk_response_extractor(type_hints['return'])
+        request_adapter = prepare_request_adapter(fn.__name__, params, op, media_types)
         return request_adapter, response_extractor
     except TypeError as error:
         raise TypeError(fn.__name__) from error

@@ -12,7 +12,7 @@ import typing_extensions as typing
 from ..annotations import Body, Cookie, Header, Metadata, Param, Path, Query, WebArg
 from ..http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from ..metattype import is_array_like, make_not_optional
-from ..types_ import Dumper, MimeType, RequestFactory, SecurityRequirements
+from ..types_ import Dumper, MimeType, RequestFactory, SecurityRequirements, Signature
 from .annotations import (
     find_annotation,
     find_field_annotation,
@@ -236,20 +236,20 @@ class RequestObjectContributor(RequestContributor):
                 try:
                     contributor = self.contributors[name]
                 except KeyError:
-                    raise TypeError('Unexpected argument', name)
+                    raise TypeError('Unexpected argument', name) from None
                 contributor.update_builder(builder, value)
         if self.free_param_contributor:
             self.free_param_contributor.update_builder(builder, free_params)
 
     @classmethod
-    def for_signature(cls, sig: inspect.Signature) -> typing.Self:
+    def for_signature(cls, sig: Signature) -> typing.Self:
         contributors: dict[str, RequestContributor] = {}
         body_param: typing.Optional[str] = None
         body_contributor: typing.Optional[BodyContributor] = None
 
         free_params: dict[str, typing.Any] = {}  # python name => annotation
 
-        for param in sig.parameters.values():
+        for param in sig.values():
             if param.annotation is typing.Self:
                 continue
 
@@ -322,7 +322,7 @@ class RequestAdapter:
         return builder(), auth
 
 
-def prepare_request_adapter(name: str, sig: inspect.Signature, operation: 'Operation', accept: Iterable[str]) -> RequestAdapter:
+def prepare_request_adapter(name: str, sig: Signature, operation: 'Operation', accept: Iterable[str]) -> RequestAdapter:
     return RequestAdapter(
         name,
         operation.method,
