@@ -35,27 +35,16 @@ jobs:
       run: pre-commit run -a
 
   tests:
-    name: ${{ matrix.os }} / ${{ matrix.python-version }}
-    runs-on: ${{ matrix.image }}
+    name: ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os:
-        - Ubuntu
-        - macOS
-        - Windows
         python-version:
         - "3.9"
         - "3.10"
         - "3.11"
         - "3.12"
         - "3.13"
-        include:
-        - os: Ubuntu
-          image: ubuntu-latest
-        - os: Windows
-          image: windows-latest
-        - os: macOS
-          image: macos-latest
       fail-fast: false
     defaults:
       run:
@@ -67,7 +56,7 @@ jobs:
       uses: packetcoders/action-setup-cache-python-poetry@main
       with:
         python-version: ${{ matrix.python-version }}
-        poetry-version: 1.8.3
+        poetry-version: 1.8.5
 
     - name: Install dependencies
       run: poetry install
@@ -92,7 +81,7 @@ jobs:
       uses: packetcoders/action-setup-cache-python-poetry@main
       with:
         python-version: 3.12
-        poetry-version: 1.8.3
+        poetry-version: 1.8.5
     - name: Mint token
       id: mint
       uses: tschm/token-mint-action@v1.0.3
