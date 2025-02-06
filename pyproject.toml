@@ -11,6 +11,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: AsyncIO",
     "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
     "Operating System :: OS Independent",
     "Topic :: Internet",
     "Topic :: Internet :: WWW/HTTP",
