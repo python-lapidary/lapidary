@@ -181,14 +181,14 @@ trio = ["trio (>=0.22.0,<1.0)"]
 
 [[package]]
 name = "httpx"
-version = "0.27.2"
+version = "0.28.1"
 description = "The next generation HTTP client."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "httpx-0.27.2-py3-none-any.whl", hash = "sha256:7bb2708e112d8fdd7829cd4243970f0c223274051cb35ee80c03301ee29a3df0"},
-    {file = "httpx-0.27.2.tar.gz", hash = "sha256:f7c2be1d2f3c3c3160d441802406b206c2b76f5947b11115e6df10c6c65e66c2"},
+    {file = "httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"},
+    {file = "httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc"},
 ]
 
 [package.dependencies]
@@ -197,7 +197,6 @@ certifi = "*"
 h2 = {version = ">=3,<5", optional = true, markers = "extra == \"http2\""}
 httpcore = "==1.*"
 idna = "*"
-sniffio = "*"
 
 [package.extras]
 brotli = ["brotli ; platform_python_implementation == \"CPython\"", "brotlicffi ; platform_python_implementation != \"CPython\""]
@@ -208,21 +207,21 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "httpx-auth"
-version = "0.22.0"
+version = "0.23.1"
 description = "Authentication for HTTPX"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "httpx_auth-0.22.0-py3-none-any.whl", hash = "sha256:c60198e8160728f00e754b5181f4b9d1e4530260b94bbd09fd8abfe826b5be50"},
-    {file = "httpx_auth-0.22.0.tar.gz", hash = "sha256:5dc2d18cd3a0788015fd22714048e59f5eca6aa3051bfbd8d9dd0d2e6254c095"},
+    {file = "httpx_auth-0.23.1-py3-none-any.whl", hash = "sha256:04f8bd0824efe3d9fb79690cc670b0da98ea809babb7aea04a72f334d4fd5ec5"},
+    {file = "httpx_auth-0.23.1.tar.gz", hash = "sha256:27b5a6022ad1b41a303b8737fa2e3e4bce6bbbe7ab67fed0b261359be62e0434"},
 ]
 
 [package.dependencies]
-httpx = "==0.27.*"
+httpx = "==0.28.*"
 
 [package.extras]
-testing = ["pyjwt (==2.*)", "pytest-asyncio (==0.23.*)", "pytest-cov (==4.*)", "pytest-httpx (==0.30.*)", "time-machine (==2.*)"]
+testing = ["pyjwt (==2.*)", "pytest-asyncio (==0.25.*)", "pytest-cov (==6.*)", "pytest_httpx (==0.35.*)", "time-machine (==2.*)"]
 
 [[package]]
 name = "hyperframe"
@@ -718,4 +717,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "073260102ac9e1ec5ded49f8309efe6f372e25b2a5135a3caa9b0528130cf985"
+content-hash = "760fa8d4881b321372f8a06466b3e5fad11be33156e86f443ca2b0f3b718849e"
