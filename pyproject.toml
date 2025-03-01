@@ -1,25 +1,26 @@
 [tool.poetry]
-name = "lapidary"
-version = "0.12.3"
-description = "Python async OpenAPI client library"
-authors = ["Raphael Krupinski <rafalkrupinski@users.noreply.github.com>"]
-license = "MIT"
-readme = "Readme.md"
-packages = [{ include = "lapidary", from = "src" }]
-repository = "https://github.com/python-lapidary/lapidary"
+authors = ["Rafał Krupiński <rafal@lapidary.dev>"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: AsyncIO",
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Operating System :: OS Independent",
-    "Topic :: Internet",
     "Topic :: Internet :: WWW/HTTP",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
+    "Topic :: Internet",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
     "Typing :: Typed",
 ]
+description = "Python async OpenAPI client library"
+homepage = "https://lapidary.dev/"
+license = "MIT"
+name = "lapidary"
+packages = [{ include = "lapidary", from = "src" }]
+readme = "Readme.md"
+repository = "https://github.com/python-lapidary/lapidary"
+version = "0.12.3"
 
 
 [tool.poetry.dependencies]
