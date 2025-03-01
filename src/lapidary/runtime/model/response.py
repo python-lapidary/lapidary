@@ -197,7 +197,7 @@ class ResponseMessageExtractor(ResponseExtractor):
         except KeyError:
             return _NOOP_TUPLE
 
-        mime_match = find_mime([media_type for media_type in mime_map.keys() if media_type is not None], media_type)
+        mime_match = find_mime([media_type_ for media_type_ in mime_map.keys() if media_type_ is not None], media_type)
         if not mime_match:
             raise UnexpectedResponse(response)
         return mime_map[mime_match]
