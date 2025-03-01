@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html),
 and the format of this file is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+
+- Fix handling arrays.
+- Handle models with future annotations enabled.
+- Fixed variable name clash.
+
+
 ## [0.12.2] - 2024-11-20
 
 ### Fixed
