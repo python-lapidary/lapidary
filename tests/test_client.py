@@ -101,6 +101,10 @@ async def login(request: Request) -> JSONResponse:
     return JSONResponse(AuthResponse(api_key="you're in").model_dump())
 
 
+async def return_body(request: Request) -> JSONResponse:
+    return JSONResponse(await request.json())
+
+
 # Client
 
 
@@ -198,6 +202,19 @@ class CatClient(ClientBase):
     ]:
         pass
 
+    @post('/body')
+    async def body(
+        self: typing.Self, body: typing.Annotated[pydantic.JsonValue, Body({'application/json': pydantic.JsonValue})]
+    ) -> typing.Annotated[
+        tuple[pydantic.JsonValue, None],
+        Responses(
+            {
+                '2XX': Response(Body({'application/json': pydantic.JsonValue})),
+            }
+        ),
+    ]:
+        pass
+
 
 @pytest_asyncio.fixture
 async def client() -> CatClient:
@@ -211,6 +228,7 @@ async def client() -> CatClient:
             Route('/cat', cat_list),
             Route('/cat', create_cat, methods=['POST']),
             Route('/login', login, methods=['POST']),
+            Route('/body', return_body, methods=['POST']),
         ],
     )
 
@@ -247,6 +265,13 @@ async def test_response_auth(client: CatClient):
     response, _ = await client.login(body=AuthRequest(login='login', password='passwd'))
 
     assert response.api_key == "you're in"
+
+
+@pytest.mark.asyncio
+async def test_json_value(client: CatClient):
+    response, _ = await client.body(body={'a': 'b'})
+
+    assert response == {'a': 'b'}
 
 
 @pytest.mark.asyncio
