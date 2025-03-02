@@ -1,5 +1,5 @@
-[tool.poetry]
-authors = ["Rafał Krupiński <rafal@lapidary.dev>"]
+[project]
+authors = [{ name = "Rafał Krupiński", email = "rafal@lapidary.dev" }]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: AsyncIO",
@@ -14,18 +14,22 @@ classifiers = [
     "Typing :: Typed",
 ]
 description = "Python async OpenAPI client library"
-homepage = "https://lapidary.dev/"
+dynamic = ["dependencies"]
 license = "MIT"
 name = "lapidary"
-packages = [{ include = "lapidary", from = "src" }]
 readme = "Readme.md"
-repository = "https://github.com/python-lapidary/lapidary"
+requires-python = ">=3.9"
 version = "0.12.3"
 
+[project.urls]
+Homepage = "https://lapidary.dev/"
+
+[tool.poetry]
+packages = [{ include = "lapidary", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-httpx = {extras = ["http2"], version = "^0.28"}
+httpx = { extras = ["http2"], version = "^0.28" }
 httpx-auth = "^0.23"
 pydantic = "^2"
 python-mimeparse = "^2"
