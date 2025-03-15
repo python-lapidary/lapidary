@@ -23,6 +23,7 @@ version = "0.12.3"
 
 [project.urls]
 Homepage = "https://lapidary.dev/"
+Changelog = "https://github.com/python-lapidary/lapidary/blob/develop/ChangeLog.md"
 
 [tool.poetry]
 packages = [{ include = "lapidary", from = "src" }]

@@ -121,7 +121,7 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 - Dynamically creating generic types
 
 [unreleased]: https://github.com/python-lapidary/lapidary/compare/v0.12.3...HEAD
-[0.12.2]: https://github.com/python-lapidary/lapidary/compare/v0.12.2...v0.12.3
+[0.12.3]: https://github.com/python-lapidary/lapidary/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/python-lapidary/lapidary/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/python-lapidary/lapidary/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/python-lapidary/lapidary/compare/v0.11.0...v0.12.0
