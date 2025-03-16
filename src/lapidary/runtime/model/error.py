@@ -37,7 +37,7 @@ class HttpErrorResponse(typing.Generic[Body, Headers], LapidaryResponseError):
 
 
 class UnexpectedResponse(LapidaryResponseError):
-    """Base error class for undeclared responses"""
+    """Raised when the remote server responded with code and content-type pair that wasn't declared in the method return annotation"""
 
     def __init__(self, response: httpx.Response):
         self.response = response

@@ -26,6 +26,8 @@ def lapidary_user_agent() -> str:
 
 
 class ClientBase(abc.ABC):
+    """Base for Client classes"""
+
     def __init__(
         self,
         security: Iterable[SecurityRequirements] | None = None,
@@ -33,6 +35,12 @@ class ClientBase(abc.ABC):
         middlewares: Sequence[HttpxMiddleware] = (),
         **httpx_kwargs: typing.Unpack[ClientArgs],
     ) -> None:
+        """
+        :param security: Security requirements as a mapping of name => list of scopes
+        :param session_factory: `httpx.AsyncClient` or a subclass type
+        :param middlewares: list of middlewares to process HTTP requests and responses
+        :param httpx_kwargs: keyword arguments to pass to session_factory
+        """
         self._client = session_factory(**httpx_kwargs)
         if USER_AGENT not in self._client.headers:
             self._client.headers[USER_AGENT] = lapidary_user_agent()
@@ -53,7 +61,10 @@ class ClientBase(abc.ABC):
         return await self._client.__aexit__(exc_type, exc_value, traceback)
 
     def lapidary_authenticate(self, *auth_args: NamedAuth, **auth_kwargs: httpx.Auth) -> None:
-        """Register named Auth instances for future use with methods that require authentication."""
+        """
+        Register named Auth instances for future use with methods that require authentication.
+        Accepts named [`Auth`][httpx.Auth] as tuples name, auth or as named arguments
+        """
         if auth_args:
             # make python complain about duplicate names
             self.lapidary_authenticate(**dict(auth_args), **auth_kwargs)

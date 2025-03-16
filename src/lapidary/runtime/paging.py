@@ -14,7 +14,7 @@ def iter_pages(
     get_cursor: Callable[[R], Optional[C]],
 ) -> Callable[P, AsyncIterable[R]]:
     """
-    Create a function that returns an async iterator over pages from the async operation function :param:`fn`.
+    Take a function that returns a pageg response and return a function that returns an async iterator that iterates over the pages.
 
     The returned function can be called with the same parameters as :param:`fn` (except for the cursor parameter),
     and returns an async iterator that yields results from :param:`fn`, handling pagination automatically.
@@ -24,19 +24,19 @@ def iter_pages(
 
     **Example:**
 
-    .. code:: python
-
-        async for page in iter_pages(client.fn, 'cursor', extractor_fn)(parameter=value):
-            # Process page
+    ```python
+    async for page in iter_pages(client.fn, 'cursor', extractor_fn)(parameter=value):
+        # Process page
+    ```
 
     Typically, an API will use the same paging pattern for all operations supporting it, so it's a good idea to write a shortcut function:
 
-    .. code:: python
+    ```python
+    from lapidary.runtime import iter_pages as _iter_pages
 
-        from lapidary.runtime import iter_pages as _iter_pages
-
-        def iter_pages[P, R](fn: Callable[P, Awaitable[R]]) -> Callable[P, AsyncIterable[R]]:
-            return _iter_pages(fn, 'cursor', lambda result: ...)
+    def iter_pages[P, R](fn: Callable[P, Awaitable[R]]) -> Callable[P, AsyncIterable[R]]:
+        return _iter_pages(fn, 'cursor', lambda result: ...)
+    ```
 
     :param fn: An async function that retrieves a page of data.
     :param cursor_param_name: The name of the cursor parameter in :param:`fn`.
