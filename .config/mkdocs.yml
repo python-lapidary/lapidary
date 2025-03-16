@@ -6,6 +6,7 @@ docs_dir: ../docs
 nav:
 - index.md
 - Usage:
+  - usage/installation.md
   - usage/client.md
   - usage/operation.md
   - usage/auth.md
