@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import ssl
 from collections.abc import Callable, Mapping, MutableMapping
 
 import httpx
@@ -60,12 +61,12 @@ class ClientArgs(typing.TypedDict):
     params: typing.NotRequired[httpx._types.QueryParamTypes]
     headers: typing.NotRequired[httpx._types.HeaderTypes]
     cookies: typing.NotRequired[httpx._types.CookieTypes]
-    verify: typing.NotRequired[httpx._types.VerifyTypes]
+    verify: typing.NotRequired[typing.Union[ssl.SSLContext, str, bool]]
     cert: typing.NotRequired[httpx._types.CertTypes]
     http1: typing.NotRequired[bool]
     http2: typing.NotRequired[bool]
     proxy: typing.NotRequired[httpx._types.ProxyTypes]
-    proxies: typing.NotRequired[httpx._types.ProxiesTypes]
+    proxies: typing.NotRequired[httpx._types.ProxyTypes]
     mounts: typing.NotRequired[typing.Mapping[str, httpx._transports.base.AsyncBaseTransport | None]]
     timeout: typing.NotRequired[httpx._types.TimeoutTypes]
     follow_redirects: typing.NotRequired[bool]

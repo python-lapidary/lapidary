@@ -143,7 +143,7 @@ class ParamsContributor(RequestContributor):
     def update_builder(self, builder: RequestBuilder, headers_model: pydantic.BaseModel) -> None:
         raw_model = headers_model.model_dump(mode='json', exclude_unset=True)
         for field_name in headers_model.model_fields_set:
-            assert field_name in headers_model.model_fields
+            assert field_name in type(headers_model).model_fields
             value = raw_model[field_name]
             if value is None:
                 continue
