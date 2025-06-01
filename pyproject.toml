@@ -39,7 +39,7 @@ typing-extensions = "^4.9"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8"
 pytest-asyncio = "^0.26"
-starlette = "^0.46"
+starlette = "^0.47"
 
 [build-system]
 requires = ["poetry-core>=2.1.0"]
