@@ -34,11 +34,11 @@ httpx = { extras = ["http2"], version = "^0.28" }
 httpx-auth = "^0.23"
 pydantic = "^2.11"
 python-mimeparse = "^2"
-typing-extensions = "^4.9"
+typing-extensions = "^4.14"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8"
-pytest-asyncio = "^0.26"
+pytest-asyncio = "^1.0"
 starlette = "^0.47"
 
 [build-system]
