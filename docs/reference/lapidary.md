@@ -1,3 +1,0 @@
-# Lapidary Reference
-
-::: lapidary.runtime

@@ -40,6 +40,15 @@ typing-extensions = "^4.9"
 pytest = "^8"
 pytest-asyncio = "^0.26"
 starlette = "^0.46"
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.6.20"
+markdown-callouts = "^0.4.0"
+mkdocstrings = {extras = ["python"], version = "^0.30.0"}
+markdown-exec = "^1.11.0"
+mkdocs-llmstxt = "^0.3.1"
+mkdocs-minify-plugin = "^0.8.0"
+mkdocs-section-index = "^0.3.10"
+mkdocs-coverage = "^2.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.1.0"]
