@@ -6,11 +6,11 @@ Python DSL for Web API clients.
 
 ## Why
 
-DRY. Web API clients follow a relatively small set of patterns and writing them is rather repetitive task. Encoding these patterns in form of a DSL library frees its users from implementing the same patterns over and over again.
+Web API clients follow a relatively small set of patterns and implementing them is rather repetitive task. Encapsulating these patterns in form of a DSL library frees its users from coding the same patterns over and over again.
 
 ## How
 
-Lapidary is an internal DSL made of decorators and annotations, that can be used to describe Web APIs similarly to OpenAPI
+Lapidary is an internal (in-python) DSL made of decorators and annotations, that can be used to describe Web APIs similarly to OpenAPI.
 ([lapidary-render](https://github.com/python-lapidary/lapidary-render/) can convert a large subset of OpenAPI 3.0 to Lapidary).
 
 At runtime, the library interprets user-provided function declarations (without bodies), and makes them behave as declared. If a function accepts parameter of type `X` and returns `Y`, Lapidary will try to convert `X` to HTTP request and the response to `Y`.
