@@ -17,7 +17,7 @@ exclude_docs: |
 nav:
 - index.md
 - Usage:
-  - usage/installation.md
+  - Installation: usage/installation.md
   - usage/client.md
   - usage/operation.md
   - usage/auth.md
@@ -31,12 +31,12 @@ validation:
 
 theme:
   name: material
-#  custom_dir: docs/.overrides
-#  icon:
-#    logo: material/currency-sign
+  logo: assets/logo.svg
+  icon:
+    logo: assets/logo.svg
+  favicon: assets/logo.svg
   features:
   - announce.dismiss
-  - content.action.edit
   - content.action.view
   - content.code.annotate
   - content.code.copy
