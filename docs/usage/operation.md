@@ -22,7 +22,7 @@ class CatClient(ClientBase):
 
 !!! note
 
-    In the examples below, methods are depicted as standalone functions, with the encapsulating class structure omitted.
+    In the examples below, methods are written as top-level functions, while in real code you would write them as methods.
 
 ```python
 @get('/cats')  # method and path

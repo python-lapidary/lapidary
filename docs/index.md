@@ -1,12 +1,14 @@
 # Lapidary
 
-Python DSL for Web API clients.
+Python helper for creating Web API clients.
 
 ## Features
 
 - [x] Write Web API clients declaratively
-- [x] Use pydantic models for JSON data
-- [ ] Compatibility with OpenAPI 3.0 and 3.1
+- [x] Use [pydantic](https://docs.pydantic.dev/latest/) models for JSON data
+- [x] Compatibility with [OpenAPI](https://www.openapis.org/)
+    - [x] 3.0
+    - [ ] 3.1 (Planned)
 
 ## Installation
 
@@ -57,9 +59,10 @@ class CatClient(ClientBase):
         })),
     })]:
         pass
+```
 
-# User code
-
+User code
+```python
 async def main():
     client = CatClient()
     cat = await client.cat_get(id=7)
@@ -68,6 +71,9 @@ async def main():
 See [this test file](https://github.com/python-lapidary/lapidary/blob/develop/tests/test_client.py) for a working
 example.
 
-[Full documentation](https://lapidary.dev)
+Also check [clients](https://github.com/orgs/lapidary-library/repositories) generated with Lapidary Render.
 
-Also check the [library of clients](https://github.com/orgs/lapidary-library/repositories).
+
+## Prior work
+
+[Uplink 📡](https://uplink.prkumar.dev/) - more mature and full-featured but not designed with OpenAPI compatibility in mind.

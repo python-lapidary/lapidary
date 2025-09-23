@@ -17,8 +17,7 @@ exclude_docs: |
 nav:
 - index.md
 - Usage:
-  - Installation: usage/installation.md
-  - usage/client.md
+  - Client class: usage/client.md
   - usage/operation.md
   - usage/auth.md
 - API reference: reference/api.md

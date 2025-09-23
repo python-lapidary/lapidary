@@ -2,44 +2,20 @@
 
 [![test](https://github.com/python-lapidary/lapidary/actions/workflows/test_publish.yaml/badge.svg)](https://github.com/python-lapidary/lapidary/actions/workflows/test_publish.yaml)
 
-Python DSL for Web API clients.
+Python Helper for Web API clients.
 
 ## Why
 
-Web API clients follow a relatively small set of patterns and implementing them is rather repetitive task. Encapsulating these patterns in form of a DSL library frees its users from coding the same patterns over and over again.
+Web API clients follow a relatively small set of patterns and implementing them is rather repetitive task.
+Prepare request, make the call, handle response status, deserialize the body
+Typical examples show how to use `request.get()` or similar method, but this is an anti-pattern. These calls should be encapsulated as module functions or methods.
 
 ## How
 
-Lapidary is an internal (in-python) DSL made of decorators and annotations, that can be used to describe Web APIs similarly to OpenAPI.
-([lapidary-render](https://github.com/python-lapidary/lapidary-render/) can convert a large subset of OpenAPI 3.0 to Lapidary).
+Lapidary is a library that provides decorators and annotations for describing Web APIs in a way similar to OpenAPI.
+In fact [lapidary render](https://github.com/python-lapidary/lapidary-render/) can convert much of OpenAPI 3.0 to Lapidary code.
 
-At runtime, the library interprets user-provided function declarations (without bodies), and makes them behave as declared. If a function accepts parameter of type `X` and returns `Y`, Lapidary will try to convert `X` to HTTP request and the response to `Y`.
+At runtime, the library interprets user-provided function declarations and makes them behave as specified.
+If a function accepts parameter of type `X` and returns `Y`, Lapidary will try to convert `X` to HTTP request and the response back to `Y`.
 
-### Example:
-
-```python
-class CatClient(ClientBase):
-    """This class is a working API client"""
-
-    def __init__(self):
-        super().__init__(
-            base_url='https://example.com/api',
-        )
-
-    @get('/cat')
-    async def list_cats(self: Self) -> Annotated[
-        tuple[list[Cat], CatListMeta],
-        Responses({
-            '2XX': Response(
-                Body({
-                    'application/json': list[Cat],
-                }),
-                CatListMeta
-            ),
-        })
-    ]:
-       pass
-
-client = CatClient()
-cats_body, cats_meta = await client.list_cats()
-```
+Check the [example](https://python-lapidary.github.io/lapidary/#usage)
