@@ -18,7 +18,7 @@ dynamic = ["dependencies"]
 license = "MIT"
 name = "lapidary"
 readme = "Readme.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 version = "0.12.3"
 
 [project.urls]
@@ -29,7 +29,6 @@ Changelog = "https://github.com/python-lapidary/lapidary/blob/develop/ChangeLog.
 packages = [{ include = "lapidary", from = "src" }]
 
 [tool.poetry.dependencies]
-python = "^3.9"
 httpx = { extras = ["http2"], version = "^0.28" }
 httpx-auth = "^0.23"
 pydantic = "^2.12"
@@ -67,11 +66,11 @@ addopts = "--color=yes"
 [tool.mypy]
 mypy_path = "src"
 namespace_packages = true
-python_version = "3.9"
+python_version = "3.10"
 packages = ["lapidary.runtime"]
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 140
 
 [tool.ruff.lint]
