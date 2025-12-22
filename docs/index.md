@@ -76,4 +76,5 @@ Also check [clients](https://github.com/orgs/lapidary-library/repositories) gene
 
 ## Prior work
 
-[Uplink 📡](https://uplink.prkumar.dev/) - more mature and full-featured but not designed with OpenAPI compatibility in mind.
+- [Uplink 📡](https://uplink.prkumar.dev/) - more mature and full-featured but not designed with OpenAPI compatibility in mind.
+- [aiopenapi3](https://github.com/commonism/aiopenapi3) - An OpenAPI client. aiopenapi3 interprets OpenAPI document and creates all the classes and functions at runtime, so it lacks suport for IDEs or type checkers.
