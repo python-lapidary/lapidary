@@ -1,5 +1,4 @@
 from collections.abc import Iterable, Mapping, MutableMapping
-from typing import Optional
 
 import httpx
 
@@ -8,7 +7,7 @@ from ..types_ import MultiAuth, SecurityRequirements
 
 
 class AuthRegistry:
-    def __init__(self, security: Optional[Iterable[SecurityRequirements]]):
+    def __init__(self, security: Iterable[SecurityRequirements] | None):
         # Every Auth instance the user code authenticated with
         self._auth: MutableMapping[str, httpx.Auth] = {}
 
@@ -18,7 +17,7 @@ class AuthRegistry:
         # Client-wide security requirements
         self._security = security
 
-    def resolve_auth(self, name: str, security: Optional[Iterable[SecurityRequirements]]) -> AuthType:
+    def resolve_auth(self, name: str, security: Iterable[SecurityRequirements] | None) -> AuthType:
         if security:
             sec_name = name
             sec_source = security
@@ -43,7 +42,7 @@ class AuthRegistry:
     def _mk_auth(self, security: Iterable[SecurityRequirements]) -> httpx.Auth:
         security = list(security)
         assert security
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         for requirements in security:
             try:
                 auth = _build_auth(self._auth, requirements)

@@ -1,7 +1,6 @@
 import abc
 import dataclasses as dc
 from collections.abc import Callable, Iterable, Mapping
-from typing import Optional
 
 import httpx
 import pydantic
@@ -34,7 +33,7 @@ _NOOP = NoopExtractor()
 
 @dc.dataclass
 class BodyExtractor(ResponseExtractor):
-    type_adapter: typing.Optional[TypeAdapter]
+    type_adapter: TypeAdapter | None
 
     def handle_response(self, response: httpx.Response) -> typing.Any:
         try:
@@ -167,7 +166,7 @@ _NOOP_TUPLE = TupleExtractor(response_extractors=(_NOOP, _NOOP))
 
 
 # similar structure to openapi responses
-ResponseExtractorMap: typing.TypeAlias = dict[StatusCodeRange, dict[Optional[MimeType], ResponseExtractor]]
+ResponseExtractorMap: typing.TypeAlias = dict[StatusCodeRange, dict[MimeType | None, ResponseExtractor]]
 
 
 @dc.dataclass

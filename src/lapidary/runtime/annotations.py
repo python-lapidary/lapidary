@@ -56,9 +56,9 @@ class Param(WebArg, abc.ABC):
     """Base class for web parameters (headers, query and path parameters, including cookies)"""
 
     style: typing.Any
-    alias: typing.Optional[str]
+    alias: str | None
 
-    def __init__(self, alias: typing.Optional[str], /) -> None:
+    def __init__(self, alias: str | None, /) -> None:
         self.alias = alias
 
 
@@ -67,7 +67,7 @@ class Header(Param):
 
     def __init__(
         self,
-        alias: typing.Optional[str] = None,
+        alias: str | None = None,
         /,
         *,
         style: type[MultimapSerializationStyle] = SimpleMultimap,
@@ -83,7 +83,7 @@ class Header(Param):
 class Cookie(Param):
     def __init__(
         self,
-        alias: typing.Optional[str] = None,
+        alias: str | None = None,
         /,
         *,
         style: type[MultimapSerializationStyle] = FormExplode,
@@ -99,7 +99,7 @@ class Cookie(Param):
 class Path(Param):
     def __init__(
         self,
-        alias: typing.Optional[str] = None,
+        alias: str | None = None,
         /,
         *,
         style: type[StringSerializationStyle] = SimpleString,
@@ -115,7 +115,7 @@ class Path(Param):
 class Query(Param):
     def __init__(
         self,
-        alias: typing.Optional[str] = None,
+        alias: str | None = None,
         /,
         *,
         style: type[MultimapSerializationStyle] = FormExplode,
@@ -140,7 +140,7 @@ class StatusCode(WebArg):
 @dc.dataclass
 class Response:
     body: Body
-    headers: typing.Optional[type[pydantic.BaseModel]] = None
+    headers: type[pydantic.BaseModel] | None = None
 
 
 @dc.dataclass

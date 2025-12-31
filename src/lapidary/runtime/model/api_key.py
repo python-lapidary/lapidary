@@ -6,7 +6,7 @@ import typing_extensions as typing
 class CookieApiKey(httpx.Auth, authx.SupportMultiAuth):
     """Describes an API Key requests authentication."""
 
-    def __init__(self, api_key: str, cookie_name: typing.Optional[str] = None):
+    def __init__(self, api_key: str, cookie_name: str | None = None):
         """
         :param api_key: The API key that will be sent.
         :param cookie_name: Name of the query parameter. "api_key" by default.

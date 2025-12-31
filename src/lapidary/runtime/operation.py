@@ -15,7 +15,7 @@ SimpleDecorator: typing.TypeAlias = Callable[[OperationMethod], OperationMethod]
 class Operation:
     method: str
     path: str
-    security: typing.Optional[Iterable[SecurityRequirements]] = None
+    security: Iterable[SecurityRequirements] | None = None
 
     def __call__(self, fn: OperationMethod) -> OperationMethod:
         exchange_fn = mk_exchange_fn(fn, self)
@@ -23,7 +23,7 @@ class Operation:
 
 
 class MethodProto(typing.Protocol):
-    def __call__(self, path: str, security: typing.Optional[Iterable[SecurityRequirements]] = None) -> typing.Callable:
+    def __call__(self, path: str, security: Iterable[SecurityRequirements] | None = None) -> typing.Callable:
         pass
 
 

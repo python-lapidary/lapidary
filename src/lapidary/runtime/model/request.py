@@ -44,7 +44,7 @@ class RequestBuilder:  # pylint: disable=too-many-instance-attributes
     path_params: typing.MutableMapping[str, ScalarType] = dc.field(default_factory=dict)
     query_params: list[tuple[str, str]] = dc.field(default_factory=list)
 
-    content: typing.Optional[httpx._types.RequestContent] = None
+    content: httpx._types.RequestContent | None = None
 
     def __call__(self) -> httpx.Request:
         assert self.method
@@ -218,10 +218,10 @@ class BodyContributor:
 class RequestObjectContributor(RequestContributor):
     contributors: Mapping[str, RequestContributor]  # keys are params names
 
-    body_param: typing.Optional[str]
-    body_contributor: typing.Optional[BodyContributor]
+    body_param: str | None
+    body_contributor: BodyContributor | None
 
-    free_param_contributor: typing.Optional[FreeParamsContributor]
+    free_param_contributor: FreeParamsContributor | None
     free_param_names: Iterable[str]
 
     def update_builder(self, builder: RequestBuilder, kwargs: dict[str, typing.Any]) -> None:
@@ -244,8 +244,8 @@ class RequestObjectContributor(RequestContributor):
     @classmethod
     def for_signature(cls, sig: Signature) -> typing.Self:
         contributors: dict[str, RequestContributor] = {}
-        body_param: typing.Optional[str] = None
-        body_contributor: typing.Optional[BodyContributor] = None
+        body_param: str | None = None
+        body_contributor: BodyContributor | None = None
 
         free_params: dict[str, typing.Any] = {}  # python name => annotation
 
@@ -277,7 +277,7 @@ class RequestObjectContributor(RequestContributor):
         )
 
     @staticmethod
-    def _mk_free_params_contributor(free_params: Mapping[str, typing.Any]) -> tuple[typing.Optional[FreeParamsContributor], Iterable[str]]:
+    def _mk_free_params_contributor(free_params: Mapping[str, typing.Any]) -> tuple[FreeParamsContributor | None, Iterable[str]]:
         if not free_params:
             return None, set()
 
@@ -298,14 +298,14 @@ class RequestAdapter:
     http_method: str
     http_path_template: str
     contributor: RequestContributor
-    accept: typing.Optional[Iterable[str]]
-    security: typing.Optional[Iterable[SecurityRequirements]]
+    accept: Iterable[str] | None
+    security: Iterable[SecurityRequirements] | None
 
     def build_request(
         self,
         client: 'ClientBase',
         kwargs: dict[str, typing.Any],
-    ) -> tuple[httpx.Request, typing.Optional[httpx.Auth]]:
+    ) -> tuple[httpx.Request, httpx.Auth | None]:
         builder = RequestBuilder(
             typing.cast(RequestFactory, client._client.build_request),
             self.http_method,

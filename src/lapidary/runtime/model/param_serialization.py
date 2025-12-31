@@ -32,7 +32,7 @@ SCALAR_TYPES = (
 
 ScalarType: typing.TypeAlias = typing.Union[PYTHON_SCALARS]  # type: ignore[valid-type]
 ArrayType: typing.TypeAlias = typing.Iterable[ScalarType]
-ObjectType: typing.TypeAlias = typing.Mapping[str, typing.Optional[ScalarType]]
+ObjectType: typing.TypeAlias = typing.Mapping[str, ScalarType | None]
 ValueType: typing.TypeAlias = typing.Union[str, ArrayType, ObjectType]
 Entry: typing.TypeAlias = tuple[str, ScalarType]
 Multimap: typing.TypeAlias = Iterable[Entry]

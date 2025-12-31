@@ -1,4 +1,4 @@
-from typing import Annotated, Generic, Optional, Union
+from typing import Annotated, Generic, Union
 
 from client import ClientTestBase
 from httpx import AsyncClient
@@ -9,7 +9,7 @@ from lapidary.runtime.model.op import process_operation_method
 
 
 class BodyModel(ModelBase):
-    a: Optional[str]
+    a: str | None
 
 
 def test_serialize_str():

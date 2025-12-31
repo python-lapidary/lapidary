@@ -1,5 +1,5 @@
 from collections.abc import AsyncIterable, Awaitable, Callable
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -11,7 +11,7 @@ C = TypeVar('C')
 def iter_pages(
     fn: Callable[P, Awaitable[R]],
     cursor_param_name: str,
-    get_cursor: Callable[[R], Optional[C]],
+    get_cursor: Callable[[R], C | None],
 ) -> Callable[P, AsyncIterable[R]]:
     """
     Take a function that returns a pageg response and return a function that returns an async iterator that iterates over the pages.

@@ -31,7 +31,7 @@ from lapidary.runtime.http_consts import MIME_JSON
 
 
 class Cat(pydantic.BaseModel):
-    id: typing.Optional[int] = None
+    id: int | None = None
     name: str
 
 
@@ -109,13 +109,13 @@ async def return_body(request: Request) -> JSONResponse:
 
 
 class CatListRequestHeaders(pydantic.BaseModel):
-    token: typing.Annotated[typing.Optional[str], Header] = None
-    return_list: typing.Annotated[typing.Optional[bool], Header('return-list')] = None
+    token: typing.Annotated[str | None, Header] = None
+    return_list: typing.Annotated[bool | None, Header('return-list')] = None
 
 
 class CatListResponseHeaders(pydantic.BaseModel):
     count: typing.Annotated[int, Header('X-Count')]
-    token: typing.Annotated[typing.Optional[str], Header] = None
+    token: typing.Annotated[str | None, Header] = None
     date: typing.Annotated[
         dt.datetime,
         Header,
