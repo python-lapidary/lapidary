@@ -6,9 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 and the format of this file is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 [unreleased]
+### Added
+
+- Support for Python 3.10 type unions
+
 ### Changed
 
-- Bumped minimum required python version to 3.10
+- Bumped minimum required Python version to 3.10
 
 ## [0.12.3] - 2025-03-01
 ### Fixed
