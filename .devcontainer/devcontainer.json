@@ -1,0 +1,14 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "root",
+  "remoteEnv": {
+    "MISE_DEFAULT_CONFIG_FILENAME": ".devcontainer/mise.toml",
+    "MISE_TRUSTED_CONFIG_PATHS": "/",
+  },
+  postStartCommand: [
+    "poetry install --all-groups"
+  ],
+  postCreateCommand: "mise -c /workspaces/lapidary install"
+}

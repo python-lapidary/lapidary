@@ -1,0 +1,15 @@
+[tools]
+"pipx:mypy" = "1.19"
+"pipx:poetry" = "2.2"
+ruff = "0.14.10"
+
+
+
+[tasks.mypy]
+run = 'mypy --python-executable "$(poetry env info -p)/bin/python" --hide-absolute-path '
+[tasks.install]
+run = 'poetry install --all-groups'
+
+[tasks]
+#check =
+format = 'ruff format'
