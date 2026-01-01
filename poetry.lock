@@ -512,14 +512,14 @@ markdown = ">=3.3.3"
 
 [[package]]
 name = "markdown-exec"
-version = "1.11.0"
+version = "1.12.1"
 description = "Utilities to execute code blocks in Markdown files."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "markdown_exec-1.11.0-py3-none-any.whl", hash = "sha256:0526957984980f55c02b425d32e8ac8bb21090c109c7012ff905d3ddcc468ceb"},
-    {file = "markdown_exec-1.11.0.tar.gz", hash = "sha256:e0313a0dff715869a311d24853b3a7ecbbaa12e74eb0f3cf7d91401a7d8f0082"},
+    {file = "markdown_exec-1.12.1-py3-none-any.whl", hash = "sha256:a645dce411fee297f5b4a4169c245ec51e20061d5b71e225bef006e87f3e465f"},
+    {file = "markdown_exec-1.12.1.tar.gz", hash = "sha256:eee8ba0df99a5400092eeda80212ba3968f3cbbf3a33f86f1cd25161538e6534"},
 ]
 
 [package.dependencies]
@@ -781,14 +781,14 @@ pyyaml = ">=5.1"
 
 [[package]]
 name = "mkdocs-llmstxt"
-version = "0.4.0"
+version = "0.5.0"
 description = "MkDocs plugin to generate an /llms.txt file."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "mkdocs_llmstxt-0.4.0-py3-none-any.whl", hash = "sha256:7244bf0ac917c9964030c93e9c3e26c02d2d14a0f66fc113416007125b6da0fc"},
-    {file = "mkdocs_llmstxt-0.4.0.tar.gz", hash = "sha256:a7e4d20496bc8c55b6773b55c8d69cf552448a9ad38915b6e8c657ae3a46c8b8"},
+    {file = "mkdocs_llmstxt-0.5.0-py3-none-any.whl", hash = "sha256:753c699913d2d619a9072604b26b6dc9f5fb6d257d9b107857f80c8a0b787533"},
+    {file = "mkdocs_llmstxt-0.5.0.tar.gz", hash = "sha256:b2fa9e6d68df41d7467e948a4745725b6c99434a36b36204857dbd7bb3dfe041"},
 ]
 
 [package.dependencies]
@@ -799,14 +799,14 @@ mdformat-tables = ">=1.0"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.7.0"
+version = "9.7.1"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "mkdocs_material-9.7.0-py3-none-any.whl", hash = "sha256:da2866ea53601125ff5baa8aa06404c6e07af3c5ce3d5de95e3b52b80b442887"},
-    {file = "mkdocs_material-9.7.0.tar.gz", hash = "sha256:602b359844e906ee402b7ed9640340cf8a474420d02d8891451733b6b02314ec"},
+    {file = "mkdocs_material-9.7.1-py3-none-any.whl", hash = "sha256:3f6100937d7d731f87f1e3e3b021c97f7239666b9ba1151ab476cabb96c60d5c"},
+    {file = "mkdocs_material-9.7.1.tar.gz", hash = "sha256:89601b8f2c3e6c6ee0a918cc3566cb201d40bf37c3cd3c2067e26fadb8cce2b8"},
 ]
 
 [package.dependencies]
@@ -820,7 +820,7 @@ mkdocs-material-extensions = ">=1.3"
 paginate = ">=0.5"
 pygments = ">=2.16"
 pymdown-extensions = ">=10.2"
-requests = ">=2.26"
+requests = ">=2.30"
 
 [package.extras]
 git = ["mkdocs-git-committers-plugin-2 (>=1.1,<3)", "mkdocs-git-revision-date-localized-plugin (>=1.2.4,<2.0)"]
@@ -874,18 +874,18 @@ mkdocs = ">=1.2"
 
 [[package]]
 name = "mkdocstrings"
-version = "0.30.1"
+version = "1.0.0"
 description = "Automatic documentation from sources, for MkDocs."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "mkdocstrings-0.30.1-py3-none-any.whl", hash = "sha256:41bd71f284ca4d44a668816193e4025c950b002252081e387433656ae9a70a82"},
-    {file = "mkdocstrings-0.30.1.tar.gz", hash = "sha256:84a007aae9b707fb0aebfc9da23db4b26fc9ab562eb56e335e9ec480cb19744f"},
+    {file = "mkdocstrings-1.0.0-py3-none-any.whl", hash = "sha256:4c50eb960bff6e05dfc631f6bc00dfabffbcb29c5ff25f676d64daae05ed82fa"},
+    {file = "mkdocstrings-1.0.0.tar.gz", hash = "sha256:351a006dbb27aefce241ade110d3cd040c1145b7a3eb5fd5ac23f03ed67f401a"},
 ]
 
 [package.dependencies]
-Jinja2 = ">=2.11.1"
+Jinja2 = ">=3.1"
 Markdown = ">=3.6"
 MarkupSafe = ">=1.1"
 mkdocs = ">=1.6"
@@ -1181,21 +1181,21 @@ extra = ["pygments (>=2.19.1)"]
 
 [[package]]
 name = "pytest"
-version = "8.4.2"
+version = "9.0.2"
 description = "pytest: simple powerful testing with Python"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79"},
-    {file = "pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01"},
+    {file = "pytest-9.0.2-py3-none-any.whl", hash = "sha256:711ffd45bf766d5264d487b917733b453d917afd2b0ad65223959f59089f875b"},
+    {file = "pytest-9.0.2.tar.gz", hash = "sha256:75186651a92bd89611d1d9fc20f0b4345fd827c41ccd5c299a868a05d70edf11"},
 ]
 
 [package.dependencies]
 colorama = {version = ">=0.4", markers = "sys_platform == \"win32\""}
 exceptiongroup = {version = ">=1", markers = "python_version < \"3.11\""}
-iniconfig = ">=1"
-packaging = ">=20"
+iniconfig = ">=1.0.1"
+packaging = ">=22"
 pluggy = ">=1.5,<2"
 pygments = ">=2.7.2"
 tomli = {version = ">=1", markers = "python_version < \"3.11\""}
@@ -1205,19 +1205,19 @@ dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "requests
 
 [[package]]
 name = "pytest-asyncio"
-version = "1.2.0"
+version = "1.3.0"
 description = "Pytest support for asyncio"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "pytest_asyncio-1.2.0-py3-none-any.whl", hash = "sha256:8e17ae5e46d8e7efe51ab6494dd2010f4ca8dae51652aa3c8d55acf50bfb2e99"},
-    {file = "pytest_asyncio-1.2.0.tar.gz", hash = "sha256:c609a64a2a8768462d0c99811ddb8bd2583c33fd33cf7f21af1c142e824ffb57"},
+    {file = "pytest_asyncio-1.3.0-py3-none-any.whl", hash = "sha256:611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5"},
+    {file = "pytest_asyncio-1.3.0.tar.gz", hash = "sha256:d7f52f36d231b80ee124cd216ffb19369aa168fc10095013c6b014a34d3ee9e5"},
 ]
 
 [package.dependencies]
 backports-asyncio-runner = {version = ">=1.1,<2", markers = "python_version < \"3.11\""}
-pytest = ">=8.2,<9"
+pytest = ">=8.2,<10"
 typing-extensions = {version = ">=4.12", markers = "python_version < \"3.13\""}
 
 [package.extras]
@@ -1392,14 +1392,14 @@ files = [
 
 [[package]]
 name = "starlette"
-version = "0.49.3"
+version = "0.50.0"
 description = "The little ASGI library that shines."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "starlette-0.49.3-py3-none-any.whl", hash = "sha256:b579b99715fdc2980cf88c8ec96d3bf1ce16f5a8051a7c2b84ef9b1cdecaea2f"},
-    {file = "starlette-0.49.3.tar.gz", hash = "sha256:1c14546f299b5901a1ea0e34410575bc33bbd741377a10484a54445588d00284"},
+    {file = "starlette-0.50.0-py3-none-any.whl", hash = "sha256:9e5391843ec9b6e472eed1365a78c8098cfceb7a74bfd4d6b1c0c0095efb3bca"},
+    {file = "starlette-0.50.0.tar.gz", hash = "sha256:a2a17b22203254bcbc2e1f926d2d55f3f9497f769416b3190768befe598fa3ca"},
 ]
 
 [package.dependencies]
@@ -1555,4 +1555,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "0fa58485bc3fe8d2f53a03aa7a9a72ee4d75b355d4d738b15391b2c0fa6d488a"
+content-hash = "59a5f1861cb518e0618e371bb6c25aac1ea0a4e3f7d2c78b067ba8f746dea8bb"
