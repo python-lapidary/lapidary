@@ -13,6 +13,13 @@ classifiers = [
     "Topic :: Software Development",
     "Typing :: Typed",
 ]
+dependencies = [
+    "httpx[http2]==0.28.1",
+    "httpx-auth==0.23.1",
+    "pydantic>=2.12,<3.0",
+    "python-mimeparse>=2,<3",
+    "typing-extensions>=4.15,<5.0",
+]
 description = "Python async OpenAPI client library"
 dynamic = ["dependencies"]
 license = "MIT"
@@ -21,33 +28,30 @@ readme = "Readme.md"
 requires-python = ">=3.10"
 version = "0.12.3"
 
+[dependency-groups]
+docs = [
+    "markdown-callouts>=0.4.0",
+    "markdown-exec>=1.11.0,<2",
+    "mkdocs>=1.6.1,<2",
+    "mkdocs-coverage>=2,<3",
+    "mkdocs-llmstxt>=0.4.0",
+    "mkdocs-material>=9,<10",
+    "mkdocs-minify-plugin==0.8.0",
+    "mkdocs-section-index==0.3.10",
+    "mkdocstrings[python]>=0.30,<0.31",
+]
+test = [
+    "pytest >= 8,<9",
+    "pytest-asyncio>=1.2,<2",
+    "starlette==0.49",
+]
+
 [project.urls]
 Homepage = "https://lapidary.dev/"
 Changelog = "https://github.com/python-lapidary/lapidary/blob/develop/ChangeLog.md"
 
 [tool.poetry]
 packages = [{ include = "lapidary", from = "src" }]
-
-[tool.poetry.dependencies]
-httpx = { extras = ["http2"], version = "^0.28" }
-httpx-auth = "^0.23"
-pydantic = "^2.12"
-python-mimeparse = "^2"
-typing-extensions = "^4.15"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8"
-pytest-asyncio = "^1.2"
-starlette = "^0.49"
-mkdocs = "^1.6.1"
-mkdocs-material = "^9.7.0"
-markdown-callouts = "^0.4.0"
-mkdocstrings = {extras = ["python"], version = "^0.30.1"}
-markdown-exec = "^1.11.0"
-mkdocs-llmstxt = "^0.4.0"
-mkdocs-minify-plugin = "^0.8.0"
-mkdocs-section-index = "^0.3.10"
-mkdocs-coverage = "^2.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.1.0"]
