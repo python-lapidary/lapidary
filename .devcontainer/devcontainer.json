@@ -4,11 +4,10 @@
   },
   "remoteUser": "root",
   "remoteEnv": {
-    "MISE_DEFAULT_CONFIG_FILENAME": ".devcontainer/mise.toml",
     "MISE_TRUSTED_CONFIG_PATHS": "/",
   },
   postStartCommand: [
-    "poetry install --all-groups"
+    "poetry install --all-groups --all-extras"
   ],
   postCreateCommand: "mise -c /workspaces/lapidary install"
 }
