@@ -1,11 +1,8 @@
-FROM dhi.io/alpine-base:3.22-dev
+FROM ghcr.io/astral-sh/uv:alpine
 
-RUN apk add mise git bash uv --no-cache
+RUN apk add mise git bash --no-cache
 
-# mise builds python from sources, instead use uv to get the binary
 RUN uv python install 3.14
-
-
 
 RUN \
     echo 'eval "$(mise activate bash)"' >> ~/.bashrc &&\
