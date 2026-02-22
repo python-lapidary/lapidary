@@ -1,13 +1,23 @@
 {
+  "appPort": [
+    8000
+  ],
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "remoteUser": "root",
-  "remoteEnv": {
-    "MISE_TRUSTED_CONFIG_PATHS": "/",
-  },
+  containerUser: "dev",
+  postCreateCommand: "mise -c /workspaces/lapidary install",
   postStartCommand: [
     "poetry install --all-groups --all-extras"
   ],
-  postCreateCommand: "mise -c /workspaces/lapidary install"
+  "remoteEnv": {
+    "MISE_TRUSTED_CONFIG_PATHS": "/"
+  },
+  runArgs: [
+    "--userns=keep-id:uid=1000,gid=1000",
+  // seems @devcontainers/cli doesn't like forwardPorts
+    "-p",
+    "8000:8000"
+  ],
+  updateRemoteUserUID: true
 }

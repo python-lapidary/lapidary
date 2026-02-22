@@ -1,10 +1,11 @@
-copyright: Copyright &copy; 2022-2025 Rafał Krupiński
+copyright: Copyright &copy; 2022-2026 Rafał Krupiński
 site_name: Lapidary
 repo_url: https://github.com/python-lapidary/lapidary
 repo_name: python-lapidary/lapidary
 site_url: https://lapidary.github.io/lapidary
 site_description: "Declarative Web API client for python"
 site_dir: "../site"
+edit_uri: edit/main/docs/
 watch:
 - mkdocs.yaml
 - ../src
@@ -13,6 +14,7 @@ watch:
 docs_dir: ../docs
 exclude_docs: |
   adr
+  theme
 
 nav:
 - index.md
@@ -21,6 +23,7 @@ nav:
   - usage/operation.md
   - usage/auth.md
 - API reference: reference/api.md
+- Lapidary Render: https://lapidary.dev/lapidary-render
 
 validation:
   omitted_files: warn
@@ -29,11 +32,15 @@ validation:
 
 
 theme:
+  custom_dir: ../docs/theme
   name: material
   logo: assets/logo.svg
   icon:
     logo: assets/logo.svg
+    repo: fontawesome/brands/git-alt
   favicon: assets/logo.svg
+  repo_branch: main
+
   features:
   - announce.dismiss
   - content.action.view
@@ -41,15 +48,15 @@ theme:
   - content.code.copy
   - content.tooltips
   - navigation.footer
+  - navigation.instant
   - navigation.instant.preview
   - navigation.path
   - navigation.sections
-  - navigation.tabs
-  - navigation.tabs.sticky
   - navigation.top
   - search.highlight
   - search.suggest
   - toc.follow
+  font: false
   palette:
   - media: "(prefers-color-scheme)"
     toggle:
@@ -105,7 +112,7 @@ plugins:
       python:
         inventories:
         - https://docs.python.org/3/objects.inv
-        paths: [src]
+        paths: [../src]
         options:
           backlinks: tree
           docstring_section_style: spacy
@@ -127,19 +134,10 @@ plugins:
           show_symbol_type_toc: true
           signature_crossrefs: true
           summary: true
-- llmstxt:
-    full_output: llms-full.txt
-    sections:
-      Usage:
-      - index.md
-      API:
-      - reference/api.md
-#- git-revision-date-localized:
-#    enabled: !ENV [DEPLOY, false]
-#    enable_creation_date: true
-#    type: timeago
 - minify:
     minify_html: !ENV [DEPLOY, false]
+- privacy:
+    enabled: true
 
 extra:
   social:
@@ -150,14 +148,5 @@ extra:
   - icon: fontawesome/brands/python
     link: https://pypi.org/project/lapidary/
   analytics:
-    feedback:
-      title: Was this page helpful?
-      ratings:
-        - icon: material/emoticon-happy-outline
-          name: This page was helpful
-          data: 1
-          note: Thanks for your feedback!
-        - icon: material/emoticon-sad-outline
-          name: This page could be improved
-          data: 0
-          note: Let us know how we can improve this page.
+    provider: goatcounter
+    code: lapidary

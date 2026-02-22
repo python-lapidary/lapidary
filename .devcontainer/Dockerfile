@@ -1,8 +1,8 @@
 FROM ghcr.io/astral-sh/uv:alpine
 
-RUN apk add mise git bash --no-cache
+RUN apk add mise git bash git ssh-client-default --no-cache
 
-RUN uv python install 3.14
+RUN uv python install 3.10
 
 RUN \
     echo 'eval "$(mise activate bash)"' >> ~/.bashrc &&\

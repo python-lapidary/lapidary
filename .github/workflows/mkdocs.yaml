@@ -1,0 +1,48 @@
+name: Build and publish docs
+
+on:
+  push:
+    branches:
+    - develop
+    - main
+  workflow_dispatch:
+
+jobs:
+  mkdocs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+
+    - name: Cache Poetry dependencies
+      uses: actions/cache@v5
+      with:
+        path: |
+          ~/.cache/pypoetry
+          ~/.cache/pip
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
+    - name: Install dependencies
+      run: |
+        pip install poetry
+        poetry install --no-root
+
+    - name: Build site
+      run: poetry run mkdocs build -f .config/mkdocs.yaml
+
+    - name: Publish to org pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        destination_dir: lapidary-runtime
+        external_repository: python-lapidary/lapidary.dev
+        personal_token: ${{ secrets.GH_PAT }}
+        publish_branch: gh-pages
+        publish_dir: site
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        user_name: 'github-actions[bot]'
