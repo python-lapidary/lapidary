@@ -1,6 +1,7 @@
 [tools]
 "pipx:mypy" = "1.19"
 "pipx:poetry" = "2.2"
+poetry = "2.1.2"
 ruff = "0.14.10"
 
 [tasks]
