@@ -51,8 +51,8 @@ class ClientBase(abc.ABC):
         if auth_args:
             # make python complain about duplicate names
             self.lapidary_authenticate(**dict(auth_args), **auth_kwargs)
-
-        self._auth_registry.authenticate(auth_kwargs)
+        else:
+            self._auth_registry.authenticate(auth_kwargs)
 
     def lapidary_deauthenticate(self, *sec_names: str) -> None:
         """Remove reference to a given Auth instance.
