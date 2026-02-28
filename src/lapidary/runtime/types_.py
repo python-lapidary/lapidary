@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import abc
-import ssl
-from collections.abc import Callable, Mapping, MutableMapping
+from collections.abc import Mapping, MutableMapping
 
 import httpx
 import httpx._transports.base
@@ -20,7 +19,6 @@ MimeMap: typing.TypeAlias = MutableMapping[MimeType, type]
 Signature: typing.TypeAlias = Mapping[str, typing.Any]
 StatusCodeRange: typing.TypeAlias = str
 StatusCodeType: typing.TypeAlias = int
-SessionFactory: typing.TypeAlias = Callable[..., httpx.AsyncClient]
 
 
 class Dumper(abc.ABC):
@@ -54,27 +52,3 @@ class RequestFactory(typing.Protocol):
         _extensions: httpx._types.RequestExtensions | None = None,
     ) -> httpx.Request:
         pass
-
-
-class ClientArgs(typing.TypedDict):
-    auth: typing.NotRequired[httpx._types.AuthTypes]
-    params: typing.NotRequired[httpx._types.QueryParamTypes]
-    headers: typing.NotRequired[httpx._types.HeaderTypes]
-    cookies: typing.NotRequired[httpx._types.CookieTypes]
-    verify: typing.NotRequired[typing.Union[ssl.SSLContext, str, bool]]
-    cert: typing.NotRequired[httpx._types.CertTypes]
-    http1: typing.NotRequired[bool]
-    http2: typing.NotRequired[bool]
-    proxy: typing.NotRequired[httpx._types.ProxyTypes]
-    proxies: typing.NotRequired[httpx._types.ProxyTypes]
-    mounts: typing.NotRequired[typing.Mapping[str, httpx._transports.base.AsyncBaseTransport | None]]
-    timeout: typing.NotRequired[httpx._types.TimeoutTypes]
-    follow_redirects: typing.NotRequired[bool]
-    limits: typing.NotRequired[httpx._config.Limits]
-    max_redirects: typing.NotRequired[int]
-    event_hooks: typing.NotRequired[typing.Mapping[str, list[typing.Callable[..., typing.Any]]]]
-    base_url: typing.NotRequired[httpx._types.URLTypes]
-    transport: typing.NotRequired[httpx._transports.base.AsyncBaseTransport]
-    app: typing.NotRequired[typing.Callable[..., typing.Any]]
-    trust_env: typing.NotRequired[bool]
-    default_encoding: typing.NotRequired[str | typing.Callable[[bytes], str]]

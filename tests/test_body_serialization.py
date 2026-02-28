@@ -1,7 +1,6 @@
 from typing import Annotated, Generic, Union
 
 from client import ClientTestBase
-from httpx import AsyncClient
 from typing_extensions import Self, TypeVar
 
 from lapidary.runtime import Body, ModelBase, Responses, get
@@ -17,7 +16,7 @@ def test_serialize_str():
         def op(self: Self, body: Annotated[str, Body({'application/json': str})]) -> Annotated[None, Responses({})]:
             pass
 
-    client = ClientTestBase(AsyncClient())
+    client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
     request, auth = adapter.build_request(client, dict(body='a'))
@@ -30,7 +29,7 @@ def test_serialize_obj():
         def op(self: Self, body: Annotated[BodyModel, Body({'application/json': BodyModel})]) -> Annotated[None, Responses({})]:
             pass
 
-    client = ClientTestBase(AsyncClient())
+    client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
     request, auth = adapter.build_request(client, dict(body=BodyModel(a='a')))
@@ -43,7 +42,7 @@ def test_serialize_list():
         def op(self: Self, body: Annotated[list[BodyModel], Body({'application/json': list[BodyModel]})]) -> Annotated[None, Responses({})]:
             pass
 
-    client = ClientTestBase(AsyncClient())
+    client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
     request, auth = adapter.build_request(client, dict(body=[BodyModel(a='a')]))
@@ -65,7 +64,7 @@ def test_serialize_generic_str():
         ) -> Annotated[None, Responses({})]:
             pass
 
-    client = ClientTestBase(AsyncClient())
+    client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
     request, auth = adapter.build_request(client, dict(body=[GenericBodyModel(a='a')]))
@@ -80,7 +79,7 @@ def test_serialize_generic_int():
         ) -> Annotated[None, Responses({})]:
             pass
 
-    client = ClientTestBase(AsyncClient())
+    client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
     request, auth = adapter.build_request(client, dict(body=[GenericBodyModel(a=1)]))
@@ -95,7 +94,7 @@ def test_serialize_generic_obj():
         ) -> Annotated[None, Responses({})]:
             pass
 
-    client = ClientTestBase(AsyncClient())
+    client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
     request, auth = adapter.build_request(client, dict(body=[GenericBodyModel(a=BodyModel(a='a'))]))
@@ -114,7 +113,7 @@ def test_serialize_generic_union():
         ) -> Annotated[None, Responses({})]:
             pass
 
-    client = ClientTestBase(AsyncClient())
+    client = Client()
 
     adapter, _ = process_operation_method(Client.op, get('/path'))
 

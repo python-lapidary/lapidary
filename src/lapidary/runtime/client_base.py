@@ -6,15 +6,13 @@ import logging
 import httpx
 import typing_extensions as typing
 
-from .http_consts import USER_AGENT
 from .middleware import HttpxMiddleware
 from .model.auth import AuthRegistry
 
 if typing.TYPE_CHECKING:
-    import types
     from collections.abc import Iterable, Sequence
 
-    from .types_ import ClientArgs, NamedAuth, SecurityRequirements, SessionFactory
+    from .types_ import NamedAuth, SecurityRequirements
 
 logger = logging.getLogger(__name__)
 
@@ -31,34 +29,19 @@ class ClientBase(abc.ABC):
     def __init__(
         self,
         security: Iterable[SecurityRequirements] | None = None,
-        session_factory: SessionFactory = httpx.AsyncClient,
+        client: httpx.AsyncClient | None = None,
+        base_url: str | None = None,
         middlewares: Sequence[HttpxMiddleware] = (),
-        **httpx_kwargs: typing.Unpack[ClientArgs],
     ) -> None:
         """
         :param security: Security requirements as a mapping of name => list of scopes
-        :param session_factory: `httpx.AsyncClient` or a subclass type
+        :param client: the httpx client to use
         :param middlewares: list of middlewares to process HTTP requests and responses
-        :param httpx_kwargs: keyword arguments to pass to session_factory
         """
-        self._client = session_factory(**httpx_kwargs)
-        if USER_AGENT not in self._client.headers:
-            self._client.headers[USER_AGENT] = lapidary_user_agent()
-
+        self._base_url = base_url
+        self._client = client or httpx.AsyncClient()
         self._auth_registry = AuthRegistry(security)
         self._middlewares = middlewares
-
-    async def __aenter__(self: typing.Self) -> typing.Self:
-        await self._client.__aenter__()
-        return self
-
-    async def __aexit__(
-        self,
-        exc_type: type[BaseException] | None = None,
-        exc_value: BaseException | None = None,
-        traceback: types.TracebackType | None = None,
-    ) -> bool | None:
-        return await self._client.__aexit__(exc_type, exc_value, traceback)
 
     def lapidary_authenticate(self, *auth_args: NamedAuth, **auth_kwargs: httpx.Auth) -> None:
         """

@@ -45,16 +45,17 @@ against the declared requirements before proceeding with the request. To meet th
 previously configured the necessary Auth instances using lapidary_authenticate.
 
 ```python
+import httpx
 from lapidary.runtime import *
 from lapidary.runtime.auth import HeaderApiKey
 from typing import Self, Annotated
 
 
 class MyClient(ClientBase):
-    def __init__(self):
+    def __init__(self, client: httpx.AsyncClient):
         super().__init__(
-            base_url=...,
-            security=[{'apiKeyAuth': []}],
+            client=client,
+            base_url='https://example.com/'
         )
 
     @get('/api/operation', security=[{'admin_only': []}])
@@ -71,14 +72,15 @@ class MyClient(ClientBase):
 
 # User code
 async def main():
-    client = MyClient()
+    async with httpx.AsyncClient() as hac:
+        client = MyClient(hac)
 
-    token = await client.login().token
-    client.lapidary_authenticate(apiKeyAuth=HeaderApiKey(token))
-    await client.my_op()
+        token = (await client.login()).token
+        client.lapidary_authenticate(apiKeyAuth=HeaderApiKey(token))
+        await client.my_op()
 
-    # optionally
-    client.lapidary_deauthenticate('apiKeyAuth')
+        # optionally
+        client.lapidary_deauthenticate('apiKeyAuth')
 ```
 
 `lapidary_authenticate` also accepts tuples of Auth instances with names, so this is possible:

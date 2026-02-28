@@ -23,13 +23,13 @@ class MyRequestBodyList(pydantic.RootModel):
 
 @pytest_asyncio.fixture(scope='function')
 async def mock_http_client():
-    client = httpx.AsyncClient(base_url='http://example.com')
-    client.build_request = Mock(wraps=client.build_request)
-    response = httpx.Response(543, request=httpx.Request('get', ''))
+    async with httpx.AsyncClient(base_url='http://example.com') as client:
+        client.build_request = Mock(wraps=client.build_request)
+        response = httpx.Response(543, request=httpx.Request('get', ''))
 
-    client.send = AsyncMock(return_value=response)
+        client.send = AsyncMock(return_value=response)
 
-    yield client
+        yield client
 
 
 @pytest.mark.asyncio
@@ -42,9 +42,9 @@ async def test_build_request_from_list(mock_http_client) -> None:
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponse):
-            await client.body_list(body=MyRequestBodyList(root=[MyRequestBodyModel(a='a')]))
+    client = Client(client=mock_http_client)
+    with pytest.raises(UnexpectedResponse):
+        await client.body_list(body=MyRequestBodyList(root=[MyRequestBodyModel(a='a')]))
 
     mock_http_client.build_request.assert_called_with(
         'GET',
@@ -70,9 +70,9 @@ async def test_request_param_list_simple(mock_http_client):
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponse):
-            await client.param_list_simple(q_a=['hello', 'world'])
+    client = Client(client=mock_http_client)
+    with pytest.raises(UnexpectedResponse):
+        await client.param_list_simple(q_a=['hello', 'world'])
 
     mock_http_client.build_request.assert_called_with(
         'GET',
@@ -93,9 +93,9 @@ async def test_build_request_none(mock_http_client):
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponse):
-            await client.request_none()
+    client = Client(client=mock_http_client)
+    with pytest.raises(UnexpectedResponse):
+        await client.request_none()
 
     mock_http_client.build_request.assert_called_with(
         'GET',
@@ -117,9 +117,9 @@ async def test_request_param_list_exploded(mock_http_client):
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponse):
-            await client.param_list_exploded(q_a=['hello', 'world'])
+    client = Client(client=mock_http_client)
+    with pytest.raises(UnexpectedResponse):
+        await client.param_list_exploded(q_a=['hello', 'world'])
 
     mock_http_client.build_request.assert_called_with(
         'GET',
@@ -141,9 +141,9 @@ async def test_missing_required_param(mock_http_client):
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    async with Client(client=mock_http_client) as client:
-        with pytest.raises(TypeError):
-            await client.op()
+    client = Client(client=mock_http_client)
+    with pytest.raises(TypeError):
+        await client.op()
 
 
 @pytest.mark.asyncio
@@ -158,9 +158,9 @@ async def test_build_request_param_date(mock_http_client):
 
     today = dt.date.today()
 
-    async with Client(client=mock_http_client) as client:
-        with pytest.raises(UnexpectedResponse):
-            await client.request_date(date=today)
+    client = Client(client=mock_http_client)
+    with pytest.raises(UnexpectedResponse):
+        await client.request_date(date=today)
 
     mock_http_client.build_request.assert_called_with(
         'GET',

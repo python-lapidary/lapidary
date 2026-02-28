@@ -13,6 +13,8 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 ### Changed
 
 - Bumped minimum required Python version to 3.10
+- ClientBase accepts httpx client instance; remove async context manager protocol
+
 
 ## [0.12.3] - 2025-03-01
 ### Fixed

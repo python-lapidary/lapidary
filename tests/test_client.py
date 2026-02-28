@@ -128,12 +128,12 @@ class CatListResponseHeaders(pydantic.BaseModel):
 class CatClient(ClientBase):
     def __init__(
         self,
+        client: httpx.AsyncClient,
         base_url='http://localhost',
-        **httpx_args,
     ):
         super().__init__(
             base_url=base_url,
-            **httpx_args,
+            client=client,
         )
 
     @get('/cat')
@@ -232,7 +232,7 @@ async def client() -> CatClient:
         ],
     )
 
-    return CatClient(transport=httpx.ASGITransport(app=app))
+    return CatClient(httpx.AsyncClient(transport=httpx.ASGITransport(app=app)))
 
 
 # tests

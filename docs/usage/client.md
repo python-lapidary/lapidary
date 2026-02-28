@@ -21,16 +21,19 @@ the `base_url` of the API.
 Example implementation:
 
 ```python
+import httpx
 import lapidary.runtime
 
 
 class CatClient(lapidary.runtime.ClientBase):
     def __init__(
-            self,
-            base_url='https://example.com/api',
-            **kwargs
+        self,
+        client: httpx.AsyncClient | None = None,
+        base_url = 'https://example.com/api',
+        **kwargs,
     ):
         super().__init__(
+            client=client,
             base_url=base_url,
             **kwargs
         )

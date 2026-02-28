@@ -1,7 +1,6 @@
 __all__ = (
     'Body',
     'ClientBase',
-    'ClientArgs',
     'Cookie',
     'lapidary_user_agent',
     'Form',
@@ -19,7 +18,6 @@ __all__ = (
     'Response',
     'Responses',
     'SecurityRequirements',
-    'SessionFactory',
     'SimpleMultimap',
     'SimpleString',
     'StatusCode',
@@ -42,4 +40,4 @@ from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError
 from .model.param_serialization import Form, FormExplode, SimpleMultimap, SimpleString
 from .operation import delete, get, head, patch, post, put, trace
 from .paging import iter_pages
-from .types_ import ClientArgs, NamedAuth, SecurityRequirements, SessionFactory
+from .types_ import NamedAuth, SecurityRequirements

@@ -309,7 +309,7 @@ class RequestAdapter:
         builder = RequestBuilder(
             typing.cast(RequestFactory, client._client.build_request),
             self.http_method,
-            self.http_path_template,
+            (client._base_url or '') + self.http_path_template,
         )
 
         self.contributor.update_builder(builder, kwargs)
