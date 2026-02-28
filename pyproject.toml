@@ -67,6 +67,7 @@ pythonpath = [
     "tests"
 ]
 addopts = "--color=yes"
+asyncio_default_fixture_loop_scope = 'module'
 
 [tool.mypy]
 mypy_path = "src"
