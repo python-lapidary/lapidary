@@ -30,8 +30,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install poetry
-        poetry install --no-root
+        pip install poetry==2.3.2
+        poetry install --no-root --with=docs
 
     - name: Build site
       run: poetry run mkdocs build -f .config/mkdocs.yaml

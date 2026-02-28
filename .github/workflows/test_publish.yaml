@@ -58,7 +58,7 @@ jobs:
       uses: packetcoders/action-setup-cache-python-poetry@main
       with:
         python-version: ${{ matrix.python-version }}
-        poetry-version: 2.1.1
+        poetry-version: 2.3.2
 
     - name: Install dependencies
       run: poetry install
@@ -83,7 +83,7 @@ jobs:
       uses: packetcoders/action-setup-cache-python-poetry@main
       with:
         python-version: 3.12
-        poetry-version: 2.1.1
+        poetry-version: 2.3.2
     - name: Mint token
       id: mint
       uses: tschm/token-mint-action@v1.0.3
