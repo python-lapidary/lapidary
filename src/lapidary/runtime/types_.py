@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from collections.abc import Mapping, MutableMapping
+from collections.abc import Awaitable, Callable, Mapping, MutableMapping
 
 import httpx
 import httpx._transports.base
@@ -19,6 +19,8 @@ MimeMap: typing.TypeAlias = MutableMapping[MimeType, type]
 Signature: typing.TypeAlias = Mapping[str, typing.Any]
 StatusCodeRange: typing.TypeAlias = str
 StatusCodeType: typing.TypeAlias = int
+
+Next: typing.TypeAlias = Callable[[httpx.Request], Awaitable[httpx.Response]]
 
 
 class Dumper(abc.ABC):

@@ -13,6 +13,7 @@ __all__ = (
     'Metadata',
     'ModelBase',
     'NamedAuth',
+    'Next',
     'Path',
     'Query',
     'Response',
@@ -40,4 +41,4 @@ from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError
 from .model.param_serialization import Form, FormExplode, SimpleMultimap, SimpleString
 from .operation import delete, get, head, patch, post, put, trace
 from .paging import iter_pages
-from .types_ import NamedAuth, SecurityRequirements
+from .types_ import NamedAuth, Next, SecurityRequirements

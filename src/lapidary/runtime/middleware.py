@@ -1,25 +1,18 @@
-import abc
-from typing import Generic, TypeVar
+from typing import Protocol
 
 import httpx
 
-State = TypeVar('State')
+from .types_ import Next
 
 
-class HttpxMiddleware(Generic[State]):
+class HttpxMiddleware(Protocol):
     """
-    Base class for HTTP middleware.
+    HTTP middleware protocol, used to fix request or response objects.
     """
 
-    @abc.abstractmethod
-    async def handle_request(self, request: httpx.Request) -> State:
-        """Called for each request after it's generated for a method call but before it's sent to the remote server.
-        Any returned value will be passed back to handle_response.
-        """
-
-    async def handle_response(self, response: httpx.Response, request: httpx.Request, state: State) -> None:
-        """Called for each response after it's been received from the remote server and before it's converted to the return type as defined
-        in the python method.
-
-        state is the value returned by handle_request
-        """
+    async def __call__(
+        self,
+        request: httpx.Request,
+        next_: Next,
+    ) -> httpx.Response:
+        """Called for each request. Implementors must call :param:`next_`"""
