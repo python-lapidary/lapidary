@@ -34,8 +34,6 @@ docs = [
     "markdown-callouts>=0.4.0",
     "markdown-exec>=1.11.0,<2",
     "mkdocs>=1.6.1,<2",
-    "mkdocs-coverage>=2,<3",
-    "mkdocs-llmstxt>=0.4.0",
     "mkdocs-material>=9,<10",
     "mkdocs-minify-plugin==0.8.0",
     "mkdocs-section-index==0.3.10",

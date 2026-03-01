@@ -107,7 +107,6 @@ plugins:
 - autorefs
 - markdown-exec
 - section-index
-#- coverage
 - mkdocstrings:
     handlers:
       python:
