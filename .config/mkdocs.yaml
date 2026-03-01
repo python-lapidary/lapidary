@@ -22,6 +22,7 @@ nav:
   - Client class: usage/client.md
   - usage/operation.md
   - usage/auth.md
+  - usage/middleware.md
 - API reference: reference/api.md
 - Lapidary Render: https://lapidary.dev/lapidary-render
 
