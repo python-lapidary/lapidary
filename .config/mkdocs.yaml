@@ -10,6 +10,7 @@ watch:
 - mkdocs.yaml
 - ../src
 - ../Readme.md
+- ../docs
 
 docs_dir: ../docs
 exclude_docs: |
