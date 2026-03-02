@@ -4,7 +4,7 @@ poetry = "2.3.2"
 ruff = "0.14.10"
 
 [tasks]
-check = 'ruff check'
+check = 'ruff check --fix'
 format = 'ruff format'
 install = 'poetry install --all-groups --all-extras'
 mkdocs = 'poetry run mkdocs build -f .config/mkdocs.yaml'
