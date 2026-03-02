@@ -4,15 +4,9 @@ import abc
 from collections.abc import Awaitable, Callable, Mapping, MutableMapping
 
 import httpx
-import httpx._transports.base
-import httpx_auth
 import typing_extensions as typing
 
 from . import _httpx
-
-MultiAuth: typing.TypeAlias = httpx_auth._authentication._MultiAuth  # pylint: disable=protected-access
-NamedAuth: typing.TypeAlias = tuple[str, httpx.Auth]
-SecurityRequirements: typing.TypeAlias = typing.Mapping[str, typing.Iterable[str]]
 
 MimeType: typing.TypeAlias = str
 MimeMap: typing.TypeAlias = MutableMapping[MimeType, type]

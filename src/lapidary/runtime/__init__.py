@@ -2,7 +2,6 @@ __all__ = (
     'Body',
     'ClientBase',
     'Cookie',
-    'lapidary_user_agent',
     'Form',
     'FormExplode',
     'Header',
@@ -12,13 +11,11 @@ __all__ = (
     'LapidaryResponseError',
     'Metadata',
     'ModelBase',
-    'NamedAuth',
     'Next',
     'Path',
     'Query',
     'Response',
     'Responses',
-    'SecurityRequirements',
     'SimpleMultimap',
     'SimpleString',
     'StatusCode',
@@ -27,18 +24,20 @@ __all__ = (
     'get',
     'head',
     'iter_pages',
+    'lapidary_user_agent',
     'patch',
     'post',
     'put',
     'trace',
+    'with_auth',
 )
 
 from .annotations import Body, Cookie, Header, Metadata, Path, Query, Response, Responses, StatusCode
-from .client_base import ClientBase, lapidary_user_agent
+from .client_base import ClientBase, lapidary_user_agent, with_auth
 from .middleware import HttpxMiddleware
 from .model import ModelBase
 from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError, UnexpectedResponse
 from .model.param_serialization import Form, FormExplode, SimpleMultimap, SimpleString
 from .operation import delete, get, head, patch, post, put, trace
 from .paging import iter_pages
-from .types_ import NamedAuth, Next, SecurityRequirements
+from .types_ import Next

@@ -50,9 +50,9 @@ def mk_exchange_fn(
     request_adapter, response_handler = process_operation_method(op_method, op_decorator)
 
     async def exchange(self: 'ClientBase', **kwargs) -> typing.Any:
-        request, auth = request_adapter.build_request(self, kwargs)
+        request = request_adapter.build_request(self, kwargs)
 
-        send = _mk_send(self._client.send, auth)
+        send = _mk_send(self._client.send, self._auth)
         for middleware in reversed(self._middlewares):
             send = _wrap_middleware(middleware, send)
 

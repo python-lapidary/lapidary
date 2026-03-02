@@ -12,7 +12,7 @@ import typing_extensions as typing
 from ..annotations import Body, Cookie, Header, Metadata, Param, Path, Query, WebArg
 from ..http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from ..metattype import is_array_like, make_not_optional
-from ..types_ import Dumper, MimeType, RequestFactory, SecurityRequirements, Signature
+from ..types_ import Dumper, MimeType, RequestFactory, Signature
 from .annotations import (
     find_annotation,
     find_field_annotation,
@@ -299,13 +299,12 @@ class RequestAdapter:
     http_path_template: str
     contributor: RequestContributor
     accept: Iterable[str] | None
-    security: Iterable[SecurityRequirements] | None
 
     def build_request(
         self,
         client: 'ClientBase',
         kwargs: dict[str, typing.Any],
-    ) -> tuple[httpx.Request, httpx.Auth | None]:
+    ) -> httpx.Request:
         builder = RequestBuilder(
             typing.cast(RequestFactory, client._client.build_request),
             self.http_method,
@@ -318,8 +317,7 @@ class RequestAdapter:
         if ACCEPT not in builder.headers and self.accept is not None:
             accept_values |= set(self.accept)
         builder.headers.update([(ACCEPT, value) for value in accept_values])
-        auth = client._auth_registry.resolve_auth(self.name, self.security)
-        return builder(), auth
+        return builder()
 
 
 def prepare_request_adapter(name: str, sig: Signature, operation: 'Operation', accept: Iterable[str]) -> RequestAdapter:
@@ -329,7 +327,6 @@ def prepare_request_adapter(name: str, sig: Signature, operation: 'Operation', a
         operation.path,
         RequestObjectContributor.for_signature(sig),
         accept,
-        operation.security,
     )
 
 

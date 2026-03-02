@@ -19,7 +19,7 @@ def test_serialize_str():
     client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
-    request, auth = adapter.build_request(client, dict(body='a'))
+    request = adapter.build_request(client, dict(body='a'))
 
     assert request.content == b'"a"'
 
@@ -32,7 +32,7 @@ def test_serialize_obj():
     client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
-    request, auth = adapter.build_request(client, dict(body=BodyModel(a='a')))
+    request = adapter.build_request(client, dict(body=BodyModel(a='a')))
 
     assert request.content == b'{"a":"a"}'
 
@@ -45,7 +45,7 @@ def test_serialize_list():
     client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
-    request, auth = adapter.build_request(client, dict(body=[BodyModel(a='a')]))
+    request = adapter.build_request(client, dict(body=[BodyModel(a='a')]))
 
     assert request.content == b'[{"a":"a"}]'
 
@@ -67,7 +67,7 @@ def test_serialize_generic_str():
     client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
-    request, auth = adapter.build_request(client, dict(body=[GenericBodyModel(a='a')]))
+    request = adapter.build_request(client, dict(body=[GenericBodyModel(a='a')]))
 
     assert request.content == b'[{"a":"a"}]'
 
@@ -82,7 +82,7 @@ def test_serialize_generic_int():
     client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
-    request, auth = adapter.build_request(client, dict(body=[GenericBodyModel(a=1)]))
+    request = adapter.build_request(client, dict(body=[GenericBodyModel(a=1)]))
 
     assert request.content == b'[{"a":1}]'
 
@@ -97,7 +97,7 @@ def test_serialize_generic_obj():
     client = Client()
 
     adapter, response = process_operation_method(Client.op, get('/path'))
-    request, auth = adapter.build_request(client, dict(body=[GenericBodyModel(a=BodyModel(a='a'))]))
+    request = adapter.build_request(client, dict(body=[GenericBodyModel(a=BodyModel(a='a'))]))
 
     assert request.content == b'[{"a":{"a":"a"}}]'
 
@@ -117,11 +117,11 @@ def test_serialize_generic_union():
 
     adapter, _ = process_operation_method(Client.op, get('/path'))
 
-    request, _ = adapter.build_request(client, dict(body=[GenericBodyModel[BodyModel](a=BodyModel(a='a'))]))
+    request = adapter.build_request(client, dict(body=[GenericBodyModel[BodyModel](a=BodyModel(a='a'))]))
     assert request.content == b'[{"a":{"a":"a"}}]'
 
-    request, _ = adapter.build_request(client, dict(body=GenericBodyModel[BodyModel](a=BodyModel(a='a'))))
+    request = adapter.build_request(client, dict(body=GenericBodyModel[BodyModel](a=BodyModel(a='a'))))
     assert request.content == b'{"a":{"a":"a"}}'
 
-    request, _ = adapter.build_request(client, dict(body=BodyModel(a='a')))
+    request = adapter.build_request(client, dict(body=BodyModel(a='a')))
     assert request.content == b'{"a":"a"}'
