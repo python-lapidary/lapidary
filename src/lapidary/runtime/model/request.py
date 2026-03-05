@@ -20,7 +20,6 @@ from .param_serialization import SCALAR_TYPES, Multimap, ScalarType
 
 if typing.TYPE_CHECKING:
     from ..client_base import ClientBase
-    from ..operation import Operation
 import logging
 
 logger = logging.getLogger(__name__)
@@ -317,13 +316,3 @@ class RequestAdapter:
             accept_values |= set(self.accept)
         builder.headers.update([(ACCEPT, value) for value in accept_values])
         return builder()
-
-
-def prepare_request_adapter(name: str, sig: Signature, operation: 'Operation', accept: Iterable[str]) -> RequestAdapter:
-    return RequestAdapter(
-        name,
-        operation.method,
-        operation.path,
-        RequestObjectContributor.for_signature(sig),
-        accept,
-    )

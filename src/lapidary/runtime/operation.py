@@ -17,7 +17,7 @@ class Operation:
     security: None = None  # deprecated, not used, TODO remove
 
     def __call__(self, fn: OperationMethod) -> OperationMethod:
-        exchange_fn = mk_exchange_fn(fn, self)
+        exchange_fn = mk_exchange_fn(fn, self.method, self.path)
         return typing.cast(OperationMethod, ft.wraps(fn)(exchange_fn))
 
 

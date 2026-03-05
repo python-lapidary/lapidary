@@ -3,7 +3,7 @@ from typing import Annotated, Generic, Union
 from client import ClientTestBase
 from typing_extensions import Self, TypeVar
 
-from lapidary.runtime import Body, ModelBase, Responses, get
+from lapidary.runtime import Body, ModelBase, Responses
 from lapidary.runtime.model.op import process_operation_method
 
 
@@ -18,7 +18,7 @@ def test_serialize_str():
 
     client = Client()
 
-    adapter, response = process_operation_method(Client.op, get('/path'))
+    adapter, response = process_operation_method(Client.op, 'GET', '/path')
     request = adapter.build_request(client, dict(body='a'))
 
     assert request.content == b'"a"'
@@ -31,7 +31,7 @@ def test_serialize_obj():
 
     client = Client()
 
-    adapter, response = process_operation_method(Client.op, get('/path'))
+    adapter, response = process_operation_method(Client.op, 'GET', '/path')
     request = adapter.build_request(client, dict(body=BodyModel(a='a')))
 
     assert request.content == b'{"a":"a"}'
@@ -44,7 +44,7 @@ def test_serialize_list():
 
     client = Client()
 
-    adapter, response = process_operation_method(Client.op, get('/path'))
+    adapter, response = process_operation_method(Client.op, 'GET', '/path')
     request = adapter.build_request(client, dict(body=[BodyModel(a='a')]))
 
     assert request.content == b'[{"a":"a"}]'
@@ -66,7 +66,7 @@ def test_serialize_generic_str():
 
     client = Client()
 
-    adapter, response = process_operation_method(Client.op, get('/path'))
+    adapter, response = process_operation_method(Client.op, 'GET', '/path')
     request = adapter.build_request(client, dict(body=[GenericBodyModel(a='a')]))
 
     assert request.content == b'[{"a":"a"}]'
@@ -81,7 +81,7 @@ def test_serialize_generic_int():
 
     client = Client()
 
-    adapter, response = process_operation_method(Client.op, get('/path'))
+    adapter, response = process_operation_method(Client.op, 'GET', '/path')
     request = adapter.build_request(client, dict(body=[GenericBodyModel(a=1)]))
 
     assert request.content == b'[{"a":1}]'
@@ -96,7 +96,7 @@ def test_serialize_generic_obj():
 
     client = Client()
 
-    adapter, response = process_operation_method(Client.op, get('/path'))
+    adapter, response = process_operation_method(Client.op, 'GET', '/path')
     request = adapter.build_request(client, dict(body=[GenericBodyModel(a=BodyModel(a='a'))]))
 
     assert request.content == b'[{"a":{"a":"a"}}]'
@@ -115,7 +115,7 @@ def test_serialize_generic_union():
 
     client = Client()
 
-    adapter, _ = process_operation_method(Client.op, get('/path'))
+    adapter, _ = process_operation_method(Client.op, 'GET', '/path')
 
     request = adapter.build_request(client, dict(body=[GenericBodyModel[BodyModel](a=BodyModel(a='a'))]))
     assert request.content == b'[{"a":{"a":"a"}}]'

@@ -7,21 +7,26 @@ import typing_extensions as typing
 from ..middleware import HttpxMiddleware
 from ..types_ import Next
 from .error import HttpErrorResponse
-from .request import RequestAdapter, prepare_request_adapter
+from .request import RequestAdapter, RequestObjectContributor
 from .response import ResponseMessageExtractor, mk_response_extractor
 
 if typing.TYPE_CHECKING:
     from ..client_base import ClientBase
-    from ..operation import Operation
 
 
-def process_operation_method(fn: Callable, op: 'Operation') -> tuple[RequestAdapter, ResponseMessageExtractor]:
+def process_operation_method(fn: Callable, method: str, path: str) -> tuple[RequestAdapter, ResponseMessageExtractor]:
     sig = inspect.signature(fn)
     type_hints = typing.get_type_hints(fn, include_extras=True)
     params = {name: param.replace(annotation=type_hints[name]) for name, param in sig.parameters.items()}
     try:
         response_extractor, media_types = mk_response_extractor(type_hints['return'])
-        request_adapter = prepare_request_adapter(fn.__name__, params, op, media_types)
+        request_adapter = RequestAdapter(
+            fn.__name__,
+            method,
+            path,
+            RequestObjectContributor.for_signature(params),
+            media_types,
+        )
         return request_adapter, response_extractor
     except TypeError as error:
         raise TypeError(fn.__name__) from error
@@ -53,9 +58,10 @@ def mk_send(client_send, auth: httpx.Auth, middlewares: Sequence[HttpxMiddleware
 
 def mk_exchange_fn(
     op_method: Callable,
-    op_decorator: 'Operation',
+    method: str,
+    path: str,
 ) -> Callable[..., Awaitable[typing.Any]]:
-    request_adapter, response_handler = process_operation_method(op_method, op_decorator)
+    request_adapter, response_handler = process_operation_method(op_method, method, path)
 
     async def exchange(self: 'ClientBase', **kwargs) -> typing.Any:
         request = request_adapter.build_request(self, kwargs)
