@@ -1,5 +1,5 @@
 import inspect
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 
 import httpx
 import typing_extensions as typing
@@ -34,11 +34,19 @@ def _wrap_middleware(mw_: HttpxMiddleware, next_: Next) -> Next:
     return wrapped
 
 
-def _mk_send(client_send, auth: httpx.Auth) -> Next:
+def _mk_final_send(client_send, auth: httpx.Auth) -> Next:
     async def send(request: httpx.Request) -> httpx.Response:
         resp = await client_send(request, auth=auth)
         await resp.aread()
         return resp
+
+    return send
+
+
+def mk_send(client_send, auth: httpx.Auth, middlewares: Sequence[HttpxMiddleware]) -> Next:
+    send = _mk_final_send(client_send, auth)
+    for middleware in reversed(middlewares):
+        send = _wrap_middleware(middleware, send)
 
     return send
 
@@ -51,12 +59,7 @@ def mk_exchange_fn(
 
     async def exchange(self: 'ClientBase', **kwargs) -> typing.Any:
         request = request_adapter.build_request(self, kwargs)
-
-        send = _mk_send(self._client.send, self._auth)
-        for middleware in reversed(self._middlewares):
-            send = _wrap_middleware(middleware, send)
-
-        response = await send(request)
+        response = await self._send(request)
         status_code, result = response_handler.handle_response(response)
         if status_code >= 400:
             raise HttpErrorResponse(status_code, result[1], result[0])
