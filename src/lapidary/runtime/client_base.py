@@ -12,12 +12,6 @@ from .middleware import HttpxMiddleware
 logger = logging.getLogger(__name__)
 
 
-def lapidary_user_agent() -> str:
-    from importlib.metadata import version
-
-    return f'Lapidary/{version("lapidary")}'
-
-
 class ClientBase(abc.ABC):
     """Base for Client classes"""
 

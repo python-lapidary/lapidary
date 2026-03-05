@@ -24,7 +24,6 @@ __all__ = (
     'get',
     'head',
     'iter_pages',
-    'lapidary_user_agent',
     'patch',
     'post',
     'put',
@@ -33,7 +32,7 @@ __all__ = (
 )
 
 from .annotations import Body, Cookie, Header, Metadata, Path, Query, Response, Responses, StatusCode
-from .client_base import ClientBase, lapidary_user_agent, with_auth
+from .client_base import ClientBase, with_auth
 from .middleware import HttpxMiddleware
 from .model import ModelBase
 from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError, UnexpectedResponse

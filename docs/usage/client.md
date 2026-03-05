@@ -39,3 +39,22 @@ class CatClient(lapidary.runtime.ClientBase):
         )
     ...
 ```
+
+## Recommended request header User-Agent
+
+HTTP request headers can be added using the standard httpx API. It's recommended to add User-Agent header.
+
+```python
+from importlib.metadata import version
+
+import httpx
+
+
+async with httpx.AsyncClient(
+    headers={
+        'User-Agent': f'my-project/{version("my_package")} (+https://example.com/project; project@example.com)',
+    }
+) as httpx_client:
+    client = MyApiClient(httpx_client)
+    # make requests
+```

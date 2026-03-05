@@ -17,6 +17,9 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 - Change middleware interface to nestable callable
 - Replaced security requirements and NamedAuth factories with a simple mechanism based on shallow-copy
 
+### Removed
+
+- Removed lapidary_user_agent function to enourage users to use their programs name.
 
 ## [0.12.3] - 2025-03-01
 ### Fixed
