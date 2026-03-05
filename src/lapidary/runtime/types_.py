@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import abc
 from collections.abc import Awaitable, Callable, Mapping, MutableMapping
 
 import httpx
@@ -15,18 +14,6 @@ StatusCodeRange: typing.TypeAlias = str
 StatusCodeType: typing.TypeAlias = int
 
 Next: typing.TypeAlias = Callable[[httpx.Request], Awaitable[httpx.Response]]
-
-
-class Dumper(abc.ABC):
-    @abc.abstractmethod
-    def __call__(self, obj: typing.Any) -> bytes:
-        pass
-
-
-class Parser(abc.ABC):
-    @abc.abstractmethod
-    def __call__(self, raw: bytes) -> typing.Any:
-        pass
 
 
 class RequestFactory(typing.Protocol):

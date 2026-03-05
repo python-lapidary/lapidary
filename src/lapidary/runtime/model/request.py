@@ -1,6 +1,5 @@
 import abc
 import dataclasses as dc
-import functools as ft
 import inspect
 from collections.abc import Callable, Iterable, Mapping, MutableMapping
 
@@ -12,7 +11,7 @@ import typing_extensions as typing
 from ..annotations import Body, Cookie, Header, Metadata, Param, Path, Query, WebArg
 from ..http_consts import ACCEPT, CONTENT_TYPE, MIME_JSON
 from ..metattype import is_array_like, make_not_optional
-from ..types_ import Dumper, MimeType, RequestFactory, Signature
+from ..types_ import MimeType, RequestFactory, Signature
 from .annotations import (
     find_annotation,
     find_field_annotation,
@@ -328,16 +327,3 @@ def prepare_request_adapter(name: str, sig: Signature, operation: 'Operation', a
         RequestObjectContributor.for_signature(sig),
         accept,
     )
-
-
-@dc.dataclass
-class PydanticDumper(Dumper):
-    _type_adapter: pydantic.TypeAdapter
-
-    def __call__(self, value: typing.Any) -> bytes:
-        return self._type_adapter.dump_json(value, by_alias=True, exclude_defaults=True)
-
-
-@ft.cache
-def mk_pydantic_dumper(typ: type) -> Dumper:
-    return PydanticDumper(pydantic.TypeAdapter(typ))

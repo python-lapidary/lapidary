@@ -1,5 +1,7 @@
 """Never test third-party code..."""
 
+from collections.abc import AsyncGenerator
+
 import httpx
 import pytest
 import pytest_asyncio
@@ -10,14 +12,14 @@ from starlette.routing import Route
 
 
 @pytest_asyncio.fixture
-async def client_server() -> httpx.AsyncClient:
-    async def request(request: Request):
+async def client_server() -> AsyncGenerator[httpx.AsyncClient, None]:
+    async def request(req: Request):
         return JSONResponse(
             {
-                'url': str(request.url),
-                'param': request.query_params.getlist('param'),
-                'header': request.headers.getlist('param'),
-                'cookie': request.cookies.get('param'),
+                'url': str(req.url),
+                'param': req.query_params.getlist('param'),
+                'header': req.headers.getlist('param'),
+                'cookie': req.cookies.get('param'),
             }
         )
 
