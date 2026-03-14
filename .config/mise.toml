@@ -1,5 +1,4 @@
 [tools]
-"pipx:mypy" = "1.19"
 poetry = "2.3.2"
 ruff = "0.14.10"
 
@@ -9,4 +8,3 @@ format = 'ruff format'
 install = 'poetry install --all-groups --all-extras'
 mkdocs = 'poetry run mkdocs build -f .config/mkdocs.yaml'
 mkdocs-serve = 'poetry run mkdocs serve -f .config/mkdocs.yaml -a 0.0.0.0:8000 --livereload'
-mypy = 'mypy --python-executable "$(poetry env info -p)/lib/python3.10/site-packages" --hide-absolute-path'
