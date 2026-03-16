@@ -37,6 +37,7 @@ class MyClient(ClientBase):
     ) -> ...:
         pass
 
+
 # User code
 async def main():
     async with httpx.AsyncClient() as http_client:

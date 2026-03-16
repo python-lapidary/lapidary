@@ -35,8 +35,8 @@ async def list_cats(...):
 Parameters within Lapidary are designed to represent different components of an HTTP request, including headers,
 cookies, query parameters, path parameters, and the body of the request.
 
-It's essential that every parameter, including self, is annotated to define its role and type explicitly. Note that *
-args and **kwargs are not supported in this structure to maintain clarity and specificity in request definition.
+It's essential that every parameter, including self, is annotated to define its role and type explicitly. Note that
+\*args and \*\*kwargs are not supported in this structure to maintain clarity and specificity in request definition.
 
 ### Query parameters
 
@@ -48,8 +48,8 @@ To declare a query parameter in Lapidary, use the Query() annotation:
 ```python
 @get('/cats')
 async def list_cats(
-        self: Self,
-        color: Annotated[str, Query],
+    self: Self,
+    color: Annotated[str, Query],
 ):
     pass
 ```
@@ -76,8 +76,8 @@ parameter with Path(). Here is an example of how to define and use a path parame
 ```python
 @get('/cat/{cat_id}')
 async def get_cat(
-        self: Self,
-        cat_id: Annotated[str, Path],
+    self: Self,
+    cat_id: Annotated[str, Path],
 ):
     pass
 ```
@@ -103,8 +103,8 @@ Example:
 ```python
 @get('/cats')
 async def list_cats(
-        self: Self,
-        version: Annotated[str, Header],
+    self: Self,
+    version: Annotated[str, Header],
 ):
     pass
 ```
@@ -130,8 +130,8 @@ Example:
 ```python
 @get('/cats')
 async def list_cats(
-        self: Self,
-        cookie_key: Annotated[str, Cookie('key')],
+    self: Self,
+    cookie_key: Annotated[str, Cookie('key')],
 ):
     pass
 ```
@@ -154,10 +154,11 @@ Example:
 ```python
 @POST('/cat')
 async def add_cat(
-        self: Self,
-        cat: Annotated[Cat, Body({
-            'application/json': Cat,
-        })],
+    self: Self,
+    cat: Annotated[
+        Cat,
+        Body({'application/json': Cat}),
+    ],
 ):
     pass
 ```
@@ -189,13 +190,15 @@ Example:
 
 ```python
 @get('/cat')
-async def list_cats(self: Self) -> Annotated[
+async def list_cats(
+    self: Self,
+) -> Annotated[
     tuple[List[Cat], None],
-    Responses({
-        '2XX': Response(Body({
-            'application/json': List[Cat],
-        })),
-    })
+    Responses(
+        {
+            '2XX': Response(Body({'application/json': List[Cat]})),
+        }
+    ),
 ]:
     pass
 ```
@@ -205,7 +208,6 @@ application/json, the response body will be parsed as a list of Cat objects. Thi
 method's return type is tightly coupled with the anticipated successful response structure, providing clarity and type
 safety for API interactions.
 
-
 ### Mapping headers and response status code
 
 Lapidary operation methods always return a tuple. The first element is the response body, the second is the response metadata (headers and/or status code), each of them being optional.
@@ -213,26 +215,28 @@ Lapidary operation methods always return a tuple. The first element is the respo
 Example:
 
 ```python
-
 class CatListMeta(ModelBase):
-   total_count: Annotated[int, Header('Total-Count')]
-   status_code: Annotated[int, StatusCode]
+    total_count: Annotated[int, Header('Total-Count')]
+    status_code: Annotated[int, StatusCode]
 
 
 class CatClient(ClientBase):
-   @get('/cat')
-   async def list_cats(self: Self) -> Annotated[
-       tuple[list[Cat], CatListMeta],
-       Responses({
-           '2XX': Response(
-                Body({
-                    'application/json': list[Cat],
-                }),
-                CatListMeta
-           ),
-       })
-   ]:
-       pass
+    @get('/cat')
+    async def list_cats(
+        self: Self,
+    ) -> Annotated[
+        tuple[list[Cat], CatListMeta],
+        Responses(
+            {
+                '2XX': Response(
+                    Body({'application/json': list[Cat]}),
+                    CatListMeta,
+                ),
+            }
+        ),
+    ]:
+        pass
+
 
 client = CatClient()
 cats_body, cats_meta = await client.list_cats()
@@ -240,7 +244,6 @@ assert cats_body.body == [Cat(...)]
 assert cats_meta.count == 1
 assert cats_meta.status_code == 200
 ```
-
 
 ### Handling error responses
 
@@ -254,15 +257,15 @@ class ErrorModel(ModelBase):
 
 @get('/cat')
 async def list_cats(
-        self: Self,
+    self: Self,
 ) -> Annotated[
     tuple[List[Cat], None],
-    Responses({
-        '2XX': Response(...),
-        '4XX': Response(Body({
-            'application/json': ErrorModel,
-        }))
-    }),
+    Responses(
+        {
+            '2XX': Response(...),
+            '4XX': Response(Body({'application/json': ErrorModel})),
+        }
+    ),
 ]:
     pass
 ```

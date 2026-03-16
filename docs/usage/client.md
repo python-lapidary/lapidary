@@ -29,7 +29,7 @@ class CatClient(lapidary.runtime.ClientBase):
     def __init__(
         self,
         client: httpx.AsyncClient | None = None,
-        base_url = 'https://example.com/api',
+        base_url='https://example.com/api',
         **kwargs,
     ):
         super().__init__(

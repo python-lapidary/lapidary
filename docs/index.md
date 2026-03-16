@@ -33,14 +33,14 @@ from collections.abc import Awaitable
 from typing import Annotated, Self
 from lapidary.runtime import *
 
-# Define models
 
+# Define models
 class Cat(ModelBase):
     id: int
     name: str
 
-# Declare the client
 
+# Declare the client
 class CatClient(ClientBase):
     def __init__(
         self,
@@ -53,15 +53,15 @@ class CatClient(ClientBase):
         self: Self,
         *,
         id: Annotated[int, Path],
-    ) -> Annotated[Awaitable[Cat], Responses({
-        '2XX': Response(Body({
-            'application/json': Cat
-        })),
-    })]:
+    ) -> Annotated[
+        Awaitable[Cat],
+        Responses({'2XX': Response(Body({'application/json': Cat}))}),
+    ]:
         pass
 ```
 
 User code
+
 ```python
 async def main():
     client = CatClient()
@@ -72,7 +72,6 @@ See [this test file](https://github.com/python-lapidary/lapidary/blob/develop/te
 example.
 
 Also check [clients](https://github.com/orgs/lapidary-library/repositories) generated with Lapidary Render.
-
 
 ## Prior work
 
