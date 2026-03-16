@@ -49,7 +49,7 @@ class APIClient(typing.Generic[API_T]):
 
     def with_auth(self, auth: httpx.Auth | None) -> typing.Self:
         return APIClient(
-            self.ops,
+            self._api_model,
             self._client,
             self._base_url,
             middlewares=self._middlewares,
@@ -126,7 +126,7 @@ class APIModel:
         api_class: type[API_T],
     ):
         self._api_class = api_class
-        self._adapters = {}
+        self._adapters: dict[str, OperationAdapter] = {}
 
     def get(self, name: str) -> OperationAdapter:
         try:

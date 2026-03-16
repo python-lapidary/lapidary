@@ -51,6 +51,7 @@ class ServerErrorModel(ModelBase):
 
 DATE = dt.datetime(2024, 7, 28, 0, 55, tzinfo=dt.timezone.utc)
 
+
 # server
 
 
@@ -288,3 +289,13 @@ async def test_create_error(client: CatClient):
     with pytest.raises(UnexpectedResponse) as error:
         await client.cat_create(body=Cat(id=1, name='Benny'))
     assert error.value.response.status_code == 422
+
+
+def test_with_auth_returns_same_model():
+    client = lapidary.runtime.client.for_api(CatClient, httpx.AsyncClient(), 'https://example.com')
+    client2 = client.with_auth(httpx.BasicAuth('x', 'y'))
+
+    assert client._api_model is client2._api_model
+    assert client._client is client2._client
+    assert client._base_url is client2._base_url
+    assert client._auth is not client2._auth
