@@ -1,7 +1,7 @@
 Methods decorated with one of @get, @post, @put, etc. are transformed into operation methods. Invoking these methods
 initiates an HTTP request-response cycle. Lapidary is designed to be compatible with the HTTP methods defined in OpenAPI
-3.x, which include all methods defined in RFC 9110, with the exception of CONNECT. Methods in your client that aren't
-decorated with these operation decorators are simply ignored.
+3.x, which include all methods defined in RFC 9110 except for CONNECT. Methods in your client that aren't
+decorated with these decorators are simply ignored.
 
 !!! note methods
 
@@ -10,11 +10,10 @@ decorated with these operation decorators are simply ignored.
     Throughout this documentation, the term `method` in a programming context always refers to a Python method (defined with `def`), whereas `HTTP methods` (GET, POST, etc.) are specified as such.
 
 ```python
-from lapidary.runtime import ClientBase, get
+from lapidary.runtime import get
 
 
-class CatClient(ClientBase):
-
+class CatClient:
     @get('/cats')
     async def list_cats(...):
         pass
@@ -57,7 +56,7 @@ async def list_cats(
 Calling a method like this:
 
 ```python
-await client.list_cats(color='black')
+await client.ops.list_cats(color='black')
 ```
 
 results in a GET request being sent to the following URL: https://example.com/cats?color=black.
@@ -85,7 +84,7 @@ async def get_cat(
 When you call this method like so:
 
 ```python
-await client.get_cat(cat_id=1)
+await client.ops.get_cat(cat_id=1)
 ```
 
 it constructs and sends a GET request to https://example.com/cat/1. This demonstrates the method's ability to
@@ -112,7 +111,7 @@ async def list_cats(
 Invoking this method with:
 
 ```python
-await client.list_cats(version='2')
+await client.ops.list_cats(version='2')
 ```
 
 results in the execution of a GET request that includes the header `version: 2`.
@@ -139,7 +138,7 @@ async def list_cats(
 Calling this method as
 
 ```python
-await client.list_cats(cookie_key='value')
+await client.ops.list_cats(cookie_key='value')
 ```
 
 will send a GET request that includes the header Cookie: key=value.
@@ -152,7 +151,7 @@ such parameter.
 Example:
 
 ```python
-@POST('/cat')
+@post('/cat')
 async def add_cat(
     self: Self,
     cat: Annotated[
@@ -177,10 +176,10 @@ types. This mechanism allows developers to define how responses are parsed and r
 The return type is specified in two places:
 
 1. At the method signature level - The declared return type here should reflect the expected successful response
-   structure. It can be a single type or a Union of types, accommodating various potential non-error response bodies.
+    structure. It can be a single type or a Union of types, accommodating various potential non-error response bodies.
 
-2. Within the `Responses` annotation - This details the specific type or types to be used for parsing the response body,
-   depending on the response's HTTP status code and content type matching those specified.
+1. Within the `Responses` annotation - This details the specific type or types to be used for parsing the response body,
+    depending on the response's HTTP status code and content type matching those specified.
 
 !!! Note
 
@@ -220,7 +219,7 @@ class CatListMeta(ModelBase):
     status_code: Annotated[int, StatusCode]
 
 
-class CatClient(ClientBase):
+class CatClient:
     @get('/cat')
     async def list_cats(
         self: Self,
@@ -238,11 +237,12 @@ class CatClient(ClientBase):
         pass
 
 
-client = CatClient()
-cats_body, cats_meta = await client.list_cats()
-assert cats_body.body == [Cat(...)]
-assert cats_meta.count == 1
-assert cats_meta.status_code == 200
+async with httpx.AsyncClient() as http:
+    client = lapidary.runtime.client.for_api(CatClient, http, 'https://example.com')
+    cats_body, cats_meta = await client.ops.list_cats()
+    assert cats_body.body == [Cat(...)]
+    assert cats_meta.count == 1
+    assert cats_meta.status_code == 200
 ```
 
 ### Handling error responses
@@ -274,7 +274,7 @@ Responses with status code 400 and up will cause `HttpErrorResponse` to be risen
 
 ```python
 try:
-    await client.list_cats()
+    await client.ops.list_cats()
 except HttpErrorResponse as e:
     assert e.status_code == 400
     assert e.headers is None
@@ -285,7 +285,7 @@ Any responses not declared in the response map, regardless of their status code,
 
 ```python
 try:
-    await client.list_cats()
+    await client.ops.list_cats()
 except UnexpectedResponse as e:
     assert isinstance(e.response, httpx.response)
 ```

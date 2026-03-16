@@ -1,6 +1,5 @@
 __all__ = (
     'Body',
-    'ClientBase',
     'Cookie',
     'Form',
     'FormExplode',
@@ -21,6 +20,7 @@ __all__ = (
     'StatusCode',
     'UnexpectedResponse',
     'delete',
+    'for_api',
     'get',
     'head',
     'iter_pages',
@@ -28,11 +28,10 @@ __all__ = (
     'post',
     'put',
     'trace',
-    'with_auth',
 )
 
 from .annotations import Body, Cookie, Header, Metadata, Path, Query, Response, Responses, StatusCode
-from .client_base import ClientBase, with_auth
+from .client import for_api
 from .middleware import HttpxMiddleware
 from .model import ModelBase
 from .model.error import HttpErrorResponse, LapidaryError, LapidaryResponseError, UnexpectedResponse

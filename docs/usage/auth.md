@@ -2,9 +2,8 @@
 
 ## Behaviour
 
-Lapidary uses a simple pattern for creating client instances with the required auth handlers.
-Users can simply create their client instances with a `httpx.Auth` instance,
-or make use of a simple shallow copy tool to clone an existing instance with an authenticator configured.
+Lapidary uses a simple pattern for authentication. Pass an `httpx.Auth` instance when creating a client via `for_api()`,
+or create a new client object with a different authenticator using `APIClient.with_auth()`.
 
 Lapidary doesn't validate whether a client has an authenticator required for a given operation,
 since it can't know whether a server implies one scope from another.
@@ -13,18 +12,13 @@ since it can't know whether a server implies one scope from another.
 
 ```python
 import httpx
+import lapidary.runtime.client
 from lapidary.runtime import *
 from lapidary.runtime.auth import HeaderApiKey
 from typing import Self, Annotated
 
 
-class MyClient(ClientBase):
-    def __init__(self, client: httpx.AsyncClient):
-        super().__init__(
-            client=client,
-            base_url='https://example.com/'
-        )
-
+class MyClient:
     @get('/api/operation')
     async def my_op(self: Self) -> ...:
         pass
@@ -40,11 +34,11 @@ class MyClient(ClientBase):
 
 # User code
 async def main():
-    async with httpx.AsyncClient() as http_client:
-        client = MyClient(http_client)
+    async with httpx.AsyncClient() as http:
+        client = lapidary.runtime.client.for_api(MyClient, http, 'https://example.com/')
 
-        token = (await client.login('username', 'secret')).token
-        client_w_auth = with_auth(client, HeaderApiKey(token))
+        token = (await client.ops.login('username', 'secret')).token
+        client_w_auth = client.with_auth(client, HeaderApiKey(token))
 
-        await client_w_auth.my_op()
+        await client_w_auth.ops.my_op()
 ```

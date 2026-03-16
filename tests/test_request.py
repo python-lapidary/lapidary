@@ -8,9 +8,9 @@ import pytest
 import pytest_asyncio
 import typing_extensions as typing
 
+import lapidary.runtime.client
 from lapidary.runtime import Body, Query, Responses, SimpleMultimap, UnexpectedResponse, get
 from lapidary.runtime.http_consts import CONTENT_TYPE
-from tests.client import ClientTestBase
 
 
 class MyRequestBodyModel(pydantic.BaseModel):
@@ -34,7 +34,7 @@ async def mock_http_client():
 
 @pytest.mark.asyncio
 async def test_build_request_from_list(mock_http_client) -> None:
-    class Client(ClientTestBase):
+    class Client:
         @get('/body_list')
         async def body_list(
             self: typing.Self,
@@ -42,9 +42,9 @@ async def test_build_request_from_list(mock_http_client) -> None:
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    client = Client(client=mock_http_client)
+    client = lapidary.runtime.client.for_api(Client, mock_http_client, '')
     with pytest.raises(UnexpectedResponse):
-        await client.body_list(body=MyRequestBodyList(root=[MyRequestBodyModel(a='a')]))
+        await client.ops.body_list(body=MyRequestBodyList(root=[MyRequestBodyModel(a='a')]))
 
     mock_http_client.build_request.assert_called_with(
         'GET',
@@ -62,7 +62,7 @@ async def test_build_request_from_list(mock_http_client) -> None:
 
 @pytest.mark.asyncio
 async def test_request_param_list_simple(mock_http_client):
-    class Client(ClientTestBase):
+    class Client:
         @get('/param_list_simple')
         async def param_list_simple(
             self: typing.Self,
@@ -70,9 +70,9 @@ async def test_request_param_list_simple(mock_http_client):
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    client = Client(client=mock_http_client)
+    client = lapidary.runtime.client.for_api(Client, mock_http_client, '')
     with pytest.raises(UnexpectedResponse):
-        await client.param_list_simple(q_a=['hello', 'world'])
+        await client.ops.param_list_simple(q_a=['hello', 'world'])
 
     mock_http_client.build_request.assert_called_with(
         'GET',
@@ -86,16 +86,16 @@ async def test_request_param_list_simple(mock_http_client):
 
 @pytest.mark.asyncio
 async def test_build_request_none(mock_http_client):
-    class Client(ClientTestBase):
+    class Client:
         @get('/request_none')
         async def request_none(
             self: typing.Self,
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    client = Client(client=mock_http_client)
+    client = lapidary.runtime.client.for_api(Client, mock_http_client, '')
     with pytest.raises(UnexpectedResponse):
-        await client.request_none()
+        await client.ops.request_none()
 
     mock_http_client.build_request.assert_called_with(
         'GET',
@@ -109,7 +109,7 @@ async def test_build_request_none(mock_http_client):
 
 @pytest.mark.asyncio
 async def test_request_param_list_exploded(mock_http_client):
-    class Client(ClientTestBase):
+    class Client:
         @get('/param_list_exploded')
         async def param_list_exploded(
             self: typing.Self,
@@ -117,9 +117,9 @@ async def test_request_param_list_exploded(mock_http_client):
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    client = Client(client=mock_http_client)
+    client = lapidary.runtime.client.for_api(Client, mock_http_client, '')
     with pytest.raises(UnexpectedResponse):
-        await client.param_list_exploded(q_a=['hello', 'world'])
+        await client.ops.param_list_exploded(q_a=['hello', 'world'])
 
     mock_http_client.build_request.assert_called_with(
         'GET',
@@ -133,7 +133,7 @@ async def test_request_param_list_exploded(mock_http_client):
 
 @pytest.mark.asyncio
 async def test_missing_required_param(mock_http_client):
-    class Client(ClientTestBase):
+    class Client:
         @get('/param_list_exploded')
         async def op(
             self: typing.Self,
@@ -141,14 +141,14 @@ async def test_missing_required_param(mock_http_client):
         ) -> typing.Annotated[Awaitable[None], Responses({})]:
             pass
 
-    client = Client(client=mock_http_client)
+    client = lapidary.runtime.client.for_api(Client, mock_http_client, '')
     with pytest.raises(TypeError):
-        await client.op()
+        await client.ops.op()
 
 
 @pytest.mark.asyncio
 async def test_build_request_param_date(mock_http_client):
-    class Client(ClientTestBase):
+    class Client:
         @get('/request_date')
         async def request_date(
             self: typing.Self,
@@ -158,9 +158,9 @@ async def test_build_request_param_date(mock_http_client):
 
     today = dt.date.today()
 
-    client = Client(client=mock_http_client)
+    client = lapidary.runtime.client.for_api(Client, mock_http_client, '')
     with pytest.raises(UnexpectedResponse):
-        await client.request_date(date=today)
+        await client.ops.request_date(date=today)
 
     mock_http_client.build_request.assert_called_with(
         'GET',

@@ -1,6 +1,7 @@
 import abc
 import dataclasses as dc
 import inspect
+import logging
 from collections.abc import Callable, Iterable, Mapping, MutableMapping
 
 import httpx
@@ -17,10 +18,6 @@ from .annotations import (
     find_field_annotation,
 )
 from .param_serialization import SCALAR_TYPES, Multimap, ScalarType
-
-if typing.TYPE_CHECKING:
-    from ..client_base import ClientBase
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -300,13 +297,14 @@ class RequestAdapter:
 
     def build_request(
         self,
-        client: 'ClientBase',
+        request_factory: RequestFactory,
+        base_url: str,
         kwargs: dict[str, typing.Any],
     ) -> httpx.Request:
         builder = RequestBuilder(
-            typing.cast(RequestFactory, client._client.build_request),
+            request_factory,
             self.http_method,
-            (client._base_url or '') + self.http_path_template,
+            base_url + self.http_path_template,
         )
 
         self.contributor.update_builder(builder, kwargs)

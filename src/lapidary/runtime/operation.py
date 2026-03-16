@@ -1,35 +1,85 @@
-import dataclasses as dc
-import functools as ft
-from collections.abc import Callable
+import inspect
+from collections.abc import Callable, Sequence
 
+import httpx
 import typing_extensions as typing
 
-from .model.op import mk_exchange_fn
+from .middleware import HttpxMiddleware
+from .model.request import RequestAdapter, RequestObjectContributor
+from .model.response import ResponseMessageExtractor, mk_response_extractor
+from .types_ import Next
 
-OperationMethod = typing.TypeVar('OperationMethod', bound=typing.Callable)
-SimpleDecorator: typing.TypeAlias = Callable[[OperationMethod], OperationMethod]
-
-
-@dc.dataclass
-class Operation:
-    method: str
-    path: str
-    security: None = None  # deprecated, not used, TODO remove
-
-    def __call__(self, fn: OperationMethod) -> OperationMethod:
-        exchange_fn = mk_exchange_fn(fn, self.method, self.path)
-        return typing.cast(OperationMethod, ft.wraps(fn)(exchange_fn))
+P = typing.ParamSpec('P')
+R = typing.TypeVar('R')
+OperationMethod: typing.TypeAlias = typing.Callable[P, R]
 
 
 class MethodProto(typing.Protocol):
-    def __call__(self, path: str) -> typing.Callable:
+    def __call__(self, path: str) -> typing.Callable[[OperationMethod], OperationMethod]:
         pass
 
 
-get: MethodProto = ft.partial(Operation, 'GET')
-put: MethodProto = ft.partial(Operation, 'PUT')
-post: MethodProto = ft.partial(Operation, 'POST')
-delete: MethodProto = ft.partial(Operation, 'DELETE')
-head: MethodProto = ft.partial(Operation, 'HEAD')
-patch: MethodProto = ft.partial(Operation, 'PATCH')
-trace: MethodProto = ft.partial(Operation, 'TRACE')
+def op_decorator(http_method: str) -> MethodProto:
+    def decorator(
+        http_path: str,
+        security: typing.Any = None,  # deprecated, ignored, TODO remove
+    ):
+        def wrapper(fn: OperationMethod) -> OperationMethod:
+            fn._lapidary_method = http_method
+            fn._lapidary_path = http_path
+            return fn
+
+        return wrapper
+
+    return decorator
+
+
+get = op_decorator('GET')
+put = op_decorator('PUT')
+post = op_decorator('POST')
+delete = op_decorator('DELETE')
+head = op_decorator('HEAD')
+patch = op_decorator('PATCH')
+trace = op_decorator('TRACE')
+
+
+def process_operation_method(fn: Callable, method: str, path: str) -> tuple[RequestAdapter, ResponseMessageExtractor]:
+    sig = inspect.signature(fn)
+    type_hints = typing.get_type_hints(fn, include_extras=True)
+    params = {name: param.replace(annotation=type_hints[name]) for name, param in sig.parameters.items()}
+    try:
+        response_extractor, media_types = mk_response_extractor(type_hints['return'])
+        request_adapter = RequestAdapter(
+            fn.__name__,
+            method,
+            path,
+            RequestObjectContributor.for_signature(params),
+            media_types,
+        )
+        return request_adapter, response_extractor
+    except TypeError as error:
+        raise TypeError(fn.__name__) from error
+
+
+def _wrap_middleware(mw_: HttpxMiddleware, next_: Next) -> Next:
+    async def wrapped(req: httpx.Request) -> httpx.Response:
+        return await mw_(req, next_)
+
+    return wrapped
+
+
+def _mk_final_send(client_send, auth: httpx.Auth) -> Next:
+    async def send(request: httpx.Request) -> httpx.Response:
+        resp = await client_send(request, auth=auth)
+        await resp.aread()
+        return resp
+
+    return send
+
+
+def mk_send(client_send, auth: httpx.Auth | None, middlewares: Sequence[HttpxMiddleware]) -> Next:
+    send = _mk_final_send(client_send, auth)
+    for middleware in reversed(middlewares):
+        send = _wrap_middleware(middleware, send)
+
+    return send

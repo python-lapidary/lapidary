@@ -9,15 +9,17 @@ Problem starts when body is a collection: `type()` returns the type of only the 
 ## Possible alternatives
 
 1. Check the type of the first item, but there's never a guarantee that the passed collection is homogenic.
-Both JSON Schema and python typing support heterogenic collections.
+    Both JSON Schema and python typing support heterogenic collections.
 
 2. Check type of all items is out of the question for performance reasons, and pydantic does it anyway during serialization.
 
 3. Try to serialize the value with a TypeAdapter for each type in the type map. The first successful attempt also determines the body content type.
+
 4. Either accept extra parameter `body_type: type` or accept body as tuple with the type explicitly declared: `body: T | Union[T, type]`.
 
 The last two solutions seem feasible.
 Trying every type would incur a performance hit for unions of complex types, but
+
 - it would handle simpler cases well,
 - keep lapidary compatible with lapidary-render,
 

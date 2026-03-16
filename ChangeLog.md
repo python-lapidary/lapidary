@@ -13,9 +13,10 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 ### Changed
 
 - Bumped minimum required Python version to 3.10
-- ClientBase accepts httpx client instance; remove async context manager protocol
 - Change middleware interface to nestable callable
-- Replaced security requirements and NamedAuth factories with a simple mechanism based on shallow-copy
+- API client classes function as interfaces
+- clients are constructed using `for_api`
+- Operations are availlable via `for_api(${client_class}).ops.${operation_id}`
 
 ### Removed
 

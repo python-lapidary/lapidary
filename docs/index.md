@@ -41,13 +41,7 @@ class Cat(ModelBase):
 
 
 # Declare the client
-class CatClient(ClientBase):
-    def __init__(
-        self,
-        base_url='http://localhost:8080/api',
-    ):
-        super().__init__(base_url=base_url)
-
+class CatClient:
     @get('/cat/{id}')
     async def cat_get(
         self: Self,
@@ -63,9 +57,14 @@ class CatClient(ClientBase):
 User code
 
 ```python
+import lapidary.runtime.client
+import httpx
+
+
 async def main():
-    client = CatClient()
-    cat = await client.cat_get(id=7)
+    async with httpx.AsyncClient() as http:
+        client = lapidary.runtime.client.for_api(CatClient, http, 'http://localhost:8080/api')
+        cat = await client.cat_get(id=7)
 ```
 
 See [this test file](https://github.com/python-lapidary/lapidary/blob/develop/tests/test_client.py) for a working

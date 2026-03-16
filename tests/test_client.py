@@ -1,5 +1,6 @@
 import datetime as dt
 import email.utils
+from collections.abc import AsyncGenerator
 
 import httpx
 import pydantic
@@ -9,9 +10,9 @@ import typing_extensions as typing
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+import lapidary.runtime.client
 from lapidary.runtime import (
     Body,
-    ClientBase,
     Header,
     HttpErrorResponse,
     Metadata,
@@ -125,17 +126,7 @@ class CatListResponseHeaders(pydantic.BaseModel):
     returning_list: typing.Annotated[bool, Header]
 
 
-class CatClient(ClientBase):
-    def __init__(
-        self,
-        client: httpx.AsyncClient,
-        base_url='http://localhost',
-    ):
-        super().__init__(
-            base_url=base_url,
-            client=client,
-        )
-
+class CatClient:
     @get('/cat')
     async def cat_list(
         self: typing.Self,
@@ -217,7 +208,7 @@ class CatClient(ClientBase):
 
 
 @pytest_asyncio.fixture
-async def client() -> CatClient:
+async def client() -> AsyncGenerator[CatClient, None]:
     from starlette.applications import Starlette
     from starlette.routing import Route
 
@@ -232,7 +223,8 @@ async def client() -> CatClient:
         ],
     )
 
-    return CatClient(httpx.AsyncClient(transport=httpx.ASGITransport(app=app)))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app)) as http:
+        yield lapidary.runtime.client.for_api(CatClient, http, 'https://example.com').ops
 
 
 # tests
