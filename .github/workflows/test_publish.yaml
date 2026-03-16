@@ -61,7 +61,7 @@ jobs:
         poetry-version: 2.3.2
 
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --with test
 
     - name: Run pytest
       run: poetry run pytest -s
