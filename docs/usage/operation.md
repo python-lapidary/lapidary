@@ -116,8 +116,18 @@ await client.ops.list_cats(version='2')
 
 results in the execution of a GET request that includes the header `version: 2`.
 
-Note: The Cookie, Header, Param, and Query annotations all accept parameters such as name, style, and explode as defined
-by OpenAPI.
+HTTP headers conventionally use kebab-case names, which are not valid Python identifiers. Pass the actual header name as the first argument to `Header`:
+
+```python
+@get('/cats')
+async def list_cats(
+    self: Self,
+    x_request_id: Annotated[str, Header('X-Request-Id')],
+):
+    pass
+```
+
+The same applies to `Query` and `Cookie` — pass the wire name as the first argument when it differs from the Python parameter name.
 
 ### Cookie headers
 
@@ -142,6 +152,22 @@ await client.ops.list_cats(cookie_key='value')
 ```
 
 will send a GET request that includes the header Cookie: key=value.
+
+## Optional parameters
+
+Query, header, and cookie parameters can all be made optional by using `T | None` and a default of `None`. Parameters set to `None` are omitted from the request entirely.
+
+```python
+@get('/cats')
+async def list_cats(
+    self: Self,
+    *,
+    color: Annotated[str | None, Query] = None,
+    x_request_id: Annotated[str | None, Header('X-Request-Id')] = None,
+    session: Annotated[str | None, Cookie('session_id')] = None,
+):
+    pass
+```
 
 ## Request body
 
@@ -192,10 +218,10 @@ Example:
 async def list_cats(
     self: Self,
 ) -> Annotated[
-    tuple[List[Cat], None],
+    tuple[list[Cat], None],
     Responses(
         {
-            '2XX': Response(Body({'application/json': List[Cat]})),
+            '2XX': Response(Body({'application/json': list[Cat]})),
         }
     ),
 ]:
@@ -240,7 +266,7 @@ class CatClient:
 async with httpx.AsyncClient() as http:
     client = lapidary.runtime.client.for_api(CatClient, http, 'https://example.com')
     cats_body, cats_meta = await client.ops.list_cats()
-    assert cats_body.body == [Cat(...)]
+    assert cats_body == [Cat(...)]
     assert cats_meta.count == 1
     assert cats_meta.status_code == 200
 ```
@@ -259,7 +285,7 @@ class ErrorModel(ModelBase):
 async def list_cats(
     self: Self,
 ) -> Annotated[
-    tuple[List[Cat], None],
+    tuple[list[Cat], None],
     Responses(
         {
             '2XX': Response(...),
@@ -282,6 +308,7 @@ except HttpErrorResponse as e:
 ```
 
 Any responses not declared in the response map, regardless of their status code, raise `UnexpectedResponse`.
+`UnexpectedResponse` is also raised if the response body cannot be decoded into the declared model type.
 
 ```python
 try:

@@ -24,12 +24,11 @@ poetry add lapidary
 
 ## Usage
 
-With Lapidary, you define an API client by creating a class that mirrors the API structure, akin to OpenAPI but through
-decorated and annotated Python methods. Calling these method handles making HTTP requests and transforming the responses
-back into Python objects.
+With Lapidary, user creates an API client by writing a class that mirrors the API itself, in a similar manner to OpenAPI, except
+decorated and annotated Python methods are used. These methods handle making HTTP requests and transforming the
+responses back into Python objects.
 
 ```python
-from collections.abc import Awaitable
 from typing import Annotated, Self
 from lapidary.runtime import *
 
@@ -48,7 +47,7 @@ class CatClient:
         *,
         id: Annotated[int, Path],
     ) -> Annotated[
-        Awaitable[Cat],
+        tuple[Cat, None],
         Responses({'2XX': Response(Body({'application/json': Cat}))}),
     ]:
         pass
@@ -63,8 +62,8 @@ import httpx
 
 async def main():
     async with httpx.AsyncClient() as http:
-        client = lapidary.runtime.client.for_api(CatClient, http, 'http://localhost:8080/api')
-        cat = await client.cat_get(id=7)
+        client = lapidary.runtime.client.for_api(CatClient, http, 'https://example.com/api')
+        cat = await client.ops.cat_get(id=7)
 ```
 
 See [this test file](https://github.com/python-lapidary/lapidary/blob/develop/tests/test_client.py) for a working

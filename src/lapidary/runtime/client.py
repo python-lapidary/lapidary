@@ -23,6 +23,15 @@ def for_api(
     middlewares: Sequence[HttpxMiddleware] = (),
     auth: httpx.Auth | None = None,
 ) -> APIClient[API_T]:
+    """
+    Create an :class:`APIClient` for the given API descriptor class.
+
+    :param api: The API descriptor class — a plain class whose methods are decorated with :func:`get`, :func:`post`, etc.
+    :param client: The underlying :class:`httpx.AsyncClient` used to send requests.
+    :param base_url: Base URL prepended to all operation paths.
+    :param middlewares: Optional sequence of :class:`HttpxMiddleware` instances applied to every request.
+    :param auth: Optional :class:`httpx.Auth` instance used to authenticate requests.
+    """
     api_model = APIModel(api)
     return APIClient(api_model, client, base_url, auth=auth, middlewares=middlewares)
 

@@ -22,9 +22,9 @@ class Body(WebArg):
 
     Example use with parameter:
 
-    ```python
+    .. code-block:: python
+
     body: Body({'application/json': BodyModel})
-    ```
     """
 
     content: Mapping[MimeType, type]
@@ -36,7 +36,9 @@ class Metadata(WebArg):
     Can be used to group request parameters as an alternative to passing parameters directly.
 
     Example:
-    ```python
+
+    .. code-block:: python
+
     class RequestMetadata(pydantic.BaseModel):
         my_header: typing.Annotated[
             str,
@@ -44,11 +46,10 @@ class Metadata(WebArg):
         ]
 
     class Client(ApiClient):
-    @get(...)
-    async def my_method(
-        headers: Annotated[RequestMetadata, Metadata]
-    ):
-    ```
+        @get(...)
+        async def my_method(
+            headers: Annotated[RequestMetadata, Metadata]
+        ):
     """
 
 
@@ -139,8 +140,23 @@ class StatusCode(WebArg):
 
 @dc.dataclass
 class Response:
+    """
+    Declare the expected body and headers for a single HTTP response status code.
+
+    Used as a value inside the :class:`Responses` mapping.
+
+    Example:
+
+    .. code-block:: python
+
+    Response(Body({'application/json': Cat}))
+
+    Response(Body({'application/json': Cat}), CatListMeta)
+    """
+
     body: Body
     headers: type[pydantic.BaseModel] | None = None
+    """Pydantic model to deserialize response headers into. Fields must be annotated with :class:`Header` or :class:`StatusCode`."""
 
 
 @dc.dataclass

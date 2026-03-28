@@ -22,21 +22,10 @@ def iter_pages(
     The function :param:`fn` will be called initially without the cursor parameter and then called with the cursor parameter
     as long as :param:`get_cursor` can extract a cursor from the result.
 
-    **Example:**
+    Example::
 
-    ```python
-    async for page in iter_pages(client.fn, 'cursor', extractor_fn)(parameter=value):
+    async for page in iter_pages(client.ops.fn, 'cursor', get_cursor_from_response)(parameter=value):
         # Process page
-    ```
-
-    Typically, an API will use the same paging pattern for all operations supporting it, so it's a good idea to write a shortcut function:
-
-    ```python
-    from lapidary.runtime import iter_pages as _iter_pages
-
-    def iter_pages[P, R](fn: Callable[P, Awaitable[R]]) -> Callable[P, AsyncIterable[R]]:
-        return _iter_pages(fn, 'cursor', lambda result: ...)
-    ```
 
     :param fn: An async function that retrieves a page of data.
     :param cursor_param_name: The name of the cursor parameter in :param:`fn`.

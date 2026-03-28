@@ -18,6 +18,15 @@ from lapidary.runtime.auth import HeaderApiKey
 from typing import Self, Annotated
 
 
+class LoginRequest(ModelBase):
+    username: str
+    password: str
+
+
+class LoginResponse(ModelBase):
+    token: str
+
+
 class MyClient:
     @get('/api/operation')
     async def my_op(self: Self) -> ...:
@@ -26,9 +35,12 @@ class MyClient:
     @post('/api/login')
     async def login(
         self: Self,
-        user: Annotated[str, ...],
-        password: Annotated[str, ...],
-    ) -> ...:
+        *,
+        body: Annotated[LoginRequest, Body({'application/json': LoginRequest})],
+    ) -> Annotated[
+        tuple[LoginResponse, None],
+        Responses({'2XX': Response(Body({'application/json': LoginResponse}))}),
+    ]:
         pass
 
 
@@ -37,8 +49,8 @@ async def main():
     async with httpx.AsyncClient() as http:
         client = lapidary.runtime.client.for_api(MyClient, http, 'https://example.com/')
 
-        token = (await client.ops.login('username', 'secret')).token
-        client_w_auth = client.with_auth(client, HeaderApiKey(token))
+        response, _ = await client.ops.login(body=LoginRequest(username='user', password='secret'))
+        client_w_auth = client.with_auth(HeaderApiKey(response.token))
 
         await client_w_auth.ops.my_op()
 ```

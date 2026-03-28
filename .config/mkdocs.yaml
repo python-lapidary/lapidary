@@ -24,6 +24,7 @@ nav:
   - usage/operation.md
   - usage/auth.md
   - usage/middleware.md
+  - usage/paging.md
 - API reference: reference/api.md
 - Lapidary Render: https://lapidary.dev/lapidary-render
 

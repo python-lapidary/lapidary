@@ -3,17 +3,13 @@
 The core of the Lapidary API client is a single class that declares all the methods. Pass it to `for_api()`
 along with an `httpx.AsyncClient` instance and a base URL to get an `APIClient`. Operations are then accessed via `.ops`.
 
-Example usage:
-
 ```python
-class CatClient:
-    # operation mothods
-    ...
-
 async with httpx.AsyncClient() as http:
     client = lapidary.runtime.client.for_api(CatClient, http, 'https://example.com')
-    # call client methods via client.ops
+    result, _ = await client.ops.some_operation()
 ```
+
+`for_api()` also accepts `auth` (see [Authentication](auth.md)) and `middlewares` (see [Middleware](middleware.md)).
 
 ## Additional HTTP headers
 
