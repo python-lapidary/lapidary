@@ -3,8 +3,8 @@ from typing import Annotated, Generic, Union
 import httpx
 from typing_extensions import Self, TypeVar
 
-from lapidary.runtime import Body, ModelBase, Responses
-from lapidary.runtime.operation import process_operation_method
+from lapidary import Body, ModelBase, Responses
+from lapidary.operation import process_operation_method
 
 
 class BodyModel(ModelBase):

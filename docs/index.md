@@ -30,7 +30,7 @@ responses back into Python objects.
 
 ```python
 from typing import Annotated, Self
-from lapidary.runtime import *
+from lapidary import *
 
 
 # Define models
@@ -56,13 +56,13 @@ class CatClient:
 User code
 
 ```python
-import lapidary.runtime.client
+import lapidary.client
 import httpx
 
 
 async def main():
     async with httpx.AsyncClient() as http:
-        client = lapidary.runtime.client.for_api(CatClient, http, 'https://example.com/api')
+        client = lapidary.client.for_api(CatClient, http, 'https://example.com/api')
         cat = await client.ops.cat_get(id=7)
 ```
 

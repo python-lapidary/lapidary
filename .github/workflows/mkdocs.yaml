@@ -39,7 +39,7 @@ jobs:
     - name: Publish to org pages
       uses: peaceiris/actions-gh-pages@v4
       with:
-        destination_dir: lapidary-runtime
+        destination_dir: lapidary
         external_repository: python-lapidary/lapidary.dev
         personal_token: ${{ secrets.GH_PAT }}
         publish_branch: gh-pages

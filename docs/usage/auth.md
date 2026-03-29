@@ -12,9 +12,9 @@ since it can't know whether a server implies one scope from another.
 
 ```python
 import httpx
-import lapidary.runtime.client
-from lapidary.runtime import *
-from lapidary.runtime.auth import HeaderApiKey
+import lapidary.client
+from lapidary import *
+from lapidary import HeaderApiKey
 from typing import Self, Annotated
 
 
@@ -47,7 +47,7 @@ class MyClient:
 # User code
 async def main():
     async with httpx.AsyncClient() as http:
-        client = lapidary.runtime.client.for_api(MyClient, http, 'https://example.com/')
+        client = lapidary.client.for_api(MyClient, http, 'https://example.com/')
 
         response, _ = await client.ops.login(body=LoginRequest(username='user', password='secret'))
         client_w_auth = client.with_auth(HeaderApiKey(response.token))

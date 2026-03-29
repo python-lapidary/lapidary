@@ -10,8 +10,8 @@ import typing_extensions as typing
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-import lapidary.runtime.client
-from lapidary.runtime import (
+import lapidary.client
+from lapidary import (
     Body,
     Header,
     HttpErrorResponse,
@@ -26,7 +26,7 @@ from lapidary.runtime import (
     get,
     post,
 )
-from lapidary.runtime.http_consts import MIME_JSON
+from lapidary.http_consts import MIME_JSON
 
 # model (common to both client and server)
 
@@ -225,7 +225,7 @@ async def client() -> AsyncGenerator[CatClient, None]:
     )
 
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app)) as http:
-        yield lapidary.runtime.client.for_api(CatClient, http, 'https://example.com').ops
+        yield lapidary.client.for_api(CatClient, http, 'https://example.com').ops
 
 
 # tests
@@ -292,7 +292,7 @@ async def test_create_error(client: CatClient):
 
 
 def test_with_auth_returns_same_model():
-    client = lapidary.runtime.client.for_api(CatClient, httpx.AsyncClient(), 'https://example.com')
+    client = lapidary.client.for_api(CatClient, httpx.AsyncClient(), 'https://example.com')
     client2 = client.with_auth(httpx.BasicAuth('x', 'y'))
 
     assert client._api_model is client2._api_model

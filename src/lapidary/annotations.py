@@ -183,6 +183,4 @@ class Responses(WebArg):
     - "default"
 
     The most specific value takes precedence.
-
-    Value is [Body][lapidary.runtime.Body]
     """

@@ -4,4 +4,4 @@ hide:
 - navigation
 ---
 
-# ::: lapidary.runtime
+# ::: lapidary

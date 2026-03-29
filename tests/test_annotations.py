@@ -2,8 +2,8 @@ from typing import Annotated
 
 import pytest
 
-from lapidary.runtime import Header
-from lapidary.runtime.model.annotations import find_annotation
+from lapidary import Header
+from lapidary.model.annotations import find_annotation
 
 
 def test_find_annotations():

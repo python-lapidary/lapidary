@@ -1,5 +1,5 @@
-from lapidary.runtime import mime
-from lapidary.runtime.http_consts import MIME_JSON
+from lapidary import mime
+from lapidary.http_consts import MIME_JSON
 
 
 def test_find_mime():

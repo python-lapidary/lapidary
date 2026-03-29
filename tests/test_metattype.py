@@ -4,7 +4,7 @@ import typing
 import pytest
 import typing_extensions
 
-from lapidary.runtime.metattype import make_not_optional
+from lapidary.metattype import make_not_optional
 
 
 def test_make_not_optional_str():

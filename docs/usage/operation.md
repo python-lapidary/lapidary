@@ -10,7 +10,7 @@ decorated with these decorators are simply ignored.
     Throughout this documentation, the term `method` in a programming context always refers to a Python method (defined with `def`), whereas `HTTP methods` (GET, POST, etc.) are specified as such.
 
 ```python
-from lapidary.runtime import get
+from lapidary import get
 
 
 class CatClient:
@@ -264,7 +264,7 @@ class CatClient:
 
 
 async with httpx.AsyncClient() as http:
-    client = lapidary.runtime.client.for_api(CatClient, http, 'https://example.com')
+    client = lapidary.client.for_api(CatClient, http, 'https://example.com')
     cats_body, cats_meta = await client.ops.list_cats()
     assert cats_body == [Cat(...)]
     assert cats_meta.count == 1

@@ -1,4 +1,4 @@
-from lapidary.runtime.model.param_serialization import FormExplode, SimpleMultimap, SimpleString
+from lapidary.model.param_serialization import FormExplode, SimpleMultimap, SimpleString
 
 # simple no-explode, multimap version
 

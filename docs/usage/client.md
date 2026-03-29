@@ -5,7 +5,7 @@ along with an `httpx.AsyncClient` instance and a base URL to get an `APIClient`.
 
 ```python
 async with httpx.AsyncClient() as http:
-    client = lapidary.runtime.client.for_api(CatClient, http, 'https://example.com')
+    client = lapidary.client.for_api(CatClient, http, 'https://example.com')
     result, _ = await client.ops.some_operation()
 ```
 
