@@ -1,6 +1,6 @@
 [tools]
-poetry = "2.3.2"
-ruff = "0.14.10"
+poetry = "2.3"
+ruff = "0.15"
 
 [tasks]
 check = 'ruff check --fix'
