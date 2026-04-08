@@ -18,7 +18,7 @@ API_T = typing.TypeVar('API_T')
 def for_api(
     api: type[API_T],
     client: httpx.AsyncClient,
-    base_url: str,
+    base_url: str | None = None,
     *,
     middlewares: Sequence[HttpxMiddleware] = (),
     auth: httpx.Auth | None = None,
@@ -28,12 +28,15 @@ def for_api(
 
     :param api: The API descriptor class — a plain class whose methods are decorated with :func:`get`, :func:`post`, etc.
     :param client: The underlying :class:`httpx.AsyncClient` used to send requests.
-    :param base_url: Base URL prepended to all operation paths.
+    :param base_url: Base URL prepended to all operation paths. Defaults to ``lapidary_base_url`` class field.
     :param middlewares: Optional sequence of :class:`HttpxMiddleware` instances applied to every request.
     :param auth: Optional :class:`httpx.Auth` instance used to authenticate requests.
     """
+    resolved = base_url if base_url is not None else getattr(api, 'lapidary_base_url', None)
+    if resolved is None:
+        raise ValueError('No base_url provided and the client class has no lapidary_base_url field')
     api_model = APIModel(api)
-    return APIClient(api_model, client, base_url, auth=auth, middlewares=middlewares)
+    return APIClient(api_model, client, resolved, auth=auth, middlewares=middlewares)
 
 
 class APIClient(typing.Generic[API_T]):
@@ -56,7 +59,7 @@ class APIClient(typing.Generic[API_T]):
         request_factory = typing.cast(RequestFactory, client.build_request)
         self._ops = Dispatcher(send, request_factory, base_url, self._api_model)
 
-    def with_auth(self, auth: httpx.Auth | None) -> typing.Self:
+    def with_auth(self, auth: httpx.Auth | None) -> APIClient:
         return APIClient(
             self._api_model,
             self._client,
