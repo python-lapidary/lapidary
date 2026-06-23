@@ -68,7 +68,6 @@ asyncio_default_fixture_loop_scope = 'module'
 
 [tool.mypy]
 mypy_path = "src"
-namespace_packages = true
 python_version = "3.10"
 
 [tool.ruff]
