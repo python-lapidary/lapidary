@@ -17,7 +17,7 @@ dependencies = [
     "httpcore>=1.0.8; python_version>='3.14'",
     "httpx[http2]==0.28.1",
     "httpx-auth==0.23.1",
-    "pydantic>=2.12,<3.0",
+    "pydantic>=2.13.4,<3.0",
     "python-mimeparse>=2,<3",
     "typing-extensions>=4.15,<5.0",
 ]
@@ -36,11 +36,11 @@ docs = [
     "mkdocs-material>=9,<10",
     "mkdocs-minify-plugin==0.8.0",
     "mkdocs-section-index==0.3.10",
-    "mkdocstrings[python]>=1,<2",
+    "mkdocstrings[python]>=1.0.4,<2",
 ]
 test = [
-    "pytest>=9,<10",
-    "pytest-asyncio>=1.2,<2",
+    "pytest>=9.1.1,<10",
+    "pytest-asyncio>=1.4.0,<2",
     "starlette==0.50.0",
 ]
 
