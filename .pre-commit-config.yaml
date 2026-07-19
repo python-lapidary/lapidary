@@ -4,7 +4,7 @@ default_language_version:
   python: '3.10'
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: trailing-whitespace
   - id: end-of-file-fixer
@@ -18,7 +18,7 @@ repos:
     args:
     - --unsafe
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.11.8
+  rev: v0.15.22
   hooks:
   - id: ruff
     name: ruff-check
@@ -28,6 +28,6 @@ repos:
   - id: ruff-format
     pass_filenames: false
 - repo: https://github.com/python-poetry/poetry
-  rev: 2.3.2
+  rev: 2.4.1
   hooks:
   - id: poetry-check
