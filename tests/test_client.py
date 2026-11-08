@@ -49,7 +49,7 @@ class ServerErrorModel(ModelBase):
     msg: str
 
 
-DATE = dt.datetime(2024, 7, 28, 0, 55, tzinfo=dt.timezone.utc)
+DATE = dt.datetime(2024, 7, 28, 0, 55, tzinfo=dt.UTC)
 
 
 # server

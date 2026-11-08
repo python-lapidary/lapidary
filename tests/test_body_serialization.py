@@ -1,7 +1,7 @@
-from typing import Annotated, Generic, Union
+from typing import Annotated, Generic, Self, Union
 
 import httpx
-from typing_extensions import Self, TypeVar
+from typing_extensions import TypeVar
 
 from lapidary import Body, ModelBase, Responses
 from lapidary.operation import process_operation_method

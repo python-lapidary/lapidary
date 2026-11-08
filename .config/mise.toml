@@ -1,6 +1,7 @@
 [tools]
 poetry = "2.4"
 pre-commit = "4.4"
+python = "3.11"
 ruff = "0.15"
 
 [tasks]

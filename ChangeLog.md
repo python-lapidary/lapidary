@@ -12,7 +12,7 @@ and the format of this file is based on [Keep a Changelog](https://keepachangelo
 
 ### Changed
 
-- Bumped minimum required Python version to 3.10
+- Bumped minimum required Python version to 3.11
 - Change middleware interface to nestable callable
 - API client classes function as interfaces
 - clients are constructed using `for_api`
